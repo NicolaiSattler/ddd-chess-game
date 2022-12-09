@@ -7,9 +7,7 @@ public class Piece : Entity<Guid>
 {
     public Color Color {get; init;}
     public string Type { get; init; }
-    public Position Position { get; set; }
+    public Square Position { get; set; }
 
-    public Piece(Guid id) : base(id)
-    {
-    }
+    public Piece(Guid id) : base(id) { }
 }

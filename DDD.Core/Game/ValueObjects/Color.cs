@@ -1,6 +1,6 @@
 using System;
 
-namespace DDD.Core.Game;
+namespace DDD.Core.Game.ValueObjects;
 
 public record Color(string ColorValue)
 {

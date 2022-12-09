@@ -5,9 +5,10 @@ namespace DDD.Core.Game.Entities;
 
 public class Move: Entity<Guid>
 {
-    public Move(Guid id) : base(id) { }
-
     public Piece CurrentPiece { get; init;}
-    public Position NewPosition { get; private set; }
+    public Square NewPosition { get; private set; }
     public DateTime StartTime { get; init; }
+    public Player Player { get; init; }
+
+    public Move(Guid id) : base(id) { }
 }
