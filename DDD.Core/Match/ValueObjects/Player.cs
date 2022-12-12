@@ -1,10 +1,16 @@
 using System;
-using DDD.Core.Game.ValueObjects;
 
-namespace DDD.Core.Game.ValueObjects;
+namespace DDD.Core.Match.ValueObjects;
 
 public record Player
 {
     public Guid MemberId { get; init; }
     public Color Color { get; init; }
+}
+
+public enum Color
+{
+    Undefined = 0,
+    Black = 1,
+    White = 2
 }

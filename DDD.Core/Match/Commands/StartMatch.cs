@@ -1,8 +1,8 @@
 using System;
 
-namespace DDD.Core.Game.Commands;
+namespace DDD.Core.Match.Commands;
 
-public record StartGame
+public record StartMatch
 {
     public Guid MemberOneId { get; set;}
     public Guid MemberTwoId { get; set;}

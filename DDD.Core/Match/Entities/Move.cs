@@ -1,7 +1,7 @@
 using System;
-using DDD.Core.Game.ValueObjects;
+using DDD.Core.Match.ValueObjects;
 
-namespace DDD.Core.Game.Entities;
+namespace DDD.Core.Match.Entities;
 
 public class Move: Entity<Guid>
 {
@@ -10,5 +10,5 @@ public class Move: Entity<Guid>
     public DateTime StartTime { get; init; }
     public Player Player { get; init; }
 
-    public Move(Guid id) : base(id) { }
+    public Move() : base(Guid.NewGuid()) { }
 }
