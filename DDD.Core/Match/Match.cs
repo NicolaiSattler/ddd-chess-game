@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using DDD.Core.Match.Commands;
 using DDD.Core.Match.Entities;
 using DDD.Core.Match.Events;
+using DDD.Core.Match.Factory;
 using DDD.Core.Match.ValueObjects;
 
 namespace DDD.Core.Match;
@@ -19,6 +21,7 @@ public class Match : AggregateRoot<Guid>
     protected override void When(DomainEvent domainEvent)
     {
         if (domainEvent is MatchStarted gameStarted) Handle(gameStarted);
+        if (domainEvent is TurnTaken turnTaken) Handle(turnTaken);
     }
 
     public void Start(StartMatch command)
@@ -27,24 +30,31 @@ public class Match : AggregateRoot<Guid>
 
         AssignPlayers(command);
 
-        var gameStarted = new MatchStarted
-        {
-            WhiteMemberId = White.MemberId,
-            BlackMemberId = Black.MemberId,
-            StartTime = DateTime.UtcNow
-        };
-
-        RaiseEvent(gameStarted);
-    }
-
-    public void End(MatchEnded command)
-    {
-        throw new NotImplementedException();
+        RaiseEvent(new MatchStarted(White.MemberId, Black.MemberId, DateTime.UtcNow));
     }
 
     public void TakeTurn(TakeTurn command)
     {
-        throw new NotImplementedException();
+        var movingPiece = Pieces.FirstOrDefault(p => p.Position == command.Piece);
+
+        //TODO: create business rule
+        // - Is move valid
+        //      - Can piece move to that square?
+        //      - Can piece jump over other pieces?
+        // -
+        var availableMoves = movingPiece.GetAttackRange();
+        var isValidSquare = availableMoves.Any(m => m == command.NewPosition);
+        var targetPiece = Pieces.FirstOrDefault(p => p.Position == command.NewPosition);
+        var newPositionContainsPiece = targetPiece != null;
+
+        if (isValidSquare)
+        {
+            if (newPositionContainsPiece && targetPiece.Color != movingPiece.Color)
+            {
+                Pieces.Remove(targetPiece);
+                movingPiece.Position = command.NewPosition;
+            }
+        }
     }
 
     public void Resign(Guid resigningPlayerId)
@@ -57,15 +67,29 @@ public class Match : AggregateRoot<Guid>
         throw new NotImplementedException();
     }
 
+    public void End(MatchEnded command)
+    {
+        throw new NotImplementedException();
+    }
+
     private void Handle(MatchStarted @event)
     {
-        Pieces = new();
         Moves = new()
         {
             new() { Player = White, StartTime = @event.StartTime }
         };
 
-        //TODO: Generate pieces for Chess game.
+        var whitePieces = PiecesFactory.CreatePiecesForColor(Color.White);
+        var blackPiece = PiecesFactory.CreatePiecesForColor(Color.Black);
+
+        //TODO: Should pieces be saved?
+        Pieces = new();
+        Pieces.AddRange(whitePieces);
+        Pieces.AddRange(blackPiece);
+    }
+
+    private void Handle(TurnTaken @event)
+    {
 
     }
 

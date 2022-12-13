@@ -1,4 +1,3 @@
-using System;
 using DDD.Core.Match.ValueObjects;
 
 namespace DDD.Core.Match.Entities;

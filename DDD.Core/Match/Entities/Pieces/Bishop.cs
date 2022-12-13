@@ -15,6 +15,6 @@ public class Bishop : Piece
     }
 
 
-    public override IEnumerable<Square> AttackRange() => AttackRangeHelper.CalculateMovement(Position, Movement, 7);
+    public override IEnumerable<Square> GetAttackRange() => AttackRangeHelper.CalculateMovement(Position, Movement, 7);
 
 }

@@ -84,4 +84,26 @@ public class AttackRangeHelper
             new Square(position.Colomn + 1, row),
         };
     }
+
+    private static IEnumerable<Square> GetLegalMovements(IEnumerable<Piece> pieces, Piece movingPiece, int range = 1)
+    {
+        var result = new List<Square>();
+
+        if (movingPiece.Type == PieceType.Knight)
+        {
+            var piecesOfSameColor = pieces.Where(p => p.Color == movingPiece.Color);
+            var possibleMoves = movingPiece.GetAttackRange()
+                                           .Where(m => piecesOfSameColor.Any(p => p.Position != m));
+
+            return possibleMoves;
+        }
+        else
+        {
+            //TODO: recursive function.
+            var bla = CalculateMovement(movingPiece.Position, movingPiece.Movement, 1);
+
+            throw new NotImplementedException("....")
+
+        }
+    }
 }

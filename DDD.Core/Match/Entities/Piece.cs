@@ -12,7 +12,7 @@ public abstract class Piece : Entity<Guid>
 
     public Piece(Guid id) : base(id) { }
 
-    public abstract IEnumerable<Square> AttackRange();
+    public abstract IEnumerable<Square> GetAttackRange();
 }
 
 public enum MovementType

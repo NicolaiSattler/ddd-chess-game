@@ -14,5 +14,5 @@ public class Queen : Piece
         Movement = MovementType.Diagonal | MovementType.Rectangular;
     }
 
-    public override IEnumerable<Square> AttackRange() => AttackRangeHelper.CalculateMovement(Position, Movement, 7);
+    public override IEnumerable<Square> GetAttackRange() => AttackRangeHelper.CalculateMovement(Position, Movement, 7);
 }
