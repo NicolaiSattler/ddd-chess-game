@@ -7,11 +7,9 @@ using Chess.Core.Match.Events;
 
 namespace Chess.Application;
 
-public class MatchRepository
+public class MatchRepository : IMatchRepository
 {
-
     private readonly Dictionary<Guid, List<Event>> _events = new();
-
 
     public Match? Get(Guid aggregateId)
     {

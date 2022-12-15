@@ -41,22 +41,19 @@ public class Match : AggregateRoot<Guid>
         //      - Can piece jump over other pieces?
         //      - Castling
         //      - En Passant
-        var movingPiece = Pieces.FirstOrDefault(p => p.Position == command.Piece);
+        var movingPiece = Pieces.FirstOrDefault(p => p.Position == command.StartPosition);
         var availableMoves = movingPiece.GetAttackRange();
-        var isValidSquare = availableMoves.Any(m => m == command.NewPosition);
-        var targetPiece = Pieces.FirstOrDefault(p => p.Position == command.NewPosition);
+        var isValidSquare = availableMoves.Any(m => m == command.EndPosition);
+        var targetPiece = Pieces.FirstOrDefault(p => p.Position == command.EndPosition);
         var newPositionContainsPiece = targetPiece != null;
 
         if (isValidSquare && newPositionContainsPiece && targetPiece.Color != movingPiece.Color)
         {
-            Pieces.Remove(targetPiece);
-            movingPiece.Position = command.NewPosition;
+
+        RaiseEvent(new TurnTaken(command.MemberId, command.StartPosition, command.EndPosition));
         }
 
-        Moves.Add(new Move()
-        {
-            Piece = movingPiece,
-        });
+
 
     }
 
@@ -91,9 +88,26 @@ public class Match : AggregateRoot<Guid>
         Pieces.AddRange(blackPiece);
     }
 
+    private Player GetPlayer(Guid memberId) => White.MemberId == memberId ? White : Black;
+
     private void Handle(TurnTaken @event)
     {
+        var movingPiece = Pieces.FirstOrDefault(p => p.Position == @event.StartPosition);
+        var targetPiece = Pieces.FirstOrDefault(p => p.Position == @event.EndPosition);
 
+        if (targetPiece != null)
+        {
+            Pieces.Remove(targetPiece);
+        }
+
+        movingPiece.Position = @event.EndPosition;
+
+        Moves.Add(new Move()
+        {
+            Piece = movingPiece,
+            NewPosition = @event.EndPosition,
+            Player = GetPlayer(@event.MemberId),
+        });
     }
 
     private void AssignPlayers(StartMatch command)
