@@ -11,8 +11,8 @@ public class Queen : Piece
     public Queen(Guid id) : base(id)
     {
         Type = PieceType.Queen;
-        Movement = MovementType.Diagonal | MovementType.Rectangular;
+        Movement = MovementType.Diagonal | MovementType.FileAndRank;
     }
 
-    public override IEnumerable<Square> GetAttackRange() => AttackRangeHelper.CalculateMovement(Position, Movement, 7);
+    public override IEnumerable<Square> GetAttackRange() => Board.CalculateMovement(Position, Movement, 7);
 }

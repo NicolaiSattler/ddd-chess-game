@@ -1,3 +1,3 @@
 namespace DDD.Core.Match.ValueObjects;
 
-public record Square(int Colomn, int Row) { }
+public record Square(int File, int Rank) { }

@@ -35,25 +35,22 @@ public class Match : AggregateRoot<Guid>
 
     public void TakeTurn(TakeTurn command)
     {
-        var movingPiece = Pieces.FirstOrDefault(p => p.Position == command.Piece);
-
         //TODO: create business rule
         // - Is move valid
         //      - Can piece move to that square?
         //      - Can piece jump over other pieces?
-        // -
+        //      - Castling
+        //      - En Passant
+        var movingPiece = Pieces.FirstOrDefault(p => p.Position == command.Piece);
         var availableMoves = movingPiece.GetAttackRange();
         var isValidSquare = availableMoves.Any(m => m == command.NewPosition);
         var targetPiece = Pieces.FirstOrDefault(p => p.Position == command.NewPosition);
         var newPositionContainsPiece = targetPiece != null;
 
-        if (isValidSquare)
+        if (isValidSquare && newPositionContainsPiece && targetPiece.Color != movingPiece.Color)
         {
-            if (newPositionContainsPiece && targetPiece.Color != movingPiece.Color)
-            {
-                Pieces.Remove(targetPiece);
-                movingPiece.Position = command.NewPosition;
-            }
+            Pieces.Remove(targetPiece);
+            movingPiece.Position = command.NewPosition;
         }
     }
 

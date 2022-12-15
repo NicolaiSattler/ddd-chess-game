@@ -11,8 +11,8 @@ public class Rook : Piece
     public Rook(Guid id) : base(id)
     {
         Type = PieceType.Rook;
-        Movement = MovementType.Rectangular;
+        Movement = MovementType.FileAndRank;
     }
 
-    public override IEnumerable<Square> GetAttackRange() => AttackRangeHelper.CalculateMovement(Position, Movement, 7);
+    public override IEnumerable<Square> GetAttackRange() => Board.CalculateMovement(Position, Movement, 7);
 }
