@@ -1,10 +1,11 @@
 namespace Chess.Core.Match.Events;
 
+[Serializable]
 public class MatchStarted: DomainEvent
 {
-    public readonly Guid WhiteMemberId;
-    public readonly Guid BlackMemberId;
-    public readonly DateTime StartTime;
+    public Guid WhiteMemberId { get; set; }
+    public Guid BlackMemberId { get; set; }
+    public DateTime StartTime { get; set; }
 
     public MatchStarted(Guid whiteMemberId,
                         Guid blackMemberId,

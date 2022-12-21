@@ -1,6 +1,7 @@
 using System.Linq;
-using Chess.Core.Match;
-using Chess.Core.Match.Commands;
+using Chess.Core.Match.Events;
+using Chess.Domain;
+using Chess.Domain.Commands;
 
 namespace Chess.Application;
 
@@ -15,15 +16,14 @@ public class ApplicationService
 
     public Guid StartMatch(StartMatch command)
     {
-        //Build aggregate
         var match = MatchFactory.Create();
 
         match.Start(command);
 
-        //publish event
+        //publish event?
 
-        // save aggegrate
-        repository.Save(match.Id, match.Events.Last());
+        var @event = match.Events.Last() as MatchStarted;
+        repository.Save(match.Id, @event);
 
         return match.Id;
     }
@@ -33,10 +33,10 @@ public class ApplicationService
         //Build aggregate
         var match = repository.Get(aggregateId);
 
-        match.TakeTurn(command);
+        match?.TakeTurn(command);
 
         // save aggegrate
-        repository.Save(match.Id, match.Events.Last());
+        repository.Save(match?.Id, match?.Events?.Last());
     }
 
 }

@@ -4,11 +4,11 @@ namespace Chess.Core.Match.Events;
 
 public class TurnTaken : DomainEvent
 {
-    public readonly Guid MemberId;
-    public readonly Square StartPosition;
-    public readonly Square EndPosition;
+    public Guid MemberId { get; }
+    public Square? StartPosition { get; }
+    public Square? EndPosition { get; }
 
-    public TurnTaken(Guid memberId, Square startPosition, Square endPosition)
+    public TurnTaken(Guid memberId, Square? startPosition, Square? endPosition)
     {
         MemberId = memberId;
         StartPosition = startPosition;

@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using Chess.Core.Match.ValueObjects;
+using Chess.Domain.Model;
 
-namespace Chess.Core.Match.Entities.Pieces;
+namespace Chess.Domain.Entities.Pieces;
 
 public class Pawn : Piece
 {
     public override PieceType Type { get; init; }
     public override MovementType Movement { get; init; }
 
-    public Pawn(Guid id) : base(id)
+    public Pawn() : base(Guid.NewGuid())
     {
         Type = PieceType.Pawn;
         Movement = MovementType.Pawn;

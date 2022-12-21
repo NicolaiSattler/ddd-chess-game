@@ -24,8 +24,8 @@ public class PieceCannotAttackOwnColorTests
         //Arrange
         _pieces = new()
         {
-            new Pawn(Guid.NewGuid()) { Color = Color.Black, Position = new(File.B, 3) },
-            new Pawn(Guid.NewGuid()) { Color = Color.Black, Position = new(File.C, 2) }
+            new Pawn() { Color = Color.Black, Position = new(File.B, 3) },
+            new Pawn() { Color = Color.Black, Position = new(File.C, 2) }
         };
 
         _command = new()
@@ -49,13 +49,13 @@ public class PieceCannotAttackOwnColorTests
     {
         //Arrange
         _pieces = new();
-        _pieces.Add(new Pawn(Guid.NewGuid())
+        _pieces.Add(new Pawn()
         {
             Color = Color.Black,
             Position = new(File.C, 3)
         });
 
-        _pieces.Add(new Pawn(Guid.NewGuid())
+        _pieces.Add(new Pawn()
         {
             Color = Color.Black,
             Position = new(File.C, 2)

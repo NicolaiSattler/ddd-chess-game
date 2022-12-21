@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using Chess.Core.Match.ValueObjects;
+using Chess.Domain.Model;
 
-namespace Chess.Core.Match.Entities.Pieces;
+namespace Chess.Domain.Entities.Pieces;
 
 public class King : Piece
 {
     public override PieceType Type { get; init; }
     public override MovementType Movement { get; init; }
 
-    public King(Guid id) : base(id)
+    public King() : base(Guid.NewGuid())
     {
         Type = PieceType.King;
         Movement = MovementType.Diagonal | MovementType.FileAndRank;

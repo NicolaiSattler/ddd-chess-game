@@ -1,19 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
-using Chess.Core.Match.Commands;
-using Chess.Core.Match.Entities;
+using Chess.Core;
+using Chess.Core.BusinessRules;
 using Chess.Core.Match.Events;
 using Chess.Core.Match.Factory;
-using Chess.Core.Match.ValueObjects;
+using Chess.Domain.BusinessRules;
+using Chess.Domain.Commands;
+using Chess.Domain.Entities;
+using Chess.Domain.Entities.Pieces;
+using Chess.Domain.ValueObjects;
 
-namespace Chess.Core.Match;
+namespace Chess.Domain;
 
 public class Match : AggregateRoot<Guid>
 {
-    private Player White { get; set; }
-    private Player Black { get; set; }
-    private List<Piece> Pieces { get; set; }
-    private List<Move> Moves { get; set; }
+    private Player? White { get; set; }
+    private Player? Black { get; set; }
+    private List<Piece>? Pieces { get; set; }
+    private List<Move>? Moves { get; set; }
 
     public Match(Guid id) : base(id) { }
     public Match(Guid id, IEnumerable<DomainEvent> events) : base(id, events) { }
@@ -28,33 +32,42 @@ public class Match : AggregateRoot<Guid>
     {
         if (command.MemberOneId == command.MemberTwoId) throw new InvalidOperationException("Member Ids are the same.");
 
-        AssignPlayers(command);
+        var colorPicker = new Random(1);
+        var memberOneIsWhite = colorPicker.Next() == 0;
+        var whiteId = memberOneIsWhite ? command.MemberOneId : command.MemberTwoId;
+        var blackId = !memberOneIsWhite ? command.MemberOneId : command.MemberTwoId;
 
-        RaiseEvent(new MatchStarted(White.MemberId, Black.MemberId, DateTime.UtcNow));
+        RaiseEvent(new MatchStarted(whiteId, blackId, DateTime.UtcNow));
     }
 
+    //TODO:
+    // - return a response object to the end user.
+    // - create business rule
+    // - Is move valid
+    //      - Can piece move to that square?
+    //      - Can piece jump over other pieces?
+    //      - Castling
+    //      - En Passant
     public void TakeTurn(TakeTurn command)
     {
-        //TODO: create business rule
-        // - Is move valid
-        //      - Can piece move to that square?
-        //      - Can piece jump over other pieces?
-        //      - Castling
-        //      - En Passant
-        var movingPiece = Pieces.FirstOrDefault(p => p.Position == command.StartPosition);
-        var availableMoves = movingPiece.GetAttackRange();
-        var isValidSquare = availableMoves.Any(m => m == command.EndPosition);
-        var targetPiece = Pieces.FirstOrDefault(p => p.Position == command.EndPosition);
-        var newPositionContainsPiece = targetPiece != null;
+        try
+        {
+            var violations = RuleFactory.GetTurnRules(command, Pieces)
+                                        .Select(r => r.CheckRule());
 
-        if (isValidSquare && newPositionContainsPiece && targetPiece.Color != movingPiece.Color)
+            if (!violations.Any())
+            {
+                RaiseEvent(new TurnTaken(command.MemberId, command?.StartPosition, command?.EndPosition));
+            }
+            else
+            {
+                //....
+            }
+        }
+        catch (Exception ex)
         {
 
-        RaiseEvent(new TurnTaken(command.MemberId, command.StartPosition, command.EndPosition));
         }
-
-
-
     }
 
     public void Resign(Guid resigningPlayerId)
@@ -74,56 +87,32 @@ public class Match : AggregateRoot<Guid>
 
     private void Handle(MatchStarted @event)
     {
-        Moves = new()
-        {
-            new() { Player = White, StartTime = @event.StartTime }
-        };
+        White = new() { Color = Color.White, MemberId = @event.WhiteMemberId };
+        Black = new() { Color = Color.Black, MemberId = @event.BlackMemberId };
+        Moves = new() { new() { Player = White, StartTime = @event.StartTime } };
 
-        var whitePieces = PiecesFactory.CreatePiecesForColor(Color.White);
-        var blackPiece = PiecesFactory.CreatePiecesForColor(Color.Black);
-
-        //TODO: Should pieces be saved?
         Pieces = new();
-        Pieces.AddRange(whitePieces);
-        Pieces.AddRange(blackPiece);
+        Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.White));
+        Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.Black));
     }
-
-    private Player GetPlayer(Guid memberId) => White.MemberId == memberId ? White : Black;
 
     private void Handle(TurnTaken @event)
     {
-        var movingPiece = Pieces.FirstOrDefault(p => p.Position == @event.StartPosition);
-        var targetPiece = Pieces.FirstOrDefault(p => p.Position == @event.EndPosition);
+        var movingPiece = Pieces?.FirstOrDefault(p => p.Position == @event.StartPosition)
+                        ?? throw new InvalidOperationException("Chess piece does not exists!");
+        var targetPiece = Pieces?.FirstOrDefault(p => p.Position == @event.EndPosition);
 
-        if (targetPiece != null)
-        {
-            Pieces.Remove(targetPiece);
-        }
+        if (targetPiece != null) Pieces?.Remove(targetPiece);
 
-        movingPiece.Position = @event.EndPosition;
+        movingPiece.Position = @event?.EndPosition;
 
-        Moves.Add(new Move()
+        Moves?.Add(new Move
         {
             Piece = movingPiece,
-            NewPosition = @event.EndPosition,
-            Player = GetPlayer(@event.MemberId),
+            NewPosition = @event?.EndPosition,
+            Player = GetPlayer(@event?.MemberId),
         });
     }
 
-    private void AssignPlayers(StartMatch command)
-    {
-        var colorPicker = new Random(1);
-
-        if (colorPicker.Next() == 0)
-        {
-            White = new Player { MemberId = command.MemberOneId };
-            Black = new Player { MemberId = command.MemberTwoId };
-
-        }
-        else
-        {
-            White = new Player { MemberId = command.MemberTwoId };
-            Black = new Player { MemberId = command.MemberOneId };
-        }
-    }
+    private Player? GetPlayer(Guid? memberId) => White?.MemberId == memberId ? White : Black;
 }

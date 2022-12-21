@@ -1,13 +1,16 @@
+using Chess.Core;
 using Chess.Core.Match.ValueObjects;
+using Chess.Domain.Entities.Pieces;
+using Chess.Domain.ValueObjects;
 
-namespace Chess.Core.Match.Entities;
+namespace Chess.Domain.Entities;
 
 public class Move : Entity<Guid>
 {
     public Piece Piece { get; set; }
-    public Square NewPosition { get; set; }
+    public Square? NewPosition { get; set; }
     public DateTime StartTime { get; init; }
-    public Player Player { get; init; }
+    public Player? Player { get; init; }
 
     public Move() : base(Guid.NewGuid()) { }
 }

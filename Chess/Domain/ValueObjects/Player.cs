@@ -1,6 +1,4 @@
-using System;
-
-namespace Chess.Core.Match.ValueObjects;
+namespace Chess.Domain.ValueObjects;
 
 public record Player
 {

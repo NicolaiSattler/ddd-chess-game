@@ -32,12 +32,14 @@ public class PieceCannotAttack : BusinessRule
 
     private BusinessRuleViolation? ValidateMovement(Piece? piece) => (piece?.Type) switch
     {
-        PieceType.Pawn when IsValidMove((Pawn)piece) ?? false => new("A pawn must attack a filled square."),
+        PieceType.Pawn when !IsValidMove((Pawn)piece) ?? true => new("A pawn must attack a filled square."),
         _ => null
     };
 
     private bool? IsValidMove(Pawn? pawn)
     {
+        if (pawn == null) throw new ArgumentNullException(nameof(pawn));
+
         var availableMoves = pawn?.GetAttackRange();
         var attackMoves = availableMoves?.Where(m => m.File != pawn?.Position?.File);
         var attack = attackMoves?.FirstOrDefault(m => m == _command.EndPosition);

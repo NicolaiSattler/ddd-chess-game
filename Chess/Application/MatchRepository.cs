@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Chess.Core;
-using Chess.Core.Match;
 using Chess.Core.Match.Events;
+using Chess.Domain;
 
 namespace Chess.Application;
 
@@ -30,19 +30,24 @@ public class MatchRepository : IMatchRepository
             Id = Guid.NewGuid(),
             AggregateId = aggregateId,
             Version = version,
-            Type = @event.GetType().Name,
-            Data = JsonSerializer.Serialize(@event)
+            Type = @event.GetType()?.Name,
+            Data = JsonSerializer.Serialize(@event, @event.GetType())
         };
     }
-    public void Save(Guid aggregateId, DomainEvent @event)
+    public void Save(Guid? aggregateId, DomainEvent? @event)
     {
-        if (_events.ContainsKey(aggregateId))
-        {
-            var newVersion = _events[aggregateId].Max(e => e.Version) + 1;
-            _events[aggregateId].Add(CreateEvent(aggregateId, newVersion, @event));
-        }
+        if (!aggregateId.HasValue) throw new ArgumentNullException(nameof(aggregateId));
+        if (@event == null) throw new ArgumentNullException(nameof(@event));
 
-        _events[aggregateId] = new List<Event> { CreateEvent(aggregateId, 1, @event) };
+        if (_events.ContainsKey(aggregateId.Value))
+        {
+            var newVersion = _events[aggregateId.Value].Max(e => e.Version) + 1;
+            _events[aggregateId.Value].Add(CreateEvent(aggregateId!.Value, newVersion!.Value, @event));
+        }
+        else _events[aggregateId.Value] = new List<Event>
+        {
+            CreateEvent(aggregateId.Value, 1, @event)
+        };
     }
 
     private static DomainEvent? DeserializeEvent(Event item) => item.Type switch

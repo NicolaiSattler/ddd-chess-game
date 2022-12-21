@@ -22,11 +22,7 @@ public class PawnTests
     public void  WhiteAttackRange_A2_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.White,
-            Position = new(File.A, 2),
-        };
+        _sut = new() { Color = Color.White, Position = new(File.A, 2) };
 
         //Act
         var availableMoves = _sut.GetAttackRange();
@@ -42,11 +38,7 @@ public class PawnTests
     public void  BlackAttackRange_A7_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.Black,
-            Position = new(File.A, 7),
-        };
+        _sut = new() { Color = Color.Black, Position = new(File.A, 7), };
 
         //Act
         var availableMoves = _sut.GetAttackRange();
@@ -62,11 +54,7 @@ public class PawnTests
     public void  WhiteAttackRange_H2_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.White,
-            Position = new(File.H, 2),
-        };
+        _sut = new() { Color = Color.White, Position = new(File.H, 2) };
 
         //Act
         var availableMoves = _sut.GetAttackRange();
@@ -82,11 +70,7 @@ public class PawnTests
     public void  BlackAttackRange_H7_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.Black,
-            Position = new(File.H, 7),
-        };
+        _sut = new() { Color = Color.Black, Position = new(File.H, 7) };
 
         //Act
         var availableMoves = _sut.GetAttackRange();
@@ -102,11 +86,7 @@ public class PawnTests
     public void  WhiteAttackRange_C2_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.White,
-            Position = new(File.C, 2),
-        };
+        _sut = new() { Color = Color.White, Position = new(File.C, 2), };
 
         //Act
         var availableMoves = _sut.GetAttackRange();
@@ -123,11 +103,7 @@ public class PawnTests
     public void  BlackAttackRange_C7_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.Black,
-            Position = new(File.C, 7),
-        };
+        _sut = new() { Color = Color.Black, Position = new(File.C, 7) };
 
         //Act
         var availableMoves = _sut.GetAttackRange();
@@ -144,11 +120,7 @@ public class PawnTests
     public void  WhiteAttackRange_D4_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.White,
-            Position = new(File.D, 4)
-        };
+        _sut = new() { Color = Color.White, Position = new(File.D, 4) };
 
         //Act
         var availableMoves = _sut.GetAttackRange();
@@ -164,11 +136,7 @@ public class PawnTests
     public void  BlackAttackRange_D4_ShouldBeValid()
     {
         //Arrange
-        _sut = new(Guid.NewGuid())
-        {
-            Color = Color.Black,
-            Position = new(File.D, 4)
-        };
+        _sut = new() { Color = Color.Black, Position = new(File.D, 4) };
 
         //Act
         var availableMoves = _sut.GetAttackRange();

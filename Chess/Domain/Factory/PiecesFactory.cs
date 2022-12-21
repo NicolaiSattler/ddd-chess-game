@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Chess.Core.Match.Entities;
 using Chess.Core.Match.Entities.Pieces;
 using Chess.Core.Match.ValueObjects;
+using Chess.Domain.Entities.Pieces;
+using Chess.Domain.ValueObjects;
 
 namespace Chess.Core.Match.Factory;
 
@@ -19,14 +21,14 @@ public class PiecesFactory
         { 8, PieceType.Rook },
     };
 
-    public static Piece CreatePiece(PieceType type, Square position, Guid id) => type switch
+    public static Piece CreatePiece(PieceType type, Square position, Guid id, Color color) => type switch
     {
-        PieceType.Rook => new Rook(id) { Position = position},
-        PieceType.Knight => new Knight(id) { Position = position},
-        PieceType.Bishop => new Bishop(id) { Position = position},
-        PieceType.Queen => new Queen(id) { Position = position},
-        PieceType.King => new King(id) { Position = position},
-        PieceType.Pawn => new Pawn(id) { Position = position},
+        PieceType.Rook => new Rook() { Position = position, Color = color },
+        PieceType.Knight => new Knight() { Position = position, Color = color },
+        PieceType.Bishop => new Bishop() { Position = position, Color = color },
+        PieceType.Queen => new Queen() { Position = position, Color = color },
+        PieceType.King => new King() { Position = position, Color = color },
+        PieceType.Pawn => new Pawn() { Position = position, Color = color },
         _ => throw new InvalidOperationException($"{type.ToString()} is not a valid type.")
     };
 
@@ -39,9 +41,8 @@ public class PiecesFactory
         for (int i = 1; i < 9; i++)
         {
             var pieceType = StartPositions[i];
-
-            result.Add(CreatePiece(PieceType.Pawn, new Square(i, pawnRow), Guid.NewGuid()));
-            result.Add(CreatePiece(pieceType, new Square(i, startRow), Guid.NewGuid()));
+            result.Add(CreatePiece(PieceType.Pawn, new Square((File)i, pawnRow), Guid.NewGuid(), color));
+            result.Add(CreatePiece(pieceType, new Square((File)i, startRow), Guid.NewGuid(), color));
         }
 
         return result;

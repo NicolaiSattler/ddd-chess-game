@@ -8,7 +8,7 @@
     {
         public TId Id { get; }
 
-        public Entity(TId id)
+        public Entity(TId? id)
         {
             Id = id;
         }

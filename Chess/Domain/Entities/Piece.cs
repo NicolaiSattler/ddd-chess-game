@@ -1,12 +1,14 @@
 using System.Collections.Generic;
+using Chess.Core;
 using Chess.Core.Match.ValueObjects;
+using Chess.Domain.ValueObjects;
 
-namespace Chess.Core.Match.Entities;
+namespace Chess.Domain.Entities.Pieces;
 
 public abstract class Piece : Entity<Guid>
 {
     public Color Color { get; init; }
-    public Square Position { get; set; }
+    public Square? Position { get; set; }
     public abstract PieceType Type { get; init; }
     public abstract MovementType Movement { get; init; }
 

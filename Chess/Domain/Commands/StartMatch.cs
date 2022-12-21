@@ -1,6 +1,4 @@
-using System;
-
-namespace Chess.Core.Match.Commands;
+namespace Chess.Domain.Commands;
 
 public record StartMatch
 {

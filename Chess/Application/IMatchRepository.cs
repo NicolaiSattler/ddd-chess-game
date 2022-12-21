@@ -1,10 +1,10 @@
 using Chess.Core;
-using Chess.Core.Match;
+using Chess.Domain;
 
 namespace Chess.Application;
 
 public interface IMatchRepository
 {
     Match? Get(Guid aggregateId);
-    void Save(Guid aggregateId, DomainEvent @event);
+    void Save(Guid? aggregateId, DomainEvent? @event);
 }
