@@ -1,5 +1,4 @@
 using Chess.Core;
-using Chess.Core.Match.ValueObjects;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 

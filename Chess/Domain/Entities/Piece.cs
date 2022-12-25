@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Chess.Core;
-using Chess.Core.Match.ValueObjects;
 using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Entities.Pieces;
@@ -22,8 +21,8 @@ public enum MovementType
     Undefined = 0,
     Diagonal = 1,
     FileAndRank = 2,
-    Leap = 3,
-    Pawn = 4,
+    Leap = 4,
+    Pawn = 8,
 }
 
 public enum PieceType

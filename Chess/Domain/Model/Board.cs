@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Chess.Core.Match.ValueObjects;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
@@ -13,7 +12,7 @@ public class Board
 
     public static IEnumerable<Square> CalculateMovement(Square? position,
                                                         MovementType? movement,
-                                                        int range = 1,
+                                                        int range = 2,
                                                         Color color = Color.Undefined)
     {
         if (position == null) throw new ArgumentNullException(nameof(position));

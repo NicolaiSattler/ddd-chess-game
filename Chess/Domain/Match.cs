@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Chess.Core;
-using Chess.Core.BusinessRules;
 using Chess.Core.Match.Events;
 using Chess.Core.Match.Factory;
 using Chess.Domain.BusinessRules;

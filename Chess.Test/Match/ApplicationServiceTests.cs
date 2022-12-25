@@ -1,8 +1,5 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Chess.Application;
 using System;
-using Chess.Core.Match.ValueObjects;
-using Shouldly;
 using Chess.Domain.Commands;
 
 namespace Chess.Test.Match;

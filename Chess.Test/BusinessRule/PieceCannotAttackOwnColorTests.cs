@@ -1,13 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Chess.Core.Match.ValueObjects;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
-using Chess.Domain.Entities.Pieces;
-using Chess.Domain.ValueObjects;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Shouldly;
 
 namespace Chess.Test.BusinessRule;
 

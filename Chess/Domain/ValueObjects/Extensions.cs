@@ -1,5 +1,3 @@
-using Chess.Core.Match.ValueObjects;
-
 namespace Chess.Domain.ValueObjects;
 
 public static class Extensions

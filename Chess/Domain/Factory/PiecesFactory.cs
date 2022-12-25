@@ -1,7 +1,4 @@
 using System.Collections.Generic;
-using Chess.Core.Match.Entities;
-using Chess.Core.Match.Entities.Pieces;
-using Chess.Core.Match.ValueObjects;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 

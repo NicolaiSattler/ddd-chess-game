@@ -1,4 +1,4 @@
-using Chess.Core.Match.ValueObjects;
+using Chess.Domain.ValueObjects;
 
 namespace Chess.Core.Match.Events;
 

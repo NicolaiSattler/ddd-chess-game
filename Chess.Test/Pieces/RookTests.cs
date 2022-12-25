@@ -1,9 +1,3 @@
-using Chess.Core.Match.Entities.Pieces;
-using Chess.Core.Match.ValueObjects;
-using Chess.Domain.ValueObjects;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Shouldly;
-
 namespace Chess.Test.Pieces;
 
 [TestClass]

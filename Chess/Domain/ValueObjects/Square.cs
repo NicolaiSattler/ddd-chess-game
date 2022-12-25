@@ -1,4 +1,4 @@
-namespace Chess.Core.Match.ValueObjects;
+namespace Chess.Domain.ValueObjects;
 
 public record Square(File File, int? Rank)
 {

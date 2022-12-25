@@ -1,10 +1,4 @@
-using System;
 using System.Linq;
-using Chess.Core.Match.ValueObjects;
-using Chess.Domain.Entities.Pieces;
-using Chess.Domain.ValueObjects;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Shouldly;
 
 namespace Chess.Test.Pieces;
 
@@ -12,11 +6,6 @@ namespace Chess.Test.Pieces;
 public class PawnTests
 {
     private Pawn _sut;
-
-    [TestInitialize]
-    public void Initialize()
-    {
-    }
 
     [TestMethod]
     public void  WhiteAttackRange_A2_ShouldBeValid()
