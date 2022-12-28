@@ -21,7 +21,6 @@ public class ApplicationServiceTests
     }
 
     [TestMethod]
-    [Ignore("Work in progress..")]
     public void  StartGame_ShouldAddEvent()
     {
         //Arrange

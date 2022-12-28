@@ -15,7 +15,9 @@ public class MatchRepository : IMatchRepository
     {
         if (_events.TryGetValue(aggregateId, out List<Event>? aggregateEvents))
         {
-            var events = aggregateEvents.OrderBy(e => e.Version).Select(DeserializeEvent);
+            var events = aggregateEvents.OrderBy(e => e.Version)
+                                        .Select(DeserializeEvent);
+
             return new Match(aggregateId, events);
         }
 
@@ -50,10 +52,10 @@ public class MatchRepository : IMatchRepository
         };
     }
 
-    private static DomainEvent? DeserializeEvent(Event item) => item.Type switch
+    private static DomainEvent? DeserializeEvent(Event? item) => item?.Type switch
     {
-        nameof(MatchStarted) => JsonSerializer.Deserialize<MatchStarted>(item.Data),
-        nameof(TurnTaken) => JsonSerializer.Deserialize<TurnTaken>(item.Data),
+        nameof(MatchStarted) => JsonSerializer.Deserialize<MatchStarted>(item?.Data ?? string.Empty),
+        nameof(TurnTaken) => JsonSerializer.Deserialize<TurnTaken>(item?.Data ?? string.Empty),
         _ => throw new InvalidOperationException("Type is unknown."),
     };
 }

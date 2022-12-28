@@ -54,12 +54,14 @@ namespace Chess.Core
         public AggregateRoot(TId id, IEnumerable<DomainEvent> events) : this(id)
         {
             IsReplaying = true;
+
             foreach (DomainEvent evt in events)
             {
                 When(evt);
                 OriginalVersion++;
                 Version++;
             }
+
             IsReplaying = false;
         }
 

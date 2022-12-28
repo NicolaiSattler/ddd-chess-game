@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Chess.Core;
 using Chess.Core.Match.Events;
@@ -52,7 +53,7 @@ public class Match : AggregateRoot<Guid>
         try
         {
             var violations = RuleFactory.GetTurnRules(command, Pieces)
-                                        .Select(r => r.CheckRule());
+                                        .SelectMany(r => r.CheckRule());
 
             if (!violations.Any())
             {
@@ -65,7 +66,8 @@ public class Match : AggregateRoot<Guid>
         }
         catch (Exception ex)
         {
-
+            //TODO: Replace with ILogger
+            Debug.Print(ex.ToString());
         }
     }
 

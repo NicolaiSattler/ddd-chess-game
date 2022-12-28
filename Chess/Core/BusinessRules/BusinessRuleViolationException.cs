@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 
 namespace Chess.Core.BusinessRules;
 
@@ -24,9 +23,5 @@ public class BusinessRuleViolationException : Exception
         : base($"Rule Violations: {violations.Count()} violations have been detected.", innerException)
     {
         Violations = violations;
-    }
-
-    protected BusinessRuleViolationException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
     }
 }
