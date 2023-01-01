@@ -114,8 +114,6 @@ public class Board
         var result = new List<Square>();
         var piecesOfSameColor = pieces.Where(p => p.Color == movingPiece.Color);
 
-
-
         if (movingPiece.Type == PieceType.Knight)
         {
             var possibleMoves = movingPiece.GetAttackRange()

@@ -9,6 +9,11 @@ public class RuleFactory
 {
     public static IEnumerable<BusinessRule> GetTurnRules(TakeTurn command, IEnumerable<Piece>? pieces)
     {
-        return new List<BusinessRule> { new PieceCannotAttack(command, pieces), new PieceCannotAttackOwnColor(command, pieces) };
+        return new List<BusinessRule>
+        {
+            new PieceCannotAttack(command, pieces),
+            new PieceCannotAttackOwnColor(command, pieces),
+            new PieceIsBlocked(command, pieces)
+        };
     }
 }

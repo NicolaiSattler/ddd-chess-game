@@ -25,6 +25,15 @@ public enum MovementType
     Pawn = 8,
 }
 
+public enum DirectionType
+{
+    Undefined = 0,
+    Left = 1,
+    Right = 2,
+    Up = 4,
+    Down = 8,
+}
+
 public enum PieceType
 {
     Undefined = 0,
