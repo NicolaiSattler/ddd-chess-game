@@ -16,6 +16,7 @@ public class PieceCannotAttackOwnColor : BusinessRule
         _command = command;
         _pieces = pieces;
     }
+
     public override IEnumerable<BusinessRuleViolation> CheckRule()
     {
         var result = new List<BusinessRuleViolation>();

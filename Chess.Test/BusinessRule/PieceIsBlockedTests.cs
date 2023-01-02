@@ -34,7 +34,7 @@ public class PieceIsBlockedTests
     }
 
     [TestMethod]
-    public void  BishopA1_MoveToC3_IsBlockedByQueen()
+    public void BishopA1_MoveToC3_IsBlockedByQueen()
     {
         //Arrange
         var pieces = new List<Piece>
@@ -58,7 +58,7 @@ public class PieceIsBlockedTests
     }
 
     [TestMethod]
-    public void  PawnA1_MoveToA3_IsBlockedByQueen()
+    public void PawnA1_MoveToA3_IsBlockedByQueen()
     {
         //Arrange
         var pieces = new List<Piece>
@@ -79,6 +79,77 @@ public class PieceIsBlockedTests
 
         //Assert
         result.ShouldNotBeEmpty();
+    }
 
+    [TestMethod]
+    public void BishopC8_MoveToE6_IsBlockedByQueen()
+    {
+        //Arrange
+        var pieces = new List<Piece>
+        {
+            new Bishop { Color = Color.White, Position = new (File.C, 8)},
+            new Queen { Color = Color.White, Position = new (File.D, 7)}
+        };
+
+        var command = new TakeTurn
+        {
+            StartPosition = new(File.C, 8),
+            EndPosition = new(File.E, 6)
+        };
+        _sut = new PieceIsBlocked(command, pieces);
+
+        //Act
+        var result = _sut.CheckRule();
+
+        //Assert
+        result.ShouldNotBeEmpty();
+    }
+
+    [TestMethod]
+    public void KingC8_MoveToC7_IsBlockedByQueen()
+    {
+        //Arrange
+        var pieces = new List<Piece>
+        {
+            new King { Color = Color.White, Position = new (File.C, 8)},
+            new Queen { Color = Color.White, Position = new (File.C, 7)}
+        };
+
+        var command = new TakeTurn
+        {
+            StartPosition = new(File.C, 8),
+            EndPosition = new(File.C, 7)
+        };
+        _sut = new PieceIsBlocked(command, pieces);
+
+        //Act
+        var result = _sut.CheckRule();
+
+        //Assert
+        result.ShouldNotBeEmpty();
+    }
+
+    [TestMethod]
+    public void PawnH6_MoveToG5_IsBlockedByQueen()
+    {
+        //Arrange
+        var pieces = new List<Piece>
+        {
+            new Pawn { Color = Color.Black, Position = new (File.H, 6)},
+            new Queen { Color = Color.Black, Position = new (File.G, 5)}
+        };
+
+        var command = new TakeTurn
+        {
+            StartPosition = new(File.H, 6),
+            EndPosition = new(File.G, 5)
+        };
+        _sut = new PieceIsBlocked(command, pieces);
+
+        //Act
+        var result = _sut.CheckRule();
+
+        //Assert
+        result.ShouldNotBeEmpty();
     }
 }

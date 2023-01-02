@@ -24,17 +24,20 @@ public class PieceIsBlocked : BusinessRule
         _ = _command.StartPosition ?? throw new InvalidOperationException("Start position cannot be null");
         _ = _command.EndPosition ?? throw new InvalidOperationException("End position cannot be null");
 
-        var movingPiece = _pieces.FirstOrDefault(p => p.Position == _command.StartPosition)
+        var movingPiece = _pieces?.FirstOrDefault(p => p.Position == _command.StartPosition)
                         ?? throw new InvalidOperationException($"No piece was found at {_command.StartPosition}");
-        var direction = GetMoveDirection();
 
-        return EndPositionIsBlocked(movingPiece) || MoveIsObstructed(_pieces.ToArray(), direction, _command.StartPosition, _command.EndPosition)
+        var direction = GetMoveDirection();
+        var pieceIsBlocked = EndPositionIsBlocked(movingPiece)
+            || MoveIsObstructed(_pieces.ToArray(), direction, _command.StartPosition, _command.EndPosition);
+
+        return pieceIsBlocked
             ? new List<BusinessRuleViolation>() { new(PieceIsBlockedViolation) }
             : Enumerable.Empty<BusinessRuleViolation>();
     }
 
     private bool EndPositionIsBlocked(Piece movingPiece) =>
-        _pieces.Any(p => p.Position == _command.EndPosition && p.Color == movingPiece.Color);
+        _pieces?.Any(p => p.Position == _command.EndPosition && p.Color == movingPiece.Color) ?? false;
 
     private DirectionType GetVerticalDirection(DirectionType type) => _command.StartPosition?.Rank < _command.EndPosition?.Rank
                                             ? type |= DirectionType.Up
@@ -78,7 +81,7 @@ public class PieceIsBlocked : BusinessRule
 
     private bool ValidateDiagonalRightDownObstruction(Piece[] pieces, Square start, Square end)
     {
-        for (var x = end.Rank; x > start.Rank; x--)
+        for (var x = start.Rank; x > end.Rank; x--)
             for (var y = (int)start.File; y < (int)end.File; y++)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
