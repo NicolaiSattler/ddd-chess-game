@@ -16,8 +16,7 @@ namespace Chess.Core.BusinessRules
 
         public override IEnumerable<BusinessRuleViolation> CheckRule()
         {
-            return _firstRule.CheckRule().Concat(
-                  _secondRule.CheckRule());
+            return _firstRule.CheckRule().Concat(_secondRule.CheckRule());
         }
     }
 }

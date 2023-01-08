@@ -11,7 +11,7 @@ public class RuleFactory
     {
         return new List<BusinessRule>
         {
-            new PieceCannotAttack(command, pieces),
+            new PieceInvalidMove(command, pieces),
             new PieceCannotAttackOwnColor(command, pieces),
             new PieceIsBlocked(command, pieces)
         };

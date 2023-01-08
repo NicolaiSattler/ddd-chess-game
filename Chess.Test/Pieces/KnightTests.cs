@@ -58,6 +58,5 @@ public class KnightTests
         availableMoves.ShouldContain(m => m.File == File.C && m.Rank == 3);
         availableMoves.ShouldContain(m => m.File == File.E && m.Rank == 3);
         availableMoves.ShouldContain(m => m.File == File.F && m.Rank == 4);
-
     }
 }

@@ -15,5 +15,5 @@ public class Pawn : Piece
         Movement = MovementType.Pawn;
     }
 
-    public override IEnumerable<Square> GetAttackRange() => Board.CalculateMovement(Position, Movement, color: Color);
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement, color: Color);
 }

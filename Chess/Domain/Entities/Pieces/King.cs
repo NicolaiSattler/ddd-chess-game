@@ -15,5 +15,5 @@ public class King : Piece
         Movement = MovementType.Diagonal | MovementType.FileAndRank;
     }
 
-    public override IEnumerable<Square> GetAttackRange() => Board.CalculateMovement(Position, Movement);
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement);
 }

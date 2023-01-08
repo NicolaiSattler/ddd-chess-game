@@ -8,6 +8,7 @@ using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
+using Chess.Domain.Model;
 using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain;
@@ -43,11 +44,6 @@ public class Match : AggregateRoot<Guid>
     //TODO:
     // - return a response object to the end user.
     // - create business rule
-    // - Is move valid
-    //      - Can piece move to that square?
-    //      - Can piece jump over other pieces?
-    //      - Castling
-    //      - En Passant
     public void TakeTurn(TakeTurn command)
     {
         try
@@ -97,23 +93,44 @@ public class Match : AggregateRoot<Guid>
         Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.Black));
     }
 
+    //      - En Passant
+    //      - Castling
+    //      - Captured
+    //      - Promotion
     private void Handle(TurnTaken @event)
     {
-        var movingPiece = Pieces?.FirstOrDefault(p => p.Position == @event.StartPosition)
-                        ?? throw new InvalidOperationException("Chess piece does not exists!");
+        _ = @event ?? throw new ArgumentNullException(nameof(@event));
+
+        var movingPiece = Pieces?.FirstOrDefault(p => p.Position == @event.StartPosition);
         var targetPiece = Pieces?.FirstOrDefault(p => p.Position == @event.EndPosition);
 
-        if (targetPiece != null) Pieces?.Remove(targetPiece);
+        if (movingPiece == null) return;
 
-        movingPiece.Position = @event?.EndPosition;
-
-        Moves?.Add(new Move
+        if (Board.PieceIsCaptured(@event, Pieces) && targetPiece != null)
         {
-            Piece = movingPiece,
-            NewPosition = @event?.EndPosition,
-            Player = GetPlayer(@event?.MemberId),
-        });
+            Pieces?.Remove(targetPiece);
+
+            movingPiece.Position = @event?.EndPosition;
+        }
+
+        if (Board.PawnIsPromoted(@event, Pieces))
+        {
+            var queen = PiecesFactory.CreatePiece(PieceType.Queen, @event?.EndPosition, movingPiece.Id, movingPiece.Color);
+
+            Pieces?.Remove(movingPiece);
+            Pieces?.Add(queen);
+        }
+
+        NewMoveMade(movingPiece, @event);
     }
 
-    private Player? GetPlayer(Guid? memberId) => White?.MemberId == memberId ? White : Black;
+    private void NewMoveMade(Piece? movingPiece, TurnTaken? @event)
+    {
+        Moves?.Add(new()
+        {
+            Piece = movingPiece,
+            Position = @event?.EndPosition,
+            Player = White?.MemberId == @event?.MemberId ? White : Black
+        });
+    }
 }

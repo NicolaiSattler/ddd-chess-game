@@ -15,6 +15,6 @@ public class Knight : Piece
         Movement = MovementType.Leap;
     }
 
-    public override IEnumerable<Square> GetAttackRange() => Board.CalculateMovement(Position, Movement);
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement);
 
 }

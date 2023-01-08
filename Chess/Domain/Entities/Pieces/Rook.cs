@@ -15,5 +15,5 @@ public class Rook : Piece
         Movement = MovementType.FileAndRank;
     }
 
-    public override IEnumerable<Square> GetAttackRange() => Board.CalculateMovement(Position, Movement, 8);
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement, 8);
 }

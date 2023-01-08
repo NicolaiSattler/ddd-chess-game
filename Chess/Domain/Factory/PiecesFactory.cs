@@ -18,7 +18,7 @@ public class PiecesFactory
         { 8, PieceType.Rook },
     };
 
-    public static Piece CreatePiece(PieceType type, Square position, Guid id, Color color) => type switch
+    public static Piece CreatePiece(PieceType? type, Square? position, Guid id, Color color) => type switch
     {
         PieceType.Rook => new Rook() { Position = position, Color = color },
         PieceType.Knight => new Knight() { Position = position, Color = color },
