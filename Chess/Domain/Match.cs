@@ -18,7 +18,7 @@ public class Match : AggregateRoot<Guid>
     private Player? White { get; set; }
     private Player? Black { get; set; }
     private List<Piece>? Pieces { get; set; }
-    private List<Move>? Moves { get; set; }
+    private List<Turn>? Turns { get; set; }
 
     public Match(Guid id) : base(id) { }
     public Match(Guid id, IEnumerable<DomainEvent> events) : base(id, events) { }
@@ -86,11 +86,13 @@ public class Match : AggregateRoot<Guid>
     {
         White = new() { Color = Color.White, MemberId = @event.WhiteMemberId };
         Black = new() { Color = Color.Black, MemberId = @event.BlackMemberId };
-        Moves = new() { new() { Player = White, StartTime = @event.StartTime } };
+        Turns = new();
 
         Pieces = new();
         Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.White));
         Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.Black));
+
+        StartTurn(White, @event.StartTime);
     }
 
     //      - En Passant
@@ -121,16 +123,22 @@ public class Match : AggregateRoot<Guid>
             Pieces?.Add(queen);
         }
 
-        NewMoveMade(movingPiece, @event);
+        EndTurn(@event, movingPiece?.Type);
+        StartTurn(GetOpponent(@event?.MemberId), DateTime.UtcNow);
     }
 
-    private void NewMoveMade(Piece? movingPiece, TurnTaken? @event)
+    private Player? GetOpponent(Guid? memberId) => memberId != White?.MemberId ? White : Black;
+    private void StartTurn(Player? player, DateTime startTime) => Turns?.Add(new() { Player = player, StartTime = startTime });
+
+    private void EndTurn(TurnTaken? @event, PieceType? pieceType)
     {
-        Moves?.Add(new()
-        {
-            Piece = movingPiece,
-            Position = @event?.EndPosition,
-            Player = White?.MemberId == @event?.MemberId ? White : Black
-        });
+        _ = @event ?? throw new ArgumentNullException(nameof(@event));
+        _ = pieceType ?? throw new ArgumentNullException(nameof(pieceType));
+
+        var turn = Turns?.Last() ?? throw new InvalidOperationException("No turns found!");
+
+        turn.StartPosition = @event.StartPosition;
+        turn.EndPosition = @event.EndPosition;
+        turn.PieceType = pieceType;
     }
 }
