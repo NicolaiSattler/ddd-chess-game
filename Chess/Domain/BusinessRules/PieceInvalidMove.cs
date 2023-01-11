@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Chess.Core.BusinessRules;
 using Chess.Domain.Commands;
+using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
+using Chess.Domain.Model;
 
 namespace Chess.Domain.BusinessRules;
 
@@ -10,11 +12,13 @@ public class PieceInvalidMove : BusinessRule
 {
     private readonly TakeTurn _command;
     private readonly IEnumerable<Piece>? _pieces;
+    private readonly IEnumerable<Turn>? _turns;
 
-    public PieceInvalidMove(TakeTurn command, IEnumerable<Piece>? pieces)
+    public PieceInvalidMove(TakeTurn command, IEnumerable<Piece>? pieces, IEnumerable<Turn>? turns)
     {
         _command = command;
         _pieces = pieces;
+        _turns = turns;
     }
 
     public override IEnumerable<BusinessRuleViolation> CheckRule()
@@ -33,8 +37,11 @@ public class PieceInvalidMove : BusinessRule
 
     private BusinessRuleViolation? ValidateMovement(Piece? piece) => (piece?.Type) switch
     {
-        PieceType.Pawn when !IsValidMove((Pawn)piece) => new("A pawn must attack a filled square."),
-        _ when !PieceMovesToValidSquare(piece) => new("Piece must move to designated squares."),
+        PieceType.Pawn when !IsValidMove((Pawn)piece) || !SpecialMoves.IsEnPassant(piece, _turns)
+                       => new("A pawn must attack a filled square."),
+
+        _ when !PieceMovesToValidSquare(piece)
+                       => new("Piece must move to designated squares."),
         _ => null
     };
 

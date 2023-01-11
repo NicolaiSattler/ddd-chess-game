@@ -48,7 +48,7 @@ public class Match : AggregateRoot<Guid>
     {
         try
         {
-            var violations = RuleFactory.GetTurnRules(command, Pieces)
+            var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
                                         .SelectMany(r => r.CheckRule());
 
             if (!violations.Any())
@@ -129,7 +129,6 @@ public class Match : AggregateRoot<Guid>
 
     private Player? GetOpponent(Guid? memberId) => memberId != White?.MemberId ? White : Black;
     private void StartTurn(Player? player, DateTime startTime) => Turns?.Add(new() { Player = player, StartTime = startTime });
-
     private void EndTurn(TurnTaken? @event, PieceType? pieceType)
     {
         _ = @event ?? throw new ArgumentNullException(nameof(@event));

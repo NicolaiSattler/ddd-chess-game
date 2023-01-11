@@ -8,6 +8,7 @@ namespace Chess.Domain.Model;
 
 public class Board
 {
+    //TODO: Unit Test
     public static bool PieceIsCaptured(TurnTaken @event, IEnumerable<Piece>? pieces)
     {
         var movingPiece = pieces?.FirstOrDefault(p => p.Position == @event.StartPosition)
@@ -18,6 +19,7 @@ public class Board
         return false;
     }
 
+    //TODO: Unit Test
     public static bool PawnIsPromoted(TurnTaken? @event, IEnumerable<Piece>? pieces)
     {
         var movingPiece = pieces?.FirstOrDefault(p => p.Position == @event?.StartPosition)
