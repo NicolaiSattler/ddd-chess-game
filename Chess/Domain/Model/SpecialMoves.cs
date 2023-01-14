@@ -8,29 +8,31 @@ namespace Chess.Domain.Model;
 
 public class SpecialMoves
 {
-    //TODO: Unit Test
-    public static bool IsEnPassant(Piece? pawn, IEnumerable<Turn>? moves)
+    public static bool IsEnPassant(Piece? pawn, IEnumerable<Turn>? turns)
     {
         _ = pawn ?? throw new ArgumentNullException(nameof(pawn));
 
-        var lastMove = moves?.Last();
+        var lastTurn = turns?.Last();
 
-        if (lastMove == null && lastMove?.EndPosition == null) return false;
+        if (lastTurn == null && lastTurn?.EndPosition == null && lastTurn?.Player == null)
+        {
+            return false;
+        }
 
-        var isWhiteMove = lastMove.Player?.Color == Color.White;
-        var pawnWasMoved = lastMove.PieceType == PieceType.Pawn;
+        var isWhiteMove = lastTurn.Player?.Color == Color.White;
+        var pawnWasMoved = lastTurn.PieceType == PieceType.Pawn;
 
         if (!pawnWasMoved) return false;
 
         var opponentPawnMovedTwoRanks = isWhiteMove
-            ? (lastMove.EndPosition?.Rank - lastMove.StartPosition?.Rank) > 1
-            : (lastMove.StartPosition?.Rank - lastMove.EndPosition?.Rank) > 1;
+            ? (lastTurn.EndPosition?.Rank - lastTurn.StartPosition?.Rank) > 1
+            : (lastTurn.StartPosition?.Rank - lastTurn.EndPosition?.Rank) > 1;
 
         var enPassantRankPosition = isWhiteMove
-            ? lastMove.EndPosition!.Rank!.Value - 1
-            : lastMove.EndPosition!.Rank!.Value + 1;
+            ? lastTurn.EndPosition!.Rank!.Value - 1
+            : lastTurn.EndPosition!.Rank!.Value + 1;
 
-        var passedPosition = new Square(lastMove.EndPosition.File, enPassantRankPosition);
+        var passedPosition = new Square(lastTurn.EndPosition.File, enPassantRankPosition);
 
         var isEnPassantMove = pawn.GetAttackRange()
                                   .Where(p => p.File != pawn.Position?.File)

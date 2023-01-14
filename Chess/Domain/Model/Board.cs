@@ -19,7 +19,6 @@ public class Board
         return false;
     }
 
-    //TODO: Unit Test
     public static bool PawnIsPromoted(TurnTaken? @event, IEnumerable<Piece>? pieces)
     {
         var movingPiece = pieces?.FirstOrDefault(p => p.Position == @event?.StartPosition)
@@ -29,7 +28,7 @@ public class Board
         {
             var promotionRank = Color.White == pawn.Color ? 8 : 1;
             return @event?.EndPosition?.Rank == promotionRank
-                && (pieces?.Any(p => p.Color == pawn.Color && p.Type == PieceType.Queen) ?? false);
+                && (!pieces?.Any(p => p.Color == pawn.Color && p.Type == PieceType.Queen) ?? false);
         }
 
         return false;

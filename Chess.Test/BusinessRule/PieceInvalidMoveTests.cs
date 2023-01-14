@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
+using Chess.Domain.Entities;
 
 namespace Chess.Test.BusinessRule;
 
@@ -23,7 +24,9 @@ public class PieceInvalidMoveTests
         {
             new Pawn { Position = new Square(File.D, 1), Color = Color.White }
         };
-        _sut = new PieceInvalidMove(command, pieces);
+        var turns = new List<Turn>();
+
+        _sut = new PieceInvalidMove(command, pieces, turns);
 
         //Act
         var result = _sut.CheckRule();
@@ -46,7 +49,9 @@ public class PieceInvalidMoveTests
         {
             new Pawn { Position = new(File.D, 1), Color = Color.White }
         };
-        _sut = new PieceInvalidMove(command, pieces);
+        var turns = new List<Turn>();
+
+        _sut = new PieceInvalidMove(command, pieces, turns);
 
         //Act
         var result = _sut.CheckRule();
@@ -69,7 +74,8 @@ public class PieceInvalidMoveTests
         {
             new Bishop { Position = new(File.A, 1), Color = Color.White }
         };
-        _sut = new PieceInvalidMove(command, pieces);
+        var turns = new List<Turn>();
+        _sut = new PieceInvalidMove(command, pieces, turns);
 
         //Act
         var result = _sut.CheckRule();
