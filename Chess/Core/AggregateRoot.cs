@@ -51,15 +51,18 @@ namespace Chess.Core
         /// </summary>
         /// <param name="id">The unique Id of the aggregate.</param>
         /// <param name="events">The events to replay.</param>
-        public AggregateRoot(TId id, IEnumerable<DomainEvent> events) : this(id)
+        public AggregateRoot(TId id, IEnumerable<DomainEvent?>? events) : this(id)
         {
             IsReplaying = true;
 
-            foreach (DomainEvent evt in events)
+            if (events != null)
             {
-                When(evt);
-                OriginalVersion++;
-                Version++;
+                foreach (var evt in events)
+                {
+                    When(evt);
+                    OriginalVersion++;
+                    Version++;
+                }
             }
 
             IsReplaying = false;
@@ -96,6 +99,6 @@ namespace Chess.Core
         /// <param name="domainEevent">The event to handle.</param>
         /// <remarks>Because the parameter type of the specified event is dynamic,
         /// the appropriate overload of the When method is called.</remarks>
-        protected abstract void When(DomainEvent domainEvent);
+        protected abstract void When(DomainEvent? domainEvent);
     }
 }

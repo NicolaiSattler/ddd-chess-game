@@ -17,8 +17,8 @@ public class Navigator
                                                         int range = 2,
                                                         Color color = Color.Undefined)
     {
-        if (position == null) throw new ArgumentNullException(nameof(position));
-        if (!movement.HasValue) throw new ArgumentNullException(nameof(movement));
+        _ = position ?? throw new ArgumentNullException(nameof(position));
+        _ = movement ?? throw new ArgumentNullException(nameof(movement));
 
         var result = new List<Square>();
 

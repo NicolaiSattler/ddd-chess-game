@@ -21,9 +21,9 @@ public class Match : AggregateRoot<Guid>
     private List<Turn>? Turns { get; set; }
 
     public Match(Guid id) : base(id) { }
-    public Match(Guid id, IEnumerable<DomainEvent> events) : base(id, events) { }
+    public Match(Guid id, IEnumerable<DomainEvent?>? events) : base(id, events) { }
 
-    protected override void When(DomainEvent domainEvent)
+    protected override void When(DomainEvent? domainEvent)
     {
         if (domainEvent is MatchStarted gameStarted) Handle(gameStarted);
         if (domainEvent is TurnTaken turnTaken) Handle(turnTaken);
@@ -95,10 +95,12 @@ public class Match : AggregateRoot<Guid>
         StartTurn(White, @event.StartTime);
     }
 
-    //      - En Passant
+    //      - En Passant (done)
     //      - Castling
-    //      - Captured
-    //      - Promotion
+    //      - Captured (done)
+    //      - Promotion (done)
+    //      - Check
+    //      - Check Mate
     private void Handle(TurnTaken @event)
     {
         _ = @event ?? throw new ArgumentNullException(nameof(@event));
@@ -108,20 +110,22 @@ public class Match : AggregateRoot<Guid>
 
         if (movingPiece == null) return;
 
-        if (Board.PieceIsCaptured(@event, Pieces) && targetPiece != null)
+        var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);
+
+        if (isEnPassant)
+        {
+            var pieceId = Turns?.Last().Id;
+            targetPiece = Pieces?.FirstOrDefault(p => p.Id == pieceId);
+        }
+
+        if ((Board.PieceIsCaptured(@event, Pieces) || isEnPassant) && targetPiece != null)
         {
             Pieces?.Remove(targetPiece);
 
             movingPiece.Position = @event?.EndPosition;
         }
 
-        if (Board.PawnIsPromoted(@event, Pieces))
-        {
-            var queen = PiecesFactory.CreatePiece(PieceType.Queen, @event?.EndPosition, movingPiece.Id, movingPiece.Color);
-
-            Pieces?.Remove(movingPiece);
-            Pieces?.Add(queen);
-        }
+        CheckPromotion(@event, movingPiece);
 
         EndTurn(@event, movingPiece?.Type);
         StartTurn(GetOpponent(@event?.MemberId), DateTime.UtcNow);
@@ -139,5 +143,15 @@ public class Match : AggregateRoot<Guid>
         turn.StartPosition = @event.StartPosition;
         turn.EndPosition = @event.EndPosition;
         turn.PieceType = pieceType;
+    }
+    private void CheckPromotion(TurnTaken? @event, Piece? movingPiece)
+    {
+        if (Board.PawnIsPromoted(@event, Pieces) && movingPiece != null)
+        {
+            var queen = PiecesFactory.CreatePiece(PieceType.Queen, @event?.EndPosition, movingPiece.Id, movingPiece.Color);
+
+            Pieces?.Remove(movingPiece);
+            Pieces?.Add(queen);
+        }
     }
 }
