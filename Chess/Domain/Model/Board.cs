@@ -67,7 +67,7 @@ public class Board
             {
                 var pieceIsObstructed = Board.DirectionIsObstructed(pieces, piece.Position, king.Position);
 
-                if (!pieceIsObstructed)
+                if (!pieceIsObstructed || piece.Type == PieceType.Knight)
                 {
                     return true;
                 }
@@ -113,8 +113,8 @@ public class Board
 
     private static bool ValidateDiagonalRightDownObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
     {
-        for (var x = start?.Rank; x > end?.Rank; x--)
-            for (var y = (int?)start?.File; y < (int)end.File; y++)
+        for (var x = start?.Rank - 1; x > end?.Rank; x--)
+            for (var y = (int?)start?.File - 1; y < (int)end.File; y++)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
         return false;
@@ -122,8 +122,8 @@ public class Board
 
     private static bool ValidateDiagonalLeftDownObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
     {
-        for (var x = end?.Rank; x > start?.Rank; x--)
-            for (var y = (int?)start?.File; y > (int?)end?.File; y--)
+        for (var x = end?.Rank - 1; x > start?.Rank; x--)
+            for (var y = (int?)start?.File - 1; y > (int?)end?.File; y--)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
         return false;
@@ -131,8 +131,8 @@ public class Board
 
     private static bool ValidateDiagonalRightUpObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
     {
-        for (var x = start?.Rank; x < end?.Rank; x++)
-            for (var y = (int?)start?.File; y < (int)end.File; y++)
+        for (var x = start?.Rank + 1; x < end?.Rank; x++)
+            for (var y = (int?)start?.File + 1; y < (int)end.File; y++)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
         return false;
@@ -140,8 +140,8 @@ public class Board
 
     private static bool ValidateDiagonalLeftUpObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
     {
-        for (var x = start?.Rank; x < end?.Rank; x++)
-            for (var y = (int?)start?.File; y > (int)end.File; y--)
+        for (var x = start?.Rank + 1; x < end?.Rank; x++)
+            for (var y = (int?)start?.File + 1; y > (int)end.File; y--)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
         return false;

@@ -109,7 +109,6 @@ public class Match : AggregateRoot<Guid>
         var movingPiece = Pieces?.FirstOrDefault(p => p.Position == @event.StartPosition);
         var targetPiece = Pieces?.FirstOrDefault(p => p.Position == @event.EndPosition);
 
-        Guard.Against.InvalidInput()
         if (movingPiece == null) return;
 
         var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);

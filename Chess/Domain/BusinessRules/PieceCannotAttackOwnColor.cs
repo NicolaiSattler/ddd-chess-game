@@ -25,7 +25,7 @@ public class PieceCannotAttackOwnColor : BusinessRule
     {
         var result = new List<BusinessRuleViolation>();
         var movingPiece = _pieces?.FirstOrDefault(p => p.Position == _command?.StartPosition)
-                        ?? throw new InvalidOperationException($"No piece was found at {_command?.StartPosition}");
+            ?? throw new InvalidOperationException($"No piece was found at {_command?.StartPosition}");
 
         var availableMoves = movingPiece.GetAttackRange();
         var isValidSquare = availableMoves.Any(m => m == _command?.EndPosition);

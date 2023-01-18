@@ -66,5 +66,135 @@ namespace Chess.Test.Domain.Model
             //Assert
             result.ShouldBeTrue();
         }
+
+
+
+        [TestMethod]
+        public void  KingC7_IsNotInCheck_IsProtected_ByPawnC6()
+        {
+            //Arrange
+            var king = new King { Position = new(File.C, 7), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                new Pawn { Position = new(File.C, 6), Color = Color.Black },
+                new Rook { Position = new(File.C, 1), Color = Color.White }
+            };
+
+            //Act
+            var result = Board.IsCheck(king, pieces);
+
+            //Assert
+            result.ShouldBeFalse();
+        }
+
+        [TestMethod]
+        [DataRow(File.C, 1)]
+        [DataRow(File.A, 7)]
+        public void  KingC7_IsCheck_ByRook(File file, int rank)
+        {
+            //Arrange
+            var king = new King { Position = new(File.C, 7), Color = Color.Black };
+            var pieces = new List<Piece>()
+            {
+                new Rook { Position = new(file, rank), Color = Color.White }
+            };
+
+            //Act
+            var result = Board.IsCheck(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        [DataRow(File.A, 1)]
+        [DataRow(File.C, 5)]
+        public void  KingC1_IsCheck_ByRook(File file, int rank)
+        {
+            //Arrange
+            var king = new King { Position = new(File.C, 1), Color = Color.White };
+            var pieces = new List<Piece>()
+            {
+                new Rook { Position = new(file, rank), Color = Color.Black }
+            };
+
+            //Act
+            var result = Board.IsCheck(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+        [TestMethod]
+        [DataRow(File.A, 5)]
+        [DataRow(File.E, 5)]
+        public void  KingC7_IsInCheck_ByQueen(File file, int rank)
+        {
+            //Arrange
+            var king = new King { Position = new(File.C, 7), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                new Queen { Position = new(file, rank), Color = Color.White }
+            };
+
+            //Act
+            var result = Board.IsCheck(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        public void  KingC1_IsInCheck_ByQueen(File file, int rank)
+        {
+            //Arrange
+            var king = new King { Position = new(File.C, 1), Color = Color.White };
+            var pieces = new List<Piece>
+            {
+                new Queen { Position = new(file, rank), Color = Color.Black }
+            };
+
+            //Act
+            var result = Board.IsCheck(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        [DataRow(File.B, 6)]
+        [DataRow(File.D, 6)]
+        public void  KingC7_IsInCheck_ByPawn(File file, int rank)
+        {
+            var king = new King { Position = new(File.C, 7), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                new Pawn { Position = new(file, rank), Color = Color.White }
+            };
+
+            //Act
+            var result = Board.IsCheck(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        [DataRow(File.B, 5)]
+        [DataRow(File.D, 5)]
+        public void  KingC7_IsInCheck_ByKnight(File file, int rank)
+        {
+            var king = new King { Position = new(File.C, 7), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                new Knight { Position = new(file, rank), Color = Color.White }
+            };
+
+            //Act
+            var result = Board.IsCheck(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
     }
 }
