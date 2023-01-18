@@ -37,7 +37,7 @@ public class PieceInvalidMoveTests
     }
 
     [TestMethod]
-    public void  PawnA1_MoveToH2_AttacksInvalidSquare()
+    public void PawnA1_MoveToH2_AttacksInvalidSquare()
     {
         //Arrange
         var command = new TakeTurn
@@ -58,7 +58,7 @@ public class PieceInvalidMoveTests
 
         //Assert
         result.ShouldNotBeEmpty();
-        result.FirstOrDefault().ViolationMessage.ShouldBe("Piece must move to designated squares.");
+        result.FirstOrDefault().ViolationMessage.ShouldBe("A pawn must attack a filled square.");
     }
 
     [TestMethod]

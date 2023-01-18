@@ -42,9 +42,8 @@ public class PieceInvalidMove : BusinessRule
 
     private BusinessRuleViolation? ValidateMovement(Piece? piece) => (piece?.Type) switch
     {
-        PieceType.Pawn when !IsValidMove((Pawn)piece) || !SpecialMoves.IsEnPassant(piece, _turns)
-                       => new("A pawn must attack a filled square."),
-
+        PieceType.Pawn when !IsValidMove((Pawn)piece)
+                        => new("A pawn must attack a filled square."),
         _ when !PieceMovesToValidSquare(piece)
                        => new("Piece must move to designated squares."),
         _ => null
@@ -58,15 +57,17 @@ public class PieceInvalidMove : BusinessRule
 
     private bool IsValidMove(Pawn? pawn)
     {
-        if (pawn == null) throw new ArgumentNullException(nameof(pawn));
+        Guard.Against.Null<Pawn?>(pawn, nameof(pawn));
 
-        var availableMoves = pawn?.GetAttackRange();
+        if (!PieceMovesToValidSquare(pawn)) return false;
+
+        var availableMoves = pawn.GetAttackRange();
         var attackMoves = availableMoves?.Where(m => m.File != pawn?.Position?.File);
         var attack = attackMoves?.FirstOrDefault(m => m == _command.EndPosition);
 
         if (attack != null)
         {
-            return _pieces?.Any(p => p.Position == attack) ?? false;
+            return SpecialMoves.IsEnPassant(pawn, _turns) || (_pieces?.Any(p => p.Position == attack) ?? false);
         }
 
         return true;

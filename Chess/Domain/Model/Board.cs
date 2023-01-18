@@ -114,7 +114,7 @@ public class Board
     private static bool ValidateDiagonalRightDownObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
     {
         for (var x = start?.Rank - 1; x > end?.Rank; x--)
-            for (var y = (int?)start?.File - 1; y < (int)end.File; y++)
+            for (var y = (int?)start?.File - 1; y < (int?)end?.File; y++)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
         return false;
@@ -132,7 +132,7 @@ public class Board
     private static bool ValidateDiagonalRightUpObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
     {
         for (var x = start?.Rank + 1; x < end?.Rank; x++)
-            for (var y = (int?)start?.File + 1; y < (int)end.File; y++)
+            for (var y = (int?)start?.File + 1; y < (int?)end?.File; y++)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
         return false;
@@ -141,7 +141,7 @@ public class Board
     private static bool ValidateDiagonalLeftUpObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
     {
         for (var x = start?.Rank + 1; x < end?.Rank; x++)
-            for (var y = (int?)start?.File + 1; y > (int)end.File; y--)
+            for (var y = (int?)start?.File + 1; y > (int?)end?.File; y--)
                 if (pieces.Any(p => p.Position == new Square((File)y, x)))
                     return true;
         return false;

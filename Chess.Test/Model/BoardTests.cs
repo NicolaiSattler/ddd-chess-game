@@ -144,6 +144,8 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
+        [DataRow(File.A, 3)]
+        [DataRow(File.E, 3)]
         public void  KingC1_IsInCheck_ByQueen(File file, int rank)
         {
             //Arrange

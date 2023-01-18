@@ -16,7 +16,8 @@ public class RuleFactory
         {
             new PieceInvalidMove(command, pieces, turns),
             new PieceCannotAttackOwnColor(command, pieces),
-            new PieceIsBlocked(command, pieces)
+            new PieceIsBlocked(command, pieces),
+            new CastlingNotAllowed(command, pieces, turns)
         };
     }
 }

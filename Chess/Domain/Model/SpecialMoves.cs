@@ -12,6 +12,9 @@ public class SpecialMoves
     public static bool IsEnPassant(Piece? pawn, IEnumerable<Turn>? turns)
     {
         Guard.Against.Null<Piece?>(pawn, nameof(pawn));
+        Guard.Against.Null<IEnumerable<Turn>?>(turns, nameof(turns));
+
+        if (!turns.Any()) return false;
 
         var lastTurn = turns?.Last();
 
