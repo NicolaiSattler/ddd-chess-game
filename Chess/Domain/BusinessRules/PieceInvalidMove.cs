@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Ardalis.GuardClauses;
 using Chess.Core.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities;
@@ -16,6 +17,10 @@ public class PieceInvalidMove : BusinessRule
 
     public PieceInvalidMove(TakeTurn command, IEnumerable<Piece>? pieces, IEnumerable<Turn>? turns)
     {
+        Guard.Against.Null<TakeTurn>(command, nameof(command));
+        Guard.Against.Null<IEnumerable<Piece>?>(pieces, nameof(pieces));
+        Guard.Against.Null<IEnumerable<Turn>?>(turns, nameof(turns));
+
         _command = command;
         _pieces = pieces;
         _turns = turns;
@@ -24,7 +29,7 @@ public class PieceInvalidMove : BusinessRule
     public override IEnumerable<BusinessRuleViolation> CheckRule()
     {
         var movingPiece = _pieces?.FirstOrDefault(p => p.Position == _command.StartPosition)
-            ?? throw new InvalidOperationException($"No piece was found on position {_command.StartPosition}");
+                            ?? throw new InvalidOperationException($"No piece was found on position {_command.StartPosition}");
         var result = ValidateMovement(movingPiece);
 
         if (result != null)

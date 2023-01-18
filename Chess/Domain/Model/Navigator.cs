@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Ardalis.GuardClauses;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
@@ -17,8 +18,8 @@ public class Navigator
                                                         int range = 2,
                                                         Color color = Color.Undefined)
     {
-        _ = position ?? throw new ArgumentNullException(nameof(position));
-        _ = movement ?? throw new ArgumentNullException(nameof(movement));
+        Guard.Against.Null<Square?>(position, nameof(position));
+        Guard.Against.Null<MovementType?>(movement, nameof(movement));
 
         var result = new List<Square>();
 
@@ -45,15 +46,17 @@ public class Navigator
 
         for (int i = 1; i < range; i++)
         {
+            var rankUp = position.Rank - i;
+            var rankDown = position.Rank + i;
+
             result.Add(new Square(position.File.ChangeFile(-i), position.Rank));
             result.Add(new Square(position.File.ChangeFile(i), position.Rank));
-            result.Add(new Square(position.File, position.Rank - i));
-            result.Add(new Square(position.File, position.Rank + i));
+            result.Add(new Square(position.File, rankDown));
+            result.Add(new Square(position.File, rankUp));
         }
 
         return result;
     }
-
 
     private static IEnumerable<Square> GetDiagonalMovements(Square position, int range)
     {
@@ -61,10 +64,13 @@ public class Navigator
 
         for (int i = 1; i < range; i++)
         {
-            result.Add(new Square(position.File.ChangeFile(-i), position.Rank - i));
-            result.Add(new Square(position.File.ChangeFile(i), position.Rank - i));
-            result.Add(new Square(position.File.ChangeFile(-i), position.Rank + i));
-            result.Add(new Square(position.File.ChangeFile(i), position.Rank + i));
+            var rankUp = position.Rank - i;
+            var rankDown = position.Rank + i;
+
+            result.Add(new Square(position.File.ChangeFile(-i), rankDown));
+            result.Add(new Square(position.File.ChangeFile(i), rankDown));
+            result.Add(new Square(position.File.ChangeFile(-i), rankUp));
+            result.Add(new Square(position.File.ChangeFile(i), rankUp));
         }
 
         return result;

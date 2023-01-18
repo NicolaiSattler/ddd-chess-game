@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Ardalis.GuardClauses;
 using Chess.Core;
 using Chess.Core.Match.Events;
 using Chess.Core.Match.Factory;
@@ -103,11 +104,12 @@ public class Match : AggregateRoot<Guid>
     //      - Check Mate
     private void Handle(TurnTaken @event)
     {
-        _ = @event ?? throw new ArgumentNullException(nameof(@event));
+        Guard.Against.Null<TurnTaken>(@event, nameof(@event));
 
         var movingPiece = Pieces?.FirstOrDefault(p => p.Position == @event.StartPosition);
         var targetPiece = Pieces?.FirstOrDefault(p => p.Position == @event.EndPosition);
 
+        Guard.Against.InvalidInput()
         if (movingPiece == null) return;
 
         var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);

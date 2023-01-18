@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Ardalis.GuardClauses;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
@@ -10,7 +11,7 @@ public class SpecialMoves
 {
     public static bool IsEnPassant(Piece? pawn, IEnumerable<Turn>? turns)
     {
-        _ = pawn ?? throw new ArgumentNullException(nameof(pawn));
+        Guard.Against.Null<Piece?>(pawn, nameof(pawn));
 
         var lastTurn = turns?.Last();
 
