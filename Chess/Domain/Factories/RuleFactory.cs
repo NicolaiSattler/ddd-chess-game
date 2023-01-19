@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using Chess.Core.BusinessRules;
+using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 
-namespace Chess.Domain.BusinessRules;
+namespace Chess.Domain.Factories;
 
 public class RuleFactory
 {

@@ -3,11 +3,11 @@ using System.Linq;
 using System.Text.Json;
 using Chess.Core;
 using Chess.Core.Match.Events;
-using Chess.Domain;
+using Chess.Domain.Aggregates;
 
 namespace Chess.Application;
 
-public class MatchRepository : IMatchRepository
+public class InMemoryMatchRepository : IMatchRepository
 {
     private readonly Dictionary<Guid, List<Event>> _events = new();
 

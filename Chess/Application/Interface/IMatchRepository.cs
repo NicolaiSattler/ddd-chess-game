@@ -1,5 +1,5 @@
 using Chess.Core;
-using Chess.Domain;
+using Chess.Domain.Aggregates;
 
 namespace Chess.Application;
 

@@ -4,15 +4,15 @@ using System.Linq;
 using Ardalis.GuardClauses;
 using Chess.Core;
 using Chess.Core.Match.Events;
-using Chess.Core.Match.Factory;
-using Chess.Domain.BusinessRules;
+using Chess.Core.Match.Factories;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
+using Chess.Domain.Factories;
 using Chess.Domain.Model;
 using Chess.Domain.ValueObjects;
 
-namespace Chess.Domain;
+namespace Chess.Domain.Aggregates;
 
 public class Match : AggregateRoot<Guid>
 {

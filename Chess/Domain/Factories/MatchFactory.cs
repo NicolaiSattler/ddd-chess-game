@@ -1,4 +1,6 @@
-namespace Chess.Domain;
+using Chess.Domain.Aggregates;
+
+namespace Chess.Domain.Factories;
 
 public class MatchFactory
 {

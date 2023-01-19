@@ -1,6 +1,6 @@
 using System.Linq;
 using Chess.Core.Match.Events;
-using Chess.Domain;
+using Chess.Domain.Factories;
 using Chess.Domain.Commands;
 
 namespace Chess.Application;

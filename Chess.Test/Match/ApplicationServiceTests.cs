@@ -1,6 +1,6 @@
 using Chess.Application;
-using System;
 using Chess.Domain.Commands;
+using System;
 
 namespace Chess.Test.Match;
 
@@ -10,7 +10,7 @@ public class ApplicationServiceTests
     private Guid WhiteId { get; }
     private Guid BlackId { get; }
     private Guid AggregateId { get; }
-    private MatchRepository _repository;
+    private InMemoryMatchRepository _repository;
     private ApplicationService _sut;
 
     [TestInitialize]
