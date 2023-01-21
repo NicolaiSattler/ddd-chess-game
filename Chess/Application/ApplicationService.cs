@@ -5,7 +5,7 @@ using Chess.Domain.Commands;
 
 namespace Chess.Application;
 
-public class ApplicationService
+public class ApplicationService : IApplicationService
 {
     private readonly IMatchRepository repository;
 

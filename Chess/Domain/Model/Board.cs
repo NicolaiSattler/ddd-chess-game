@@ -32,40 +32,48 @@ public class Board
     }
 
     //TODO: Unit test.
-    public static bool DirectionIsObstructed(IEnumerable<Piece> pieces, Square? start, Square? end)
+    public static bool? DirectionIsObstructed(IEnumerable<Piece>? pieces, Square? start, Square? end)
         => DirectionIsObstructed(pieces, GetMoveDirection(start, end), start, end);
 
     //TODO: Unit test
-    public static bool IsCheck(King king, IEnumerable<Piece> pieces)
+    // Test with real life scenario's
+    public static bool IsCheck(King? king, IEnumerable<Piece>? pieces)
     {
+        Guard.Against.Null<King?>(king, nameof(King));
+        Guard.Against.Null<IEnumerable<Piece>?>(pieces, nameof(pieces));
+
         var isUnReachable = KingIsUnreachable(king, pieces);
 
         if (isUnReachable) return false;
 
-        var pieceCanReachKing = CanPieceReachKing(king, pieces);
+        var pieceCanReachKing = PieceCanReachKing(king, pieces);
 
         if (pieceCanReachKing) return true;
 
         return false;
     }
 
-    private static bool CanPieceReachKing(King king, IEnumerable<Piece> pieces)
+    private static bool PieceCanReachKing(King king, IEnumerable<Piece> pieces)
     {
         Guard.Against.Null<King>(king, nameof(king));
         Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
         Guard.Against.InvalidInput<King>(king, nameof(king), k => k.Position != null, "King doesn't have a position.");
 
         var opponentPieces = pieces.Where(p => p.Color != king?.Color);
+        return PositionIsReachable(king?.Position, pieces, opponentPieces);
+    }
 
+    private static bool PositionIsReachable(Square? position, IEnumerable<Piece> pieces, IEnumerable<Piece> opponentPieces)
+    {
         foreach (var piece in opponentPieces)
         {
             Guard.Against.InvalidInput<Piece>(piece, nameof(piece), k => k.Position != null, "Piece doesn't have a position.");
 
             var availableMoves = piece.GetAttackRange();
 
-            if (availableMoves.Any(s => s == king?.Position))
+            if (availableMoves.Any(s => s == position))
             {
-                var pieceIsObstructed = Board.DirectionIsObstructed(pieces, piece.Position, king.Position);
+                var pieceIsObstructed = Board.DirectionIsObstructed(pieces, piece.Position, position) ?? false;
 
                 if (!pieceIsObstructed || piece.Type == PieceType.Knight)
                 {
@@ -98,12 +106,12 @@ public class Board
 
         return result;
     }
-    private static bool DirectionIsObstructed(IEnumerable<Piece> pieces, DirectionType direction, Square? start, Square? end) => (direction) switch
+    private static bool? DirectionIsObstructed(IEnumerable<Piece>? pieces, DirectionType direction, Square? start, Square? end) => (direction) switch
     {
-        DirectionType.Left => pieces.Any(p => (int?)p.Position?.File < (int?)start?.File && (int?)p.Position?.File > (int?)end?.File),
-        DirectionType.Right => pieces.Any(p => (int?)p.Position?.File > (int?)start?.File && (int?)p.Position?.File < (int?)end?.File),
-        DirectionType.Up => pieces.Any(p => p.Position?.Rank > start?.Rank && p.Position?.Rank < end?.Rank),
-        DirectionType.Down => pieces.Any(p => p.Position?.Rank < start?.Rank && p.Position?.Rank > end?.Rank),
+        DirectionType.Left => pieces?.Any(p => (int?)p.Position?.File < (int?)start?.File && (int?)p.Position?.File > (int?)end?.File),
+        DirectionType.Right => pieces?.Any(p => (int?)p.Position?.File > (int?)start?.File && (int?)p.Position?.File < (int?)end?.File),
+        DirectionType.Up => pieces?.Any(p => p.Position?.Rank > start?.Rank && p.Position?.Rank < end?.Rank),
+        DirectionType.Down => pieces?.Any(p => p.Position?.Rank < start?.Rank && p.Position?.Rank > end?.Rank),
         DirectionType.Left | DirectionType.Up => ValidateDiagonalLeftUpObstruction(pieces, start, end),
         DirectionType.Right | DirectionType.Up => ValidateDiagonalRightUpObstruction(pieces, start, end),
         DirectionType.Left | DirectionType.Down => ValidateDiagonalLeftDownObstruction(pieces, start, end),
@@ -111,38 +119,38 @@ public class Board
         _ => throw new InvalidOperationException("Oeps")
     };
 
-    private static bool ValidateDiagonalRightDownObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
+    private static bool ValidateDiagonalRightDownObstruction(IEnumerable<Piece>? pieces, Square? start, Square? end)
     {
         for (var x = start?.Rank - 1; x > end?.Rank; x--)
             for (var y = (int?)start?.File - 1; y < (int?)end?.File; y++)
-                if (pieces.Any(p => p.Position == new Square((File)y, x)))
+                if (pieces?.Any(p => p.Position == new Square((File)y, x)) ?? false)
                     return true;
         return false;
     }
 
-    private static bool ValidateDiagonalLeftDownObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
+    private static bool ValidateDiagonalLeftDownObstruction(IEnumerable<Piece>? pieces, Square? start, Square? end)
     {
         for (var x = end?.Rank - 1; x > start?.Rank; x--)
             for (var y = (int?)start?.File - 1; y > (int?)end?.File; y--)
-                if (pieces.Any(p => p.Position == new Square((File)y, x)))
+                if (pieces?.Any(p => p.Position == new Square((File)y, x)) ?? false)
                     return true;
         return false;
     }
 
-    private static bool ValidateDiagonalRightUpObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
+    private static bool ValidateDiagonalRightUpObstruction(IEnumerable<Piece>? pieces, Square? start, Square? end)
     {
         for (var x = start?.Rank + 1; x < end?.Rank; x++)
             for (var y = (int?)start?.File + 1; y < (int?)end?.File; y++)
-                if (pieces.Any(p => p.Position == new Square((File)y, x)))
+                if (pieces?.Any(p => p.Position == new Square((File)y, x)) ?? false)
                     return true;
         return false;
     }
 
-    private static bool ValidateDiagonalLeftUpObstruction(IEnumerable<Piece> pieces, Square? start, Square? end)
+    private static bool ValidateDiagonalLeftUpObstruction(IEnumerable<Piece>? pieces, Square? start, Square? end)
     {
         for (var x = start?.Rank + 1; x < end?.Rank; x++)
             for (var y = (int?)start?.File + 1; y > (int?)end?.File; y--)
-                if (pieces.Any(p => p.Position == new Square((File)y, x)))
+                if (pieces?.Any(p => p.Position == new Square((File)y, x)) ?? false)
                     return true;
         return false;
     }

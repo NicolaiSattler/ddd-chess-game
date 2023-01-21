@@ -32,7 +32,7 @@ public class PieceIsBlocked : BusinessRule
             ?? throw new InvalidOperationException($"No piece was found at {_command?.StartPosition}");
 
         var pieceIsBlocked = EndPositionIsBlocked(movingPiece)
-            || Board.DirectionIsObstructed(_pieces, _command?.StartPosition, _command?.EndPosition);
+            || (Board.DirectionIsObstructed(_pieces, _command?.StartPosition, _command?.EndPosition) ?? false);
 
         return pieceIsBlocked
             ? new List<BusinessRuleViolation>() { new(PieceIsBlockedViolation) }
