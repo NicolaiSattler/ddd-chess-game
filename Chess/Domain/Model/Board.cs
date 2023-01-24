@@ -31,12 +31,9 @@ public class Board
         return false;
     }
 
-    //TODO: Unit test.
     public static bool? DirectionIsObstructed(IEnumerable<Piece>? pieces, Square? start, Square? end)
         => DirectionIsObstructed(pieces, GetMoveDirection(start, end), start, end);
 
-    //TODO: Unit test
-    // Test with real life scenario's
     public static bool IsCheck(King? king, IEnumerable<Piece>? pieces)
     {
         Guard.Against.Null<King?>(king, nameof(King));

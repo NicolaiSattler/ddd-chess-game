@@ -46,7 +46,7 @@ public class CastlingNotAllowed : BusinessRule
         var rookHasMoved = _turns?.Any(p => p.PieceType == PieceType.Rook && p.StartPosition == new Square(file, rank)) ?? true;
         var kingHasMoved = _turns?.Any(p => p.PieceType == PieceType.King) ?? true;
         var kingIsInCheck = Board.IsCheck(king, _pieces);
-        var moveIsBlocked = Board.DirectionIsObstructed(_pieces, king?.Position, movingPiece?.Position) ?? false;
+        var moveIsBlocked = Board.DirectionIsObstructed(_pieces, _command?.StartPosition, _command?.EndPosition) ?? false;
 
         if (rookHasMoved || kingHasMoved || moveIsBlocked || kingIsInCheck)
         {
