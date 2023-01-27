@@ -240,5 +240,93 @@ namespace Chess.Test.Domain.Model
             result.ShouldBeTrue();
         }
 
+        [TestMethod]
+        public void  KingH8_IsCheckmate_ByRookG8_AndKnightF6()
+        {
+            //Arrange
+            var king = new King { Position = new(File.H, 8), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                king,
+                new Rook { Position = new(File.G, 8), Color = Color.White },
+                new Knight { Position = new(File.F, 6), Color = Color.White }
+            };
+
+            //Act
+            var result = Board.IsCheckMate(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        public void  KingH8_IsCheckmate_ByRookE8_AndBlockedByOwnPieces()
+        {
+            //Arrange
+            var king = new King { Position = new(File.F, 8), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                king,
+                new Bishop { Position = new(File.D, 8), Color = Color.Black },
+                new Rook { Position = new(File.H, 8), Color = Color.Black },
+                new Pawn { Position = new(File.F, 7), Color = Color.Black },
+                new Pawn { Position = new(File.G, 7), Color = Color.Black },
+                new Rook { Position = new(File.E, 8), Color = Color.White },
+                new Knight { Position = new(File.F, 6), Color = Color.White }
+            };
+
+            //Act
+            var result = Board.IsCheckMate(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        public void  KingH8_IsNotCheckmate_OpponentPieceCanBeAttacked()
+        {
+            //Arrange
+            var king = new King { Position = new(File.F, 8), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                king,
+                new Bishop { Position = new(File.D, 8), Color = Color.Black },
+                new Bishop { Position = new(File.D, 7), Color = Color.Black },
+                new Rook { Position = new(File.H, 8), Color = Color.Black },
+                new Pawn { Position = new(File.F, 7), Color = Color.Black },
+                new Pawn { Position = new(File.G, 7), Color = Color.Black },
+                new Rook { Position = new(File.E, 8), Color = Color.White },
+            };
+
+            //Act
+            var result = Board.IsCheckMate(king, pieces);
+
+            //Assert
+            result.ShouldBeFalse();
+        }
+
+        [TestMethod]
+        public void  KingH8_IsCheckmate_ByMultiplePieces()
+        {
+            //Arrange
+            var king = new King { Position = new(File.F, 8), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                king,
+                new Bishop { Position = new(File.D, 8), Color = Color.Black },
+                new Bishop { Position = new(File.D, 7), Color = Color.Black },
+                new Rook { Position = new(File.H, 8), Color = Color.Black },
+                new Pawn { Position = new(File.F, 7), Color = Color.Black },
+                new Pawn { Position = new(File.G, 7), Color = Color.Black },
+                new Rook { Position = new(File.E, 8), Color = Color.White },
+                new Rook { Position = new(File.G, 6), Color = Color.White },
+            };
+
+            //Act
+            var result = Board.IsCheckMate(king, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
     }
 }
