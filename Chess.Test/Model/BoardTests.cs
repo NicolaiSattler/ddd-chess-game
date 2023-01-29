@@ -8,24 +8,16 @@ namespace Chess.Test.Domain.Model
     [TestClass]
     public class BoardTests
     {
-
         [TestMethod]
         public void PawnC7_MovesToC8_IsPromoted()
         {
             //Arrange
             var command = new TurnTaken(Guid.NewGuid(), new(File.C, 7), new(File.C, 8));
-            var pieces = new List<Piece>()
-            {
-                new Pawn
-                {
-                    Color = Color.White,
-                    Position = new(File.C, 7)
-                }
-            };
-
+            var pawn = new Pawn { Color = Color.White, Position = new(File.C, 7) };
+            var pieces = new List<Piece>() { pawn };
 
             //Act
-            var result = Board.PawnIsPromoted(command, pieces);
+            var result = SpecialMoves.PawnIsPromoted(pawn, command.EndPosition);
 
             //Assert
             result.ShouldBeTrue();

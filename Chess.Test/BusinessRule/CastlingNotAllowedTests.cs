@@ -48,14 +48,14 @@ public class CastlingNotAllowedTests
         //Arrange
         var command = new TakeTurn()
         {
-            StartPosition = new(File.G, rank),
+            StartPosition = new(File.E, rank),
             EndPosition = new(file, rank),
             IsCastling = true
         };
         var pieces = new List<Piece>()
         {
             new Rook { Color = color, Position = new(File.A, rank)},
-            new King { Color = color, Position = new(File.G, rank)},
+            new King { Color = color, Position = new(File.E, rank)},
             new Rook { Color = color, Position = new(File.H, rank)}
         };
         var turns = new List<Turn>
@@ -84,14 +84,14 @@ public class CastlingNotAllowedTests
         //Arrange
         var command = new TakeTurn()
         {
-            StartPosition = new(File.G, rank),
+            StartPosition = new(File.E, rank),
             EndPosition = new(file, rank),
             IsCastling = true
         };
         var pieces = new List<Piece>()
         {
             new Rook { Color = color, Position = new(File.A, rank)},
-            new King { Color = color, Position = new(File.G, rank)},
+            new King { Color = color, Position = new(File.E, rank)},
             new Rook { Color = color, Position = new(File.H, rank)}
         };
         var turns = new List<Turn>

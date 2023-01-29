@@ -38,13 +38,11 @@ public class Match : AggregateRoot<Guid>
         var memberOneIsWhite = colorPicker.Next() == 0;
         var whiteId = memberOneIsWhite ? command.MemberOneId : command.MemberTwoId;
         var blackId = !memberOneIsWhite ? command.MemberOneId : command.MemberTwoId;
+        var @event = new MatchStarted() { WhiteMemberId = whiteId, BlackMemberId = blackId, StartTime = DateTime.UtcNow };
 
-        RaiseEvent(new MatchStarted(whiteId, blackId, DateTime.UtcNow));
+        RaiseEvent(@event);
     }
 
-    //TODO:
-    // - return a response object to the end user.
-    // - create business rule
     public void TakeTurn(TakeTurn command)
     {
         try
@@ -55,10 +53,6 @@ public class Match : AggregateRoot<Guid>
             if (!violations.Any())
             {
                 RaiseEvent(new TurnTaken(command.MemberId, command?.StartPosition, command?.EndPosition));
-            }
-            else
-            {
-                //....
             }
         }
         catch (Exception ex)
@@ -97,11 +91,11 @@ public class Match : AggregateRoot<Guid>
     }
 
     //      - En Passant (done)
-    //      - Castling
+    //      - Castling (done)
     //      - Captured (done)
     //      - Promotion (done)
-    //      - Check
-    //      - Check Mate
+    //      - Check (Mate)
+    //      - Stalemate
     private void Handle(TurnTaken @event)
     {
         Guard.Against.Null<TurnTaken>(@event, nameof(@event));
@@ -112,6 +106,8 @@ public class Match : AggregateRoot<Guid>
         if (movingPiece == null) return;
 
         var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);
+        var isCastling = SpecialMoves.IsCastling(@event?.StartPosition, @event?.EndPosition, Pieces);
+        var pieceIsCaptured = Board.PieceIsCaptured(@event, Pieces) || isEnPassant;
 
         if (isEnPassant)
         {
@@ -119,21 +115,25 @@ public class Match : AggregateRoot<Guid>
             targetPiece = Pieces?.FirstOrDefault(p => p.Id == pieceId);
         }
 
-        if ((Board.PieceIsCaptured(@event, Pieces) || isEnPassant) && targetPiece != null)
-        {
+        if (isCastling)
+            MoveCastingPieces(movingPiece, @event?.EndPosition);
+
+        if (targetPiece != null && pieceIsCaptured)
             Pieces?.Remove(targetPiece);
 
-            movingPiece.Position = @event?.EndPosition;
-        }
-
         CheckPromotion(@event, movingPiece);
+
+        movingPiece.Position = @event?.EndPosition;
 
         EndTurn(@event, movingPiece?.Type);
         StartTurn(GetOpponent(@event?.MemberId), DateTime.UtcNow);
     }
 
     private Player? GetOpponent(Guid? memberId) => memberId != White?.MemberId ? White : Black;
+
     private void StartTurn(Player? player, DateTime startTime) => Turns?.Add(new() { Player = player, StartTime = startTime });
+
+    //TODO: Unit Test
     private void EndTurn(TurnTaken? @event, PieceType? pieceType)
     {
         _ = @event ?? throw new ArgumentNullException(nameof(@event));
@@ -145,14 +145,33 @@ public class Match : AggregateRoot<Guid>
         turn.EndPosition = @event.EndPosition;
         turn.PieceType = pieceType;
     }
+
+    //TODO: Unit Test
     private void CheckPromotion(TurnTaken? @event, Piece? movingPiece)
     {
-        if (Board.PawnIsPromoted(@event, Pieces) && movingPiece != null)
+        if (SpecialMoves.PawnIsPromoted(movingPiece, @event?.EndPosition) && movingPiece != null)
         {
             var queen = PiecesFactory.CreatePiece(PieceType.Queen, @event?.EndPosition, movingPiece.Id, movingPiece.Color);
 
             Pieces?.Remove(movingPiece);
             Pieces?.Add(queen);
+        }
+    }
+
+    //TODO: Unit Test
+    private void MoveCastingPieces(Piece? king, Square? endPosition)
+    {
+        if (king == null) return;
+
+        var rank = king.Color == Color.Black ? 8 : 1;
+        var file = endPosition?.File > File.E ? File.H : File.A;
+        var newFilePosition = file == File.H ? File.F : File.D;
+        var rookPosition = new Square(file, rank);
+        var rook = Pieces?.FirstOrDefault(p => p.Position == rookPosition);
+
+        if (rook != null)
+        {
+            rook.Position = new Square(newFilePosition, rank);
         }
     }
 }

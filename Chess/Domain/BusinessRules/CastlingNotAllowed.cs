@@ -35,7 +35,6 @@ public class CastlingNotAllowed : BusinessRule
         _command = command;
     }
 
-    //TODO: unit test required
     public override IEnumerable<BusinessRuleViolation> CheckRule()
     {
         var movingPiece = _pieces?.FirstOrDefault(p => p.Position == _command?.StartPosition);
@@ -43,12 +42,13 @@ public class CastlingNotAllowed : BusinessRule
         var rank = movingPiece?.Color == Color.Black ? 8 : 1;
         var file = (int?)_command?.StartPosition?.File < (int?)_command?.EndPosition?.File ? File.A : File.H;
 
+        var isCastling = SpecialMoves.IsCastling(_command?.StartPosition, _command?.EndPosition, _pieces);
         var rookHasMoved = _turns?.Any(p => p.PieceType == PieceType.Rook && p.StartPosition == new Square(file, rank)) ?? true;
         var kingHasMoved = _turns?.Any(p => p.PieceType == PieceType.King) ?? true;
         var kingIsInCheck = Board.IsCheck(king, _pieces);
         var moveIsBlocked = Board.DirectionIsObstructed(_pieces, _command?.StartPosition, _command?.EndPosition) ?? false;
 
-        if (rookHasMoved || kingHasMoved || moveIsBlocked || kingIsInCheck)
+        if (isCastling && (rookHasMoved || kingHasMoved || moveIsBlocked || kingIsInCheck))
         {
             return new List<BusinessRuleViolation> { new(RuleViolationMessage) };
         }

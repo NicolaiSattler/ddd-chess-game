@@ -9,26 +9,12 @@ namespace Chess.Domain.Model;
 
 public class Board
 {
-    public static bool PieceIsCaptured(TurnTaken @event, IEnumerable<Piece>? pieces)
-    {
-        var movingPiece = pieces?.FirstOrDefault(p => p.Position == @event.StartPosition)
-                        ?? throw new InvalidOperationException("Piece does not exists!");
-
-        return pieces?.Any(p => p.Color != movingPiece.Color && p.Position == @event.EndPosition) ?? false;
-    }
-
-    public static bool PawnIsPromoted(TurnTaken? @event, IEnumerable<Piece>? pieces)
+    public static bool PieceIsCaptured(TurnTaken? @event, IEnumerable<Piece>? pieces)
     {
         var movingPiece = pieces?.FirstOrDefault(p => p.Position == @event?.StartPosition)
-                ?? throw new InvalidOperationException("Piece cannot be found.");
+                        ?? throw new InvalidOperationException("Piece does not exists!");
 
-        if (movingPiece is Pawn pawn)
-        {
-            var promotionRank = Color.White == pawn.Color ? 8 : 1;
-            return @event?.EndPosition?.Rank == promotionRank;
-        }
-
-        return false;
+        return pieces?.Any(p => p.Color != movingPiece.Color && p.Position == @event?.EndPosition) ?? false;
     }
 
     public static bool? DirectionIsObstructed(IEnumerable<Piece>? pieces, Square? start, Square? end)
