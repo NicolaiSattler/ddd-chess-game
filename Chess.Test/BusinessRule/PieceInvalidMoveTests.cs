@@ -84,4 +84,29 @@ public class PieceInvalidMoveTests
         result.ShouldNotBeEmpty();
         result.FirstOrDefault().ViolationMessage.ShouldBe("Piece must move to designated squares.");
     }
+
+    [TestMethod]
+    public void  KingC5_MoveToC6_MoveIsInvalid()
+    {
+        //Arrange
+        var command = new TakeTurn
+        {
+            StartPosition = new(File.C, 5),
+            EndPosition = new(File.C, 6)
+        };
+        var pieces = new List<Piece>
+        {
+            new King { Position = new(File.C, 5), Color = Color.White },
+            new Rook { Position = new(File.H, 6), Color = Color.Black }
+        };
+
+        _sut = new PieceInvalidMove(command, pieces, new List<Turn>());
+
+        //Act
+        var result = _sut.CheckRule();
+
+        //Assert
+        result.ShouldNotBeNull();
+        result.FirstOrDefault().ViolationMessage.ShouldBe("King cannot set itself check.");
+    }
 }

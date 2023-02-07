@@ -17,13 +17,9 @@ public class PieceInvalidMove : BusinessRule
 
     public PieceInvalidMove(TakeTurn command, IEnumerable<Piece>? pieces, IEnumerable<Turn>? turns)
     {
-        Guard.Against.Null<TakeTurn>(command, nameof(command));
-        Guard.Against.Null<IEnumerable<Piece>?>(pieces, nameof(pieces));
-        Guard.Against.Null<IEnumerable<Turn>?>(turns, nameof(turns));
-
-        _command = command;
-        _pieces = pieces;
-        _turns = turns;
+        _command = Guard.Against.Null<TakeTurn>(command, nameof(command));
+        _pieces = Guard.Against.Null<IEnumerable<Piece>?>(pieces, nameof(pieces));
+        _turns = Guard.Against.Null<IEnumerable<Turn>?>(turns, nameof(turns));
     }
 
     public override IEnumerable<BusinessRuleViolation> CheckRule()
@@ -44,6 +40,8 @@ public class PieceInvalidMove : BusinessRule
     {
         PieceType.Pawn when !IsValidMove((Pawn)piece)
                         => new("A pawn must attack a filled square."),
+        PieceType.King when !IsValidMove((King)piece)
+                        => new("King cannot set itself check."),
         _ when !PieceMovesToValidSquare(piece)
                        => new("Piece must move to designated squares."),
         _ => null
@@ -53,6 +51,15 @@ public class PieceInvalidMove : BusinessRule
     {
         var availableMoves = piece?.GetAttackRange();
         return availableMoves?.Any(square => square == _command.EndPosition) ?? false;
+    }
+
+    private bool IsValidMove(King? king)
+    {
+        //Move results in check.
+        var opponentPieces = _pieces?.Where(p => p.Color != king?.Color);
+        var positionIsSafe = Board.PositionIsReachableByPiece(_command.EndPosition, _pieces, opponentPieces) == null;
+
+        return positionIsSafe;
     }
 
     private bool IsValidMove(Pawn? pawn)

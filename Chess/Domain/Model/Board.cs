@@ -55,9 +55,42 @@ public class Board
 
     public static bool IsStalemate(Color color, IEnumerable<Piece> pieces)
     {
+        foreach(var piece in pieces.Where(p => p.Color == color))
+        {
+            var hasAvailableMove = piece.GetAttackRange()
+                                        .Any(p => Board.DirectionIsObstructed(pieces, piece.Position, p) == false);
+
+            return false;
+        }
+
+        return true;
+
         //Check if all pieces are blocked and/or if the king has movement options.
         throw new NotImplementedException();
+    }
 
+    public static Piece? PositionIsReachableByPiece(Square? position, IEnumerable<Piece>? pieces, IEnumerable<Piece>? opponentPieces)
+    {
+        Guard.Against.Null<IEnumerable<Piece>?>(opponentPieces);
+
+        foreach (var piece in opponentPieces)
+        {
+            Guard.Against.InvalidInput<Piece>(piece, nameof(piece), k => k.Position != null, "Piece doesn't have a position.");
+
+            var availableMoves = piece.GetAttackRange();
+
+            if (availableMoves.Any(s => s == position))
+            {
+                var pieceIsObstructed = Board.DirectionIsObstructed(pieces, piece.Position, position) ?? false;
+
+                if (!pieceIsObstructed || piece.Type == PieceType.Knight)
+                {
+                    return piece;
+                }
+            }
+        }
+
+        return null;
     }
 
     private static bool PieceCanReachKing(King king, IEnumerable<Piece> pieces)
@@ -97,28 +130,6 @@ public class Board
         return false;
     }
 
-    private static Piece? PositionIsReachableByPiece(Square? position, IEnumerable<Piece> pieces, IEnumerable<Piece> opponentPieces)
-    {
-        foreach (var piece in opponentPieces)
-        {
-            Guard.Against.InvalidInput<Piece>(piece, nameof(piece), k => k.Position != null, "Piece doesn't have a position.");
-
-            var availableMoves = piece.GetAttackRange();
-
-            if (availableMoves.Any(s => s == position))
-            {
-                var pieceIsObstructed = Board.DirectionIsObstructed(pieces, piece.Position, position) ?? false;
-
-                if (!pieceIsObstructed || piece.Type == PieceType.Knight)
-                {
-                    return piece;
-                }
-            }
-        }
-
-        return null;
-    }
-
     private static bool KingIsUnreachable(King? king, IEnumerable<Piece>? pieces)
                         => king?.GetAttackRange()?.All(s => pieces?.Any(p => p.Position == s) ?? false) ?? false;
 
@@ -140,6 +151,7 @@ public class Board
 
         return result;
     }
+
     private static bool? DirectionIsObstructed(IEnumerable<Piece>? pieces, DirectionType direction, Square? start, Square? end) => (direction) switch
     {
         DirectionType.Left => pieces?.Any(p => (int?)p.Position?.File < (int?)start?.File && (int?)p.Position?.File > (int?)end?.File),
