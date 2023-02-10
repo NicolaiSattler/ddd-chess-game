@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Ardalis.GuardClauses;
 using Chess.Core;
@@ -43,22 +42,30 @@ public class Match : AggregateRoot<Guid>
         RaiseEvent(@event);
     }
 
+    //TODO: Unit Test.
     public void TakeTurn(TakeTurn command)
     {
-        try
-        {
-            var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
-                                        .SelectMany(r => r.CheckRule());
+        var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
+                                    .SelectMany(r => r.CheckRule());
 
-            if (!violations.Any())
+        if (!violations.Any())
+        {
+            var isCheckmate = KingIsInCheck(command);
+            var isStalemate = IsStalemate(command);
+
+            //TODO: calculate ELO
+            if (isCheckmate)
+            {
+                RaiseEvent(new MatchEnded());
+            }
+            else if (isStalemate)
+            {
+                RaiseEvent(new MatchEnded());
+            }
+            else
             {
                 RaiseEvent(new TurnTaken(command.MemberId, command?.StartPosition, command?.EndPosition));
             }
-        }
-        catch (Exception ex)
-        {
-            //TODO: Replace with ILogger
-            Debug.Print(ex.ToString());
         }
     }
 
@@ -68,11 +75,6 @@ public class Match : AggregateRoot<Guid>
     }
 
     public void ProposeDraw(Guid proposingPlayerId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void End(MatchEnded command)
     {
         throw new NotImplementedException();
     }
@@ -90,12 +92,6 @@ public class Match : AggregateRoot<Guid>
         StartTurn(White, @event.StartTime);
     }
 
-    //      - En Passant (done)
-    //      - Castling (done)
-    //      - Captured (done)
-    //      - Promotion (done)
-    //      - Check (Mate)
-    //      - Stalemate
     private void Handle(TurnTaken @event)
     {
         Guard.Against.Null<TurnTaken>(@event, nameof(@event));
@@ -129,9 +125,11 @@ public class Match : AggregateRoot<Guid>
         StartTurn(GetOpponent(@event?.MemberId), DateTime.UtcNow);
     }
 
-    private Player? GetOpponent(Guid? memberId) => memberId != White?.MemberId ? White : Black;
+    private Player? GetOpponent(Guid? memberId)
+        => memberId != White?.MemberId ? White : Black;
 
-    private void StartTurn(Player? player, DateTime startTime) => Turns?.Add(new() { Player = player, StartTime = startTime });
+    private void StartTurn(Player? player, DateTime startTime)
+        => Turns?.Add(new() { Player = player, StartTime = startTime });
 
     //TODO: Unit Test
     private void EndTurn(TurnTaken? @event, PieceType? pieceType)
@@ -173,5 +171,27 @@ public class Match : AggregateRoot<Guid>
         {
             rook.Position = new Square(newFilePosition, rank);
         }
+    }
+
+    //TODO: Unit Test
+    private bool KingIsInCheck(TakeTurn turn)
+    {
+        var player = turn.MemberId == Black?.MemberId ? Black : White;
+        var piece = Pieces?.FirstOrDefault(p => p.Color == player?.Color && p.Type == PieceType.King);
+
+        if (piece is King king)
+        {
+            return Board.IsCheckMate(king, Pieces);
+        }
+
+        return false;
+    }
+
+    //TODO: Unit Test
+    private bool IsStalemate(TakeTurn command)
+    {
+        var movingPiece = Pieces?.FirstOrDefault(p => p.Position == command.StartPosition);
+
+        return Board.IsStalemate(movingPiece?.Color, Pieces);
     }
 }

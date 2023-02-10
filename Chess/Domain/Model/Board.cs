@@ -9,17 +9,6 @@ namespace Chess.Domain.Model;
 
 public class Board
 {
-    public static bool PieceIsCaptured(TurnTaken? @event, IEnumerable<Piece>? pieces)
-    {
-        var movingPiece = pieces?.FirstOrDefault(p => p.Position == @event?.StartPosition)
-                        ?? throw new InvalidOperationException("Piece does not exists!");
-
-        return pieces?.Any(p => p.Color != movingPiece.Color && p.Position == @event?.EndPosition) ?? false;
-    }
-
-    public static bool? DirectionIsObstructed(IEnumerable<Piece>? pieces, Square? start, Square? end)
-        => DirectionIsObstructed(pieces, GetMoveDirection(start, end), start, end);
-
     public static bool IsCheck(King? king, IEnumerable<Piece>? pieces)
     {
         Guard.Against.Null<King?>(king, nameof(King));
@@ -53,20 +42,29 @@ public class Board
         return false;
     }
 
-    public static bool IsStalemate(Color color, IEnumerable<Piece> pieces)
+    //TODO: Unit Tests
+    public static bool IsStalemate(Color? color, IEnumerable<Piece>? pieces)
     {
-        foreach(var piece in pieces.Where(p => p.Color == color))
-        {
-            var hasAvailableMove = piece.GetAttackRange()
-                                        .Any(p => Board.DirectionIsObstructed(pieces, piece.Position, p) == false);
+        var king = pieces?.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King);
+        var atTurnPieces = pieces?.Where(p => p.Color == color) ?? Enumerable.Empty<Piece>();
+        var opponentPieces = pieces?.Where(p => p.Color != color) ?? Enumerable.Empty<Piece>();
 
-            return false;
+        var pieceHasNoValidMoves = true;
+        var kingHasNoValidMoves = king?.GetAttackRange()
+                                      ?.All(p => PositionIsReachableByPiece(p, pieces, opponentPieces) != null) ?? false;
+
+        foreach (var piece in atTurnPieces.Where(p => p.Type != PieceType.King))
+        {
+            var allMovesObstructed = piece.GetAttackRange()
+                                          .All(p => DirectionIsObstructed(pieces, piece.Position, p) == true);
+            if (!allMovesObstructed)
+            {
+                pieceHasNoValidMoves = false;
+                break;
+            }
         }
 
-        return true;
-
-        //Check if all pieces are blocked and/or if the king has movement options.
-        throw new NotImplementedException();
+        return pieceHasNoValidMoves && kingHasNoValidMoves;
     }
 
     public static Piece? PositionIsReachableByPiece(Square? position, IEnumerable<Piece>? pieces, IEnumerable<Piece>? opponentPieces)
@@ -92,6 +90,17 @@ public class Board
 
         return null;
     }
+
+    public static bool PieceIsCaptured(TurnTaken? @event, IEnumerable<Piece>? pieces)
+    {
+        var movingPiece = pieces?.FirstOrDefault(p => p.Position == @event?.StartPosition)
+                        ?? throw new InvalidOperationException("Piece does not exists!");
+
+        return pieces?.Any(p => p.Color != movingPiece.Color && p.Position == @event?.EndPosition) ?? false;
+    }
+
+    public static bool? DirectionIsObstructed(IEnumerable<Piece>? pieces, Square? start, Square? end)
+        => DirectionIsObstructed(pieces, GetMoveDirection(start, end), start, end);
 
     private static bool PieceCanReachKing(King king, IEnumerable<Piece> pieces)
     {
