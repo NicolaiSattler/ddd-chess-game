@@ -134,13 +134,13 @@ public class Match : AggregateRoot<Guid>
     //TODO: Unit Test
     private void EndTurn(TurnTaken? @event, PieceType? pieceType)
     {
-        _ = @event ?? throw new ArgumentNullException(nameof(@event));
-        _ = pieceType ?? throw new ArgumentNullException(nameof(pieceType));
+        @event = Guard.Against.Null<TurnTaken?>(@event, nameof(@event));
+        pieceType = Guard.Against.Null<PieceType?>(pieceType, nameof(pieceType));
 
         var turn = Turns?.Last() ?? throw new InvalidOperationException("No turns found!");
 
-        turn.StartPosition = @event.StartPosition;
-        turn.EndPosition = @event.EndPosition;
+        turn.StartPosition = @event?.StartPosition;
+        turn.EndPosition = @event?.EndPosition;
         turn.PieceType = pieceType;
     }
 

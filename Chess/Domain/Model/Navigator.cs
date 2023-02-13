@@ -93,7 +93,8 @@ public class Navigator
     {
         var rank = color == Color.Black ? position?.Rank - 1 : position?.Rank + 1;
 
-        if (position?.Rank == 2 || position?.Rank == 7)
+        if ((color == Color.White && position?.Rank == 2)
+            || (color == Color.Black && position?.Rank == 7))
         {
             var increaseRank = position.Rank == 2;
             var result = new List<Square>()

@@ -14,6 +14,8 @@ public abstract class Piece : Entity<Guid>
     public Piece(Guid id) : base(id) { }
 
     public abstract IEnumerable<Square> GetAttackRange();
+
+    public override string ToString() => $"{Type.ToString()} - {Position?.ToString()}";
 }
 
 public enum MovementType

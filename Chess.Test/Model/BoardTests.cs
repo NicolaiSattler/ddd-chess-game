@@ -320,5 +320,97 @@ namespace Chess.Test.Domain.Model
             //Assert
             result.ShouldBeTrue();
         }
+
+        [TestMethod]
+        public void  IsStalemate_ScenarioA()
+        {
+            //Arrange
+            var blackKing = new King { Position = new(File.B, 6), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                blackKing,
+                new Rook{Position = new(File.A, 7), Color = Color.White},
+                new Rook{Position = new(File.E, 6), Color = Color.White},
+                new Bishop{Position = new(File.C, 6), Color = Color.White},
+                new Bishop{Position = new(File.F, 8), Color = Color.White},
+                new Queen{Position = new(File.G, 7), Color = Color.White},
+                new King{Position = new(File.H, 2), Color = Color.White},
+            };
+
+            //Act
+            var result = Board.IsStalemate(Color.Black, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        public void  IsStalemate_Scenario_EhrhardtVsNimzowitsch_ReturnsFalse()
+        {
+            //Arrange
+            var pieces = new List<Piece>
+            {
+                new King { Position = new(File.B, 3), Color = Color.Black},
+                new Pawn { Position = new(File.A, 2), Color = Color.Black},
+                new King { Position = new(File.A, 1), Color = Color.White},
+            };
+
+            //Act
+            var result = Board.IsStalemate(Color.White, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        /// <summary>
+        /// https://www.chess.com/terms/stalemate-chess
+        /// </summary>
+        [TestMethod]
+        public void  IsStalemate_Scenario_PuzzleTwo()
+        {
+            //Arrange
+            var pieces = new List<Piece>
+            {
+                new King { Position = new(File.H, 1), Color = Color.White },
+                new Pawn { Position = new(File.H, 2), Color = Color.White },
+                new Pawn { Position = new(File.H, 3), Color = Color.Black },
+                new Pawn { Position = new(File.F, 4), Color = Color.Black },
+                new King { Position = new(File.G, 8), Color = Color.Black },
+                new Bishop { Position = new(File.A, 7), Color = Color.Black },
+            };
+
+            //Act
+            var result = Board.IsStalemate(Color.White, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        public void  IsStalemate_Scenario_EvansVsReshevsky()
+        {
+            //Arrange
+            var pieces = new List<Piece>
+            {
+                new King { Position = new(File.H, 1), Color = Color.White },
+                new Pawn { Position = new(File.B, 4), Color = Color.White },
+                new Pawn { Position = new(File.E, 4), Color = Color.White },
+                new Pawn { Position = new(File.F, 3), Color = Color.White },
+                new Pawn { Position = new(File.H, 4), Color = Color.White },
+                new King { Position = new(File.G, 8), Color = Color.Black },
+                new Pawn { Position = new(File.B, 5), Color = Color.Black },
+                new Pawn { Position = new(File.E, 5), Color = Color.Black },
+                new Rook { Position = new(File.E, 2), Color = Color.Black },
+                new Knight { Position = new(File.F, 4), Color = Color.Black },
+                new Queen { Position = new(File.G, 3), Color = Color.Black },
+                new Pawn { Position = new(File.H, 5), Color = Color.Black }
+            };
+
+            //Act
+            var result = Board.IsStalemate(Color.White, pieces);
+
+            //Assert
+            result.ShouldBeTrue();
+        }
     }
 }
