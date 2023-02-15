@@ -9,7 +9,7 @@ public class Turn : Entity<Guid>
     public PieceType? PieceType { get; set; }
     public Square? StartPosition { get; set; }
     public Square? EndPosition { get; set; }
-    //Should be UTC
+    //Startime in UTC
     public DateTime StartTime { get; init; }
     public Player? Player { get; init; }
 

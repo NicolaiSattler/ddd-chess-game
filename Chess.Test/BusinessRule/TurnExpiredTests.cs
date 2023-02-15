@@ -41,4 +41,38 @@ public class TurnExpiredTests
         result.ShouldBeEmpty();
     }
 
+    [TestMethod]
+    public void Init_TurnIsNull_ThrowsException()
+    {
+        //Arrange
+        var maxTurnLength = new TimeSpan(1, 0, 0);
+
+
+        //Act & Assert
+        Should.Throw<ArgumentNullException>(() => _sut = new(null, maxTurnLength));
+    }
+
+    [TestMethod]
+    public void Init_StartTimeIsNull_ThrowsException()
+    {
+        //Arrange
+        var maxTurnLength = new TimeSpan(1, 0, 0);
+        var turn = new Turn();
+
+
+        //Act & Assert
+        Should.Throw<ArgumentException>(() => _sut = new(turn, maxTurnLength));
+    }
+
+    [TestMethod]
+    public void Init_TurnLength_Zero_IsNotAllowed()
+    {
+        //Arrange
+
+        var turn = new Turn { StartTime = DateTime.Now.AddHours(-1) };
+        var maxTurnLength = new TimeSpan(0, 0, 0);
+
+        //Act & Assert
+        Should.Throw<ArgumentException>(() => _sut = new(turn, maxTurnLength));
+    }
 }

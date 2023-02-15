@@ -15,13 +15,13 @@ public class TurnExpired : BusinessRule
     public TurnExpired(Turn? currentTurn, TimeSpan maxTurnLength)
     {
         Guard.Against.Null<Turn?>(currentTurn, nameof(currentTurn));
+        Guard.Against.InvalidInput(currentTurn.StartTime, nameof(currentTurn.StartTime), (startTime) => startTime != DateTime.MinValue);
         Guard.Against.Zero(maxTurnLength, nameof(maxTurnLength));
 
         _currentTurn = currentTurn;
         _maxTurnLength = maxTurnLength;
     }
 
-    //TODO: unit tests
     public override IEnumerable<BusinessRuleViolation> CheckRule()
     {
         var duration = DateTime.UtcNow.Subtract(_currentTurn.StartTime);
