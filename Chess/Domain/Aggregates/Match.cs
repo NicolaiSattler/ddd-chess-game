@@ -131,7 +131,7 @@ public class Match : AggregateRoot<Guid>
     private void StartTurn(Player? player, DateTime startTime)
         => Turns?.Add(new() { Player = player, StartTime = startTime });
 
-    //TODO: Unit Test
+    //TODO: Unit Test in aggregate
     private void EndTurn(TurnTaken? @event, PieceType? pieceType)
     {
         @event = Guard.Against.Null<TurnTaken?>(@event, nameof(@event));
@@ -144,7 +144,8 @@ public class Match : AggregateRoot<Guid>
         turn.PieceType = pieceType;
     }
 
-    //TODO: Unit Test
+    //TODO: Unit Test in aggregate
+    //TODO: User should be given a choice to which kind the piece it will be promoted to.
     private void CheckPromotion(TurnTaken? @event, Piece? movingPiece)
     {
         if (SpecialMoves.PawnIsPromoted(movingPiece, @event?.EndPosition) && movingPiece != null)
@@ -156,7 +157,7 @@ public class Match : AggregateRoot<Guid>
         }
     }
 
-    //TODO: Unit Test
+    //TODO: Unit Test in aggregate
     private void MoveCastingPieces(Piece? king, Square? endPosition)
     {
         if (king == null) return;
@@ -173,7 +174,7 @@ public class Match : AggregateRoot<Guid>
         }
     }
 
-    //TODO: Unit Test
+    //TODO: Unit Test in aggregate
     private bool KingIsInCheck(TakeTurn turn)
     {
         var player = turn.MemberId == Black?.MemberId ? Black : White;
@@ -187,7 +188,7 @@ public class Match : AggregateRoot<Guid>
         return false;
     }
 
-    //TODO: Unit Test
+    //TODO: Unit Test in aggregate
     private bool IsStalemate(TakeTurn command)
     {
         var movingPiece = Pieces?.FirstOrDefault(p => p.Position == command.StartPosition);

@@ -12,9 +12,9 @@ public class TurnExpired : BusinessRule
     private readonly Turn _currentTurn;
     private readonly TimeSpan _maxTurnLength;
 
-    public TurnExpired(Turn currentTurn, TimeSpan maxTurnLength)
+    public TurnExpired(Turn? currentTurn, TimeSpan maxTurnLength)
     {
-        Guard.Against.Null<Turn>(currentTurn, nameof(currentTurn));
+        Guard.Against.Null<Turn?>(currentTurn, nameof(currentTurn));
         Guard.Against.Zero(maxTurnLength, nameof(maxTurnLength));
 
         _currentTurn = currentTurn;
@@ -24,7 +24,7 @@ public class TurnExpired : BusinessRule
     //TODO: unit tests
     public override IEnumerable<BusinessRuleViolation> CheckRule()
     {
-        var duration = DateTime.Now.Subtract(_currentTurn.StartTime);
+        var duration = DateTime.UtcNow.Subtract(_currentTurn.StartTime);
 
         if (duration > _maxTurnLength)
         {
