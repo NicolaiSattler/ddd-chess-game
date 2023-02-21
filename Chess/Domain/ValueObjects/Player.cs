@@ -3,6 +3,7 @@ namespace Chess.Domain.ValueObjects;
 public record Player
 {
     public Guid MemberId { get; init; }
+    public float Elo { get; init; }
     public Color Color { get; init; }
 }
 

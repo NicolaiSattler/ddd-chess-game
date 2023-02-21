@@ -5,7 +5,7 @@ using Chess.Core.Match.Events;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
-namespace Chess.Domain.Model;
+namespace Chess.Domain.Determiners;
 
 public class Board
 {
@@ -243,7 +243,7 @@ public class Board
             if (pieces?.Any(p => p.Position == new Square((File)y, x)) ?? false)
                 return true;
 
-            if(y > (int?)end?.File)
+            if (y > (int?)end?.File)
             {
                 y--;
             }
@@ -296,6 +296,6 @@ public class Board
                                             : type |= DirectionType.Down;
 
     private static DirectionType GetHorizontalDirection(DirectionType type, Square start, Square end) => start?.File < end?.File
-                                            ? type |=  DirectionType.Right
+                                            ? type |= DirectionType.Right
                                             : type |= DirectionType.Left;
 }

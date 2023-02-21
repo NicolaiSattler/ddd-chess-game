@@ -5,7 +5,7 @@ using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
-namespace Chess.Domain.Model;
+namespace Chess.Domain.Determiners;
 
 public class SpecialMoves
 {

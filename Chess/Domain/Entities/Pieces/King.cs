@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Chess.Domain.Model;
+using Chess.Domain.Determiners;
 using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Entities.Pieces;

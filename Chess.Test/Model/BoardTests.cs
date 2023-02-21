@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Chess.Core.Match.Events;
-using Chess.Domain.Model;
+using Chess.Domain.Determiners;
 
 namespace Chess.Test.Domain.Model
 {
@@ -233,7 +233,7 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
-        public void  KingH8_IsCheckmate_ByRookG8_AndKnightF6()
+        public void KingH8_IsCheckmate_ByRookG8_AndKnightF6()
         {
             //Arrange
             var king = new King { Position = new(File.H, 8), Color = Color.Black };
@@ -252,7 +252,7 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
-        public void  KingH8_IsCheckmate_ByRookE8_AndBlockedByOwnPieces()
+        public void KingH8_IsCheckmate_ByRookE8_AndBlockedByOwnPieces()
         {
             //Arrange
             var king = new King { Position = new(File.F, 8), Color = Color.Black };
@@ -275,7 +275,7 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
-        public void  KingH8_IsNotCheckmate_OpponentPieceCanBeAttacked()
+        public void KingH8_IsNotCheckmate_OpponentPieceCanBeAttacked()
         {
             //Arrange
             var king = new King { Position = new(File.F, 8), Color = Color.Black };
@@ -298,7 +298,7 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
-        public void  KingH8_IsCheckmate_ByMultiplePieces()
+        public void KingH8_IsCheckmate_ByMultiplePieces()
         {
             //Arrange
             var king = new King { Position = new(File.F, 8), Color = Color.Black };
@@ -322,7 +322,7 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
-        public void  IsStalemate_ScenarioA()
+        public void IsStalemate_ScenarioA()
         {
             //Arrange
             var blackKing = new King { Position = new(File.B, 6), Color = Color.Black };
@@ -345,7 +345,7 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
-        public void  IsStalemate_Scenario_EhrhardtVsNimzowitsch_ReturnsFalse()
+        public void IsStalemate_Scenario_EhrhardtVsNimzowitsch_ReturnsFalse()
         {
             //Arrange
             var pieces = new List<Piece>
@@ -366,7 +366,7 @@ namespace Chess.Test.Domain.Model
         /// https://www.chess.com/terms/stalemate-chess
         /// </summary>
         [TestMethod]
-        public void  IsStalemate_Scenario_PuzzleTwo()
+        public void IsStalemate_Scenario_PuzzleTwo()
         {
             //Arrange
             var pieces = new List<Piece>
@@ -387,7 +387,7 @@ namespace Chess.Test.Domain.Model
         }
 
         [TestMethod]
-        public void  IsStalemate_Scenario_EvansVsReshevsky()
+        public void IsStalemate_Scenario_EvansVsReshevsky()
         {
             //Arrange
             var pieces = new List<Piece>

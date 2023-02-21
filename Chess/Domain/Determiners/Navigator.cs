@@ -4,7 +4,7 @@ using Ardalis.GuardClauses;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
-namespace Chess.Domain.Model;
+namespace Chess.Domain.Determiners;
 
 /// <summary>
 /// An example of a domain service

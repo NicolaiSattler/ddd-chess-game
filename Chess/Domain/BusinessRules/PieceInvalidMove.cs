@@ -5,7 +5,7 @@ using Chess.Core.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
-using Chess.Domain.Model;
+using Chess.Domain.Determiners;
 
 namespace Chess.Domain.BusinessRules;
 

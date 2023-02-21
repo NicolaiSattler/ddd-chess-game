@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Chess.Domain.Entities;
-using Chess.Domain.Model;
+using Chess.Domain.Determiners;
 
 namespace Chess.Test.Domain.Model;
 

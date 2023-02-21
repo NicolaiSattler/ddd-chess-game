@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
-namespace Chess.Core.Match.Factories;
+namespace Chess.Domain.Factories;
 
 public class PiecesFactory
 {
