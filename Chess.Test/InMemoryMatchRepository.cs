@@ -1,19 +1,21 @@
+using Chess.Application;
+using Chess.Core;
+using Chess.Domain.Aggregates;
+using Chess.Domain.Events;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using Chess.Core;
-using Chess.Core.Match.Events;
-using Chess.Domain.Aggregates;
 
-namespace Chess.Application;
+namespace Chess.Test;
 
 public class InMemoryMatchRepository : IMatchRepository
 {
     private readonly Dictionary<Guid, List<Event>> _events = new();
 
-    public Match? Get(Guid aggregateId)
+    public Match Get(Guid aggregateId)
     {
-        if (_events.TryGetValue(aggregateId, out List<Event>? aggregateEvents))
+        if (_events.TryGetValue(aggregateId, out List<Event> aggregateEvents))
         {
             var events = aggregateEvents.OrderBy(e => e.Version)
                                         .Select(DeserializeEvent);
@@ -36,23 +38,23 @@ public class InMemoryMatchRepository : IMatchRepository
             Data = JsonSerializer.Serialize(@event, @event.GetType())
         };
     }
-    public void Save(Guid? aggregateId, DomainEvent? @event)
+    public void Save(Guid aggregateId, DomainEvent @event)
     {
-        if (!aggregateId.HasValue) throw new ArgumentNullException(nameof(aggregateId));
+        if (aggregateId == Guid.Empty) throw new ArgumentNullException(nameof(aggregateId));
         if (@event == null) throw new ArgumentNullException(nameof(@event));
 
-        if (_events.ContainsKey(aggregateId.Value))
+        if (_events.ContainsKey(aggregateId))
         {
-            var newVersion = _events[aggregateId.Value].Max(e => e.Version) + 1;
-            _events[aggregateId.Value].Add(CreateEvent(aggregateId!.Value, newVersion!.Value, @event));
+            var newVersion = _events[aggregateId].Max(e => e.Version) + 1;
+            _events[aggregateId].Add(CreateEvent(aggregateId, newVersion!.Value, @event));
         }
-        else _events[aggregateId.Value] = new List<Event>
+        else _events[aggregateId] = new List<Event>
         {
-            CreateEvent(aggregateId.Value, 1, @event)
+            CreateEvent(aggregateId, 1, @event)
         };
     }
 
-    private static DomainEvent? DeserializeEvent(Event? item) => item?.Type switch
+    private static DomainEvent DeserializeEvent(Event item) => item?.Type switch
     {
         nameof(MatchStarted) => JsonSerializer.Deserialize<MatchStarted>(item?.Data ?? string.Empty),
         nameof(TurnTaken) => JsonSerializer.Deserialize<TurnTaken>(item?.Data ?? string.Empty),

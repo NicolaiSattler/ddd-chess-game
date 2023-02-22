@@ -18,7 +18,7 @@ namespace Chess.Domain.BusinessRules;
 /// </summary>
 public class CastlingNotAllowed : BusinessRule
 {
-    private const string RuleViolationMessage = "The Castling move is not allowed, either the King or Rook has been moved,"
+    private const string TurnIsExpiredError = "The Castling move is not allowed, either the King or Rook has been moved,"
                                               + " the King is in check or a piece is standing between the King and Rook.";
     private readonly TakeTurn? _command;
     private readonly IEnumerable<Turn>? _turns;
@@ -50,7 +50,7 @@ public class CastlingNotAllowed : BusinessRule
 
         if (isCastling && (rookHasMoved || kingHasMoved || moveIsBlocked || kingIsInCheck))
         {
-            return new List<BusinessRuleViolation> { new(RuleViolationMessage) };
+            return new List<BusinessRuleViolation> { new(TurnIsExpiredError) };
         }
 
         return Enumerable.Empty<BusinessRuleViolation>();

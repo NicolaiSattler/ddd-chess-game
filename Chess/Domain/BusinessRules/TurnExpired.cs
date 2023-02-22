@@ -8,7 +8,6 @@ namespace Chess.Domain.BusinessRules;
 
 public class TurnExpired : BusinessRule
 {
-    private const string RuleViolationMessage = "Maximum time of turn has succeeded";
     private readonly Turn _currentTurn;
     private readonly TimeSpan _maxTurnLength;
 
@@ -28,7 +27,7 @@ public class TurnExpired : BusinessRule
 
         if (duration > _maxTurnLength)
         {
-            return new List<BusinessRuleViolation> { new(RuleViolationMessage) };
+            return new List<BusinessRuleViolation> { new(Constants.TurnIsExpiredError) };
         }
 
         return Enumerable.Empty<BusinessRuleViolation>();

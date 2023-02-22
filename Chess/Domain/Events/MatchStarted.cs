@@ -1,4 +1,6 @@
-namespace Chess.Core.Match.Events;
+using Chess.Core;
+
+namespace Chess.Domain.Events;
 
 [Serializable]
 public class MatchStarted : DomainEvent

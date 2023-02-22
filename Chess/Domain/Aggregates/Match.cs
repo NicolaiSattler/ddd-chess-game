@@ -1,22 +1,20 @@
-using System.Collections.Generic;
-using System.Linq;
 using Ardalis.GuardClauses;
 using Chess.Core;
-using Chess.Core.Match.Events;
+using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
+using Chess.Domain.Determiners;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
 using Chess.Domain.Factories;
-using Chess.Domain.Determiners;
 using Chess.Domain.ValueObjects;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Chess.Domain.Aggregates;
 
 public class Match : AggregateRoot<Guid>, IMatch
 {
-    private const string InvalidStartMatchError = "Member Ids are the same.";
-
     private Player? White { get; set; }
     private Player? Black { get; set; }
     private List<Piece>? Pieces { get; set; }
@@ -37,7 +35,7 @@ public class Match : AggregateRoot<Guid>, IMatch
         Guard.Against.InvalidInput(command,
                                    nameof(command),
                                    (cmd) => cmd.MemberOneId == cmd.MemberTwoId,
-                                   InvalidStartMatchError);
+                                   Constants.InvalidStartMatchError);
 
         var colorPicker = new Random(1);
         var memberOneIsWhite = colorPicker.Next() == 0;
@@ -58,6 +56,10 @@ public class Match : AggregateRoot<Guid>, IMatch
     {
         var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
                                     .SelectMany(r => r.CheckRule());
+        var turnIsExpired = violations.Any(r => r.ViolationMessage == Constants.TurnIsExpiredError);
+
+        Func<Guid?, MatchResult> GetMatchResult = (memberId)
+            => memberId == White?.MemberId ? MatchResult.White : MatchResult.Black;
 
         if (!violations.Any())
         {
@@ -65,8 +67,7 @@ public class Match : AggregateRoot<Guid>, IMatch
 
             if (isCheckmate)
             {
-                var matchResult = command.MemberId == White?.MemberId ? MatchResult.White : MatchResult.Black;
-                var @event = new MatchEnded(White, Black, matchResult);
+                var @event = new MatchEnded(White, Black, GetMatchResult(command.MemberId));
 
                 RaiseEvent(@event);
                 return;
@@ -81,6 +82,12 @@ public class Match : AggregateRoot<Guid>, IMatch
             }
 
             RaiseEvent(new TurnTaken(command.MemberId, command?.StartPosition, command?.EndPosition));
+        }
+
+        if (turnIsExpired)
+        {
+            var @event = new MatchEnded(White, Black, GetMatchResult(command?.MemberId));
+            RaiseEvent(@event);
         }
     }
 
@@ -165,8 +172,16 @@ public class Match : AggregateRoot<Guid>, IMatch
 
     private void Handle(MatchEnded @event)
     {
+        var whiteId = Guard.Against.Null<Player?>(White, nameof(White))!.MemberId;
+        var blackId = Guard.Against.Null<Player?>(Black, nameof(Black))!.MemberId;
 
-        //TODO: calculate ELO
+        var result = Elo.Calculate(White?.Elo, Black?.Elo, @event.Result);
+
+        if (result != null)
+        {
+            White = new() { MemberId = whiteId, Color = Color.White, Elo = result.WhiteElo };
+            Black = new() { MemberId = blackId, Color = Color.Black, Elo = result.BlackElo };
+        }
     }
 
     private Player? GetOpponent(Guid? memberId)

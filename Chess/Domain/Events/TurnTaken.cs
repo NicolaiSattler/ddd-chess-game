@@ -1,6 +1,7 @@
+using Chess.Core;
 using Chess.Domain.ValueObjects;
 
-namespace Chess.Core.Match.Events;
+namespace Chess.Domain.Events;
 
 public class TurnTaken : DomainEvent
 {

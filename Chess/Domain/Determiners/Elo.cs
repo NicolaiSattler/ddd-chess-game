@@ -1,3 +1,4 @@
+using Ardalis.GuardClauses;
 using Chess.Domain.Events;
 using Chess.Domain.ValueObjects;
 
@@ -14,27 +15,30 @@ public class Elo
     /// <summary>
     /// Calculate the Elo of the player
     /// </summary>
-    public static EloResult Calculate(float ratingWhite, float ratingBlack, MatchResult matchResult)
+    public static EloResult Calculate(float? ratingWhite, float? ratingBlack, MatchResult? matchResult)
     {
-        var probabilityWhite = CalculateProbability(ratingWhite, ratingBlack);
-        var probabilityBlack = CalculateProbability(ratingBlack, ratingWhite);
+        var ratingA = Guard.Against.Null<float?>(ratingWhite, nameof(ratingWhite))!.Value;
+        var ratingB = Guard.Against.Null<float?>(ratingBlack, nameof(ratingBlack))!.Value;
+
+        var probabilityWhite = CalculateProbability(ratingA, ratingB);
+        var probabilityBlack = CalculateProbability(ratingB, ratingA);
 
         return matchResult switch
         {
             MatchResult.White => new()
             {
-                WhiteElo = CalculateEloResult(ratingWhite, probabilityWhite, 1),
-                BlackElo = CalculateEloResult(ratingBlack, probabilityBlack, 0)
+                WhiteElo = CalculateEloResult(ratingA, probabilityWhite, 1),
+                BlackElo = CalculateEloResult(ratingB, probabilityBlack, 0)
             },
             MatchResult.Black => new()
             {
-                WhiteElo = CalculateEloResult(ratingWhite, probabilityWhite, 0),
-                BlackElo = CalculateEloResult(ratingBlack, probabilityBlack, 1)
+                WhiteElo = CalculateEloResult(ratingA, probabilityWhite, 0),
+                BlackElo = CalculateEloResult(ratingA, probabilityBlack, 1)
             },
             MatchResult.Draw => new()
             {
-                WhiteElo = CalculateEloResult(ratingWhite, probabilityWhite, 0.5f),
-                BlackElo = CalculateEloResult(ratingBlack, probabilityBlack, 0.5f)
+                WhiteElo = CalculateEloResult(ratingA, probabilityWhite, 0.5f),
+                BlackElo = CalculateEloResult(ratingB, probabilityBlack, 0.5f)
             },
             _ => throw new InvalidOperationException("Unknown match result")
         };

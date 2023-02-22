@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Chess.Core.Match.Events;
+using Chess.Domain.Events;
 using Chess.Domain.Determiners;
 
 namespace Chess.Test.Domain.Model

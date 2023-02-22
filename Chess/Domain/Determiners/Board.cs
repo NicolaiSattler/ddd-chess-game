@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Ardalis.GuardClauses;
-using Chess.Core.Match.Events;
+using Chess.Domain.Events;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
@@ -42,7 +42,6 @@ public class Board
         return false;
     }
 
-    //TODO: Unit Tests
     public static bool IsStalemate(Color? color, IEnumerable<Piece>? pieces)
     {
         var king = pieces?.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King);

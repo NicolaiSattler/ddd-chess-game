@@ -1,5 +1,5 @@
 using System.Linq;
-using Chess.Core.Match.Events;
+using Chess.Domain.Events;
 using Chess.Domain.Factories;
 using Chess.Domain.Commands;
 
@@ -20,24 +20,37 @@ public class ApplicationService : IApplicationService
 
         match.Start(command);
 
-        //publish event?
+        var @event = match.Events.Last();
 
-        var @event = match.Events.Last() as MatchStarted;
-        repository.Save(match.Id, @event);
+        if (@event is MatchStarted)
+        {
+            repository.Save(match.Id, @event);
+        }
 
         return match.Id;
     }
 
     public void TakeTurn(Guid aggregateId, TakeTurn command)
     {
-        //Build aggregate
         var match = repository.Get(aggregateId);
+        match.TakeTurn(command);
 
-        match?.TakeTurn(command);
+        var @event = match.Events.Last();
 
-        // save aggegrate
-        repository.Save(match?.Id, match?.Events?.Last());
+        if (@event != null)
+        {
+            repository.Save(match.Id, @event);
+        }
+
+        if (@event is MatchEnded endEvent)
+        {
+            //TODO: update elo of players.
+        }
     }
 
+    public void Resign(Chess.Domain.Commands.Resign command)
+    {
+
+    }
 }
 
