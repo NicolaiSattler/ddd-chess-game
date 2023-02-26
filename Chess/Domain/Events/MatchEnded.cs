@@ -7,7 +7,8 @@ public enum MatchResult
 {
     White = 0,
     Black = 1,
-    Draw = 2
+    Draw = 2,
+    Stalemate = 3
 }
 
 public class MatchEnded : DomainEvent

@@ -6,7 +6,6 @@ namespace Chess.Domain.Determiners;
 
 public class Elo
 {
-
     /// <summary>
     /// The K-Factor determines how strongly a result affects the rating change.
     /// </summary>
@@ -17,28 +16,32 @@ public class Elo
     /// </summary>
     public static EloResult Calculate(float? ratingWhite, float? ratingBlack, MatchResult? matchResult)
     {
-        var ratingA = Guard.Against.Null<float?>(ratingWhite, nameof(ratingWhite))!.Value;
-        var ratingB = Guard.Against.Null<float?>(ratingBlack, nameof(ratingBlack))!.Value;
+        var rA = Guard.Against.Null<float?>(ratingWhite, nameof(ratingWhite))!.Value;
+        var rB = Guard.Against.Null<float?>(ratingBlack, nameof(ratingBlack))!.Value;
+        var result = Guard.Against.Null<MatchResult?>(matchResult, nameof(matchResult))!.Value;
 
-        var probabilityWhite = CalculateProbability(ratingA, ratingB);
-        var probabilityBlack = CalculateProbability(ratingB, ratingA);
+        Guard.Against.Negative(rA, nameof(ratingWhite));
+        Guard.Against.Negative(rB, nameof(ratingBlack));
 
-        return matchResult switch
+        var probabilityBlack = CalculateProbability(rA, rB);
+        var probabilityWhite = CalculateProbability(rB, rA);
+
+        return result switch
         {
             MatchResult.White => new()
             {
-                WhiteElo = CalculateEloResult(ratingA, probabilityWhite, 1),
-                BlackElo = CalculateEloResult(ratingB, probabilityBlack, 0)
+                WhiteElo = CalculateEloResult(rA, probabilityWhite, 1),
+                BlackElo = CalculateEloResult(rB, probabilityBlack, 0)
             },
             MatchResult.Black => new()
             {
-                WhiteElo = CalculateEloResult(ratingA, probabilityWhite, 0),
-                BlackElo = CalculateEloResult(ratingA, probabilityBlack, 1)
+                WhiteElo = CalculateEloResult(rA, probabilityWhite, 0),
+                BlackElo = CalculateEloResult(rB, probabilityBlack, 1)
             },
-            MatchResult.Draw => new()
+            MatchResult.Draw or MatchResult.Stalemate => new()
             {
-                WhiteElo = CalculateEloResult(ratingA, probabilityWhite, 0.5f),
-                BlackElo = CalculateEloResult(ratingB, probabilityBlack, 0.5f)
+                WhiteElo = CalculateEloResult(rA, probabilityWhite, 0.5f),
+                BlackElo = CalculateEloResult(rB, probabilityBlack, 0.5f)
             },
             _ => throw new InvalidOperationException("Unknown match result")
         };
@@ -46,17 +49,23 @@ public class Elo
 
     /// <summary>
     /// Calculate the probability of winning for the player with ratingA
-    /// 400 range of ranking.
+    /// 400 is an arbitrary number for the ranking range.
     /// </summary>
-    public static float CalculateProbability(float ratingA, float ratingB)
-        => 1.0f * 1.0f
-            / (1 + 1.0f
-                   * (float)(Math.Pow(10, 1.0f * (ratingA - ratingB) / 400)));
+    public static float CalculateProbability(float? ratingA, float? ratingB)
+    {
+        var rA = Guard.Against.Null<float?>(ratingA, nameof(ratingA))!.Value;
+        var rB = Guard.Against.Null<float?>(ratingB, nameof(ratingB))!.Value;
 
+        Guard.Against.Negative(rA, nameof(ratingA));
+        Guard.Against.Negative(rB, nameof(ratingB));
+
+        return 1.0f * 1.0f
+                / (1 + 1.0f
+                   * (float)(Math.Pow(10, 1.0f * (rA - rB) / 400)));
+    }
 
     private static Func<float, float, float, float> CalculateEloResult = (ranking, probability, matchResult) =>
     {
-        return ranking * K * (matchResult - probability);
+        return ranking + (K * (matchResult - probability));
     };
-
 }

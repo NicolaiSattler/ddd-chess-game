@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Chess.Domain.Entities;
 using Chess.Domain.Determiners;
 
-namespace Chess.Test.Domain.Model;
+namespace Chess.Test.Domain.Determiners;
 
 [TestClass]
 public class SpecialMovesTests

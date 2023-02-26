@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Chess.Domain.Events;
 using Chess.Domain.Determiners;
+using Chess.Domain.Events;
 
-namespace Chess.Test.Domain.Model
+namespace Chess.Test.Domain.Determiners
 {
     [TestClass]
     public class BoardTests

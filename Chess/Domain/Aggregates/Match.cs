@@ -52,6 +52,7 @@ public class Match : AggregateRoot<Guid>, IMatch
     }
 
     //TODO: Unit Test all scenario's
+    //TODO: Draw by repitition
     public void TakeTurn(TakeTurn command)
     {
         var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
@@ -107,11 +108,6 @@ public class Match : AggregateRoot<Guid>, IMatch
         RaiseEvent(@event);
     }
 
-    //TODO: how will the user interaction be?
-    public void ProposeDraw(ProposeDraw command)
-    {
-        throw new NotImplementedException();
-    }
 
     //TODO: Unit test aggregate
     public void Draw(Draw command)
