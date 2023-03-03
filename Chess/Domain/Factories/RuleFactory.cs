@@ -12,11 +12,8 @@ public class RuleFactory
 {
     public static IEnumerable<BusinessRule> GetTurnRules(TakeTurn command,
                                                          IEnumerable<Piece>? pieces,
-                                                         IEnumerable<Turn>? turns,
-                                                         string maxTurnLength = "01:00:00")
+                                                         IEnumerable<Turn>? turns)
     {
-        TimeSpan.TryParse(maxTurnLength, out var turnLength);
-
         var currentTurn = turns?.Last();
 
         return new List<BusinessRule>
@@ -24,8 +21,7 @@ public class RuleFactory
             new PieceInvalidMove(command, pieces, turns),
             new PieceCannotAttackOwnColor(command, pieces),
             new PieceIsBlocked(command, pieces),
-            new CastlingNotAllowed(command, pieces, turns),
-            new TurnExpired(currentTurn, turnLength)
+            new CastlingNotAllowed(command, pieces, turns)
         };
     }
 }

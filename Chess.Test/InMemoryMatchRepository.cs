@@ -20,6 +20,8 @@ public class InMemoryMatchRepository : IMatchRepository
             var events = aggregateEvents.OrderBy(e => e.Version)
                                         .Select(DeserializeEvent);
 
+            var startEvent = events.FirstOrDefault(e => e is MatchStarted) as MatchStarted;
+
             return new Match(aggregateId, events);
         }
 

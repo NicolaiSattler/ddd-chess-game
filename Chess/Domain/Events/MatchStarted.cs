@@ -1,4 +1,5 @@
 using Chess.Core;
+using Chess.Domain.Configuration;
 
 namespace Chess.Domain.Events;
 
@@ -10,4 +11,5 @@ public class MatchStarted : DomainEvent
     public float EloOfWhite { get; init; }
     public float EloOfBlack { get; init; }
     public DateTime StartTime { get; init; }
+    public MatchOptions? Options { get; init; }
 }

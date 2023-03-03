@@ -5,10 +5,13 @@ namespace Chess.Domain.Events;
 
 public enum MatchResult
 {
-    White = 0,
-    Black = 1,
-    Draw = 2,
-    Stalemate = 3
+    Undefined = 0,
+    WhiteWins = 1,
+    BlackWins = 2,
+    Draw = 3,
+    Stalemate = 4,
+    WhiteForfeit = 5,
+    BlackForfeit = 6
 }
 
 public class MatchEnded : DomainEvent

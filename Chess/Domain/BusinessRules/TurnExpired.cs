@@ -6,6 +6,7 @@ using Chess.Domain.Entities;
 
 namespace Chess.Domain.BusinessRules;
 
+[Obsolete("Not needed anymore?")]
 public class TurnExpired : BusinessRule
 {
     private readonly Turn _currentTurn;

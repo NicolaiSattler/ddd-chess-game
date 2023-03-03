@@ -35,12 +35,13 @@ public class EloTests
     }
 
     [TestMethod]
-    public void Calculate_BlackWins()
+    [DataRow(MatchResult.BlackWins)]
+    [DataRow(MatchResult.WhiteForfeit)]
+    public void Calculate_BlackWins(MatchResult matchResult)
     {
         //Arrange
         var ratingWhite = 1000;
         var ratingBlack = 1200;
-        var matchResult = MatchResult.Black;
 
         //Act
         var result = Elo.Calculate(ratingWhite, ratingBlack, matchResult);
@@ -51,12 +52,13 @@ public class EloTests
     }
 
     [TestMethod]
-    public void Calculate_WhiteWins()
+    [DataRow(MatchResult.WhiteWins)]
+    [DataRow(MatchResult.BlackForfeit)]
+    public void Calculate_WhiteWins(MatchResult matchResult)
     {
         //Arrange
         var ratingWhite = 1000;
         var ratingBlack = 1200;
-        var matchResult = MatchResult.White;
 
         //Act
         var result = Elo.Calculate(ratingWhite, ratingBlack, matchResult);
@@ -99,8 +101,8 @@ public class EloTests
     }
 
     [TestMethod]
-    [DataRow(null, 1200, MatchResult.White)]
-    [DataRow(1000, null, MatchResult.White)]
+    [DataRow(null, 1200, MatchResult.WhiteWins)]
+    [DataRow(1000, null, MatchResult.WhiteWins)]
     [DataRow(1000, 1200, null)]
     public void Calculate_Draw(int? ratingWhite, int? ratingBlack, MatchResult? result)
     {

@@ -1,4 +1,5 @@
 using Chess.Application;
+using Chess.Application.Models;
 using Chess.Domain.Commands;
 using System;
 
@@ -11,13 +12,14 @@ public class ApplicationServiceTests
     private Guid BlackId { get; }
     private Guid AggregateId { get; }
     private InMemoryMatchRepository _repository;
+    //private Mock<ITurnTimer> _mockedTimer;
     private ApplicationService _sut;
 
     [TestInitialize]
     public void Initialize()
     {
         _repository = new();
-        _sut = new(_repository);
+        //_sut = new(_repository);
     }
 
     [TestMethod]
