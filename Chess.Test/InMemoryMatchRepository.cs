@@ -13,7 +13,7 @@ public class InMemoryMatchRepository : IMatchRepository
 {
     private readonly Dictionary<Guid, List<Event>> _events = new();
 
-    public Match Get(Guid aggregateId)
+    public IMatch Get(Guid aggregateId)
     {
         if (_events.TryGetValue(aggregateId, out List<Event> aggregateEvents))
         {

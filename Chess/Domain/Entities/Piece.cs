@@ -4,7 +4,7 @@ using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Entities.Pieces;
 
-public abstract class Piece : Entity<Guid>
+public abstract class Piece : Entity
 {
     public Color Color { get; init; }
     public Square? Position { get; set; }

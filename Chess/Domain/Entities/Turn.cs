@@ -4,7 +4,7 @@ using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Entities;
 
-public class Turn : Entity<Guid>
+public class Turn : Entity
 {
     public PieceType? PieceType { get; set; }
     public Square? StartPosition { get; set; }

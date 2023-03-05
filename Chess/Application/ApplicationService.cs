@@ -82,7 +82,7 @@ public class ApplicationService : IApplicationService
         SaveEvent(match);
     }
 
-    private DomainEvent? SaveEvent(Match match)
+    private DomainEvent? SaveEvent(IMatch match)
     {
         var @event = match.Events.Last();
 

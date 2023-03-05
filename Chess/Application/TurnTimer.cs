@@ -27,13 +27,15 @@ public class TurnTimer : ITurnTimer, IDisposable
 
     public void Start(Guid aggregateId, Guid memberId, int maxTurnLengthInSeconds)
     {
-        Timer = new(maxTurnLengthInSeconds)
-        {
-            Enabled = true,
-            Interval = maxTurnLengthInSeconds * MilliSecords
-        };
+        AggregateId = aggregateId;
+        MemberId = memberId;
 
+        var interval = maxTurnLengthInSeconds * MilliSecords;
+
+        Timer = new(maxTurnLengthInSeconds) { Interval = interval };
         Timer.Elapsed += TurnEnded;
+        Timer.AutoReset = false;
+        Timer.Enabled = true;
     }
 
     public void Stop()
@@ -57,7 +59,7 @@ public class TurnTimer : ITurnTimer, IDisposable
         }
     }
 
-    private DomainEvent? SaveEvent(Match match)
+    private DomainEvent? SaveEvent(IMatch match)
     {
         var @event = match.Events.Last();
 
@@ -71,7 +73,6 @@ public class TurnTimer : ITurnTimer, IDisposable
 
     private void TurnEnded(object? source, ElapsedEventArgs? args)
     {
-
         var id = Guard.Against.Null<Guid?>(AggregateId, nameof(AggregateId))!.Value;
         var memberId = Guard.Against.Null<Guid?>(MemberId, nameof(MemberId))!.Value;
         var match = _repository.Get(id);

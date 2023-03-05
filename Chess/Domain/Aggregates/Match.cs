@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Chess.Domain.Aggregates;
 
-public class Match : AggregateRoot<Guid>, IMatch
+public class Match : AggregateRoot, IMatch
 {
     private List<Piece>? Pieces { get; set; }
     private List<Turn>? Turns { get; set; }
@@ -56,7 +56,6 @@ public class Match : AggregateRoot<Guid>, IMatch
 
     //TODO: Unit Test all scenario's
     //TODO: Draw by repitition
-
     public TurnResult TakeTurn(TakeTurn command)
     {
         var matchResult = MatchResult.Undefined;

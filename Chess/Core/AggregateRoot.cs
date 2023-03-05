@@ -7,7 +7,7 @@ namespace Chess.Core
     /// Represents an aggregate-root of a domain aggregate (DDD). An aggregate-root is always an entity.
     /// </summary>
     /// <typeparam name="TId">The type of the Id of the entity.</typeparam>
-    public abstract class AggregateRoot<TId> : Entity<TId>
+    public abstract class AggregateRoot : Entity, IAggregateRoot
     {
         /// <summary>
         /// The list of events that occurred while handling commands.
@@ -38,7 +38,7 @@ namespace Chess.Core
         /// Constructor for creating an empty aggregate.
         /// </summary>
         /// <param name="id">The unique id of the aggregate-root.</param>
-        public AggregateRoot(TId id) : base(id)
+        public AggregateRoot(Guid id) : base(id)
         {
             OriginalVersion = 0;
             Version = 0;
@@ -51,7 +51,7 @@ namespace Chess.Core
         /// </summary>
         /// <param name="id">The unique Id of the aggregate.</param>
         /// <param name="events">The events to replay.</param>
-        public AggregateRoot(TId id, IEnumerable<DomainEvent?>? events) : this(id)
+        public AggregateRoot(Guid id, IEnumerable<DomainEvent?>? events) : this(id)
         {
             IsReplaying = true;
 
