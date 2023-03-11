@@ -14,17 +14,10 @@ public class Board
         Guard.Against.Null<King?>(king, nameof(King));
         Guard.Against.Null<IEnumerable<Piece>?>(pieces, nameof(pieces));
 
-        var isUnReachable = KingIsUnreachable(king, pieces);
-
-        if (isUnReachable) return false;
-
-        var pieceCanReachKing = PieceCanReachKing(king, pieces);
-
-        if (pieceCanReachKing) return true;
-
-        return false;
+        return !KingIsUnreachable(king, pieces) && GetPiecesThatReachKing(king, pieces).Any();
     }
 
+    //TODO: allied pieces can lift check....
     public static bool IsCheckMate(King? king, IEnumerable<Piece>? pieces)
     {
         Guard.Against.Null<King?>(king, nameof(King));
@@ -34,9 +27,8 @@ public class Board
 
         if (isCheck)
         {
-            var attackRange = king?.GetAttackRange();
             var opponentPieces = pieces?.Where(p => p.Color != king?.Color);
-            return KingCannotEscapeCheck(attackRange, pieces, opponentPieces);
+            return KingCannotEscapeCheck(king, pieces, opponentPieces);
         }
 
         return false;
@@ -51,7 +43,7 @@ public class Board
         var pieceHasNoValidMoves = true;
         var kingHasNoValidMoves = king?.GetAttackRange()
                                       ?.Where(p => !pieces?.Any(q => q.Position == p) ?? false)
-                                      ?.All(p => PositionIsReachableByPiece(p, pieces, opponentPieces) != null) ?? false;
+                                      ?.All(p => GetPiecesThatCanReachPosition(p, pieces, opponentPieces).Count() > 0) ?? false;
 
         foreach (var piece in atTurnPieces.Where(p => p.Type != PieceType.King))
         {
@@ -79,9 +71,11 @@ public class Board
                                 || p.File == piece.Position?.File);
     }
 
-    public static Piece? PositionIsReachableByPiece(Square? position, IEnumerable<Piece>? pieces, IEnumerable<Piece>? opponentPieces)
+    public static IEnumerable<Piece> GetPiecesThatCanReachPosition(Square? position, IEnumerable<Piece>? pieces, IEnumerable<Piece>? opponentPieces)
     {
         Guard.Against.Null<IEnumerable<Piece>?>(opponentPieces);
+
+        var result = new List<Piece>();
 
         foreach (var piece in opponentPieces)
         {
@@ -95,12 +89,12 @@ public class Board
 
                 if (!pieceIsObstructed || piece.Type == PieceType.Knight)
                 {
-                    return piece;
+                    result.Add(piece);
                 }
             }
         }
 
-        return null;
+        return result;
     }
 
     public static bool PieceIsCaptured(TurnTaken? @event, IEnumerable<Piece>? pieces)
@@ -119,41 +113,50 @@ public class Board
                              : DirectionIsObstructed(pieces, GetMoveDirection(start, end), start, end);
     }
 
-    private static bool PieceCanReachKing(King king, IEnumerable<Piece> pieces)
+    private static IEnumerable<Piece> GetPiecesThatReachKing(King king, IEnumerable<Piece> pieces)
     {
         Guard.Against.Null<King>(king, nameof(king));
         Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
         Guard.Against.InvalidInput<King>(king, nameof(king), k => k.Position != null, "King doesn't have a position.");
 
         var opponentPieces = pieces.Where(p => p.Color != king?.Color);
-        return PositionIsReachableByPiece(king?.Position, pieces, opponentPieces) != null;
+        return GetPiecesThatCanReachPosition(king?.Position, pieces, opponentPieces);
     }
 
-    private static bool KingCannotEscapeCheck(IEnumerable<Square>? attackRange, IEnumerable<Piece>? allPieces, IEnumerable<Piece>? opponentPieces)
+    private static bool KingCannotEscapeCheck(King king, IEnumerable<Piece>? allPieces, IEnumerable<Piece>? opponentPieces)
     {
-        Guard.Against.NullOrEmpty(attackRange, nameof(attackRange));
+        Guard.Against.Null<King>(king, nameof(king));
         Guard.Against.NullOrEmpty(allPieces, nameof(allPieces));
         Guard.Against.NullOrEmpty(opponentPieces, nameof(opponentPieces));
 
-        var attackingPieces = attackRange.Select(square => PositionIsReachableByPiece(square, allPieces, opponentPieces))
-                                         ?.Where(p => p != null);
-        var count = attackingPieces?.Count() ?? 0;
+        var attackingPieces = king.GetAttackRange().SelectMany(square => GetPiecesThatCanReachPosition(square, allPieces, opponentPieces));
 
-        if (attackingPieces != null && count > 0)
+        if (attackingPieces != null)
         {
-            if (count == 1)
+            if (attackingPieces.Count() == 1)
             {
                 var opponent = attackingPieces.First();
                 var alliedPieces = allPieces.Where(p => p.Color != opponent?.Color);
-                var opponentCanBeAttacked = PositionIsReachableByPiece(opponent?.Position, alliedPieces, alliedPieces) != null;
+                var alliedPieceCanReachAttacker = GetPiecesThatCanReachPosition(opponent?.Position, allPieces, alliedPieces).Any();
 
-                return !opponentCanBeAttacked;
+                return !alliedPieceCanReachAttacker && !AttackCanBeBlocked(opponent, king, allPieces);
             }
-
-            return true;
+            else
+            {
+                return true;
+            }
         }
 
         return false;
+    }
+
+    private static bool AttackCanBeBlocked(Piece? attackingPiece, Piece? defender, IEnumerable<Piece> pieces)
+    {
+        var attackDirection = GetMoveDirection(attackingPiece?.Position, defender?.Position);
+        var path = attackingPiece?.GetAttackRange().Where(p => GetMoveDirection(p, defender?.Position) == attackDirection);
+        var defendingPieces = pieces.Where(p => p.Color == defender?.Color);
+
+        return path?.Any(p => GetPiecesThatCanReachPosition(p, pieces, defendingPieces).Any()) ?? false;
     }
 
     private static bool KingIsUnreachable(King? king, IEnumerable<Piece>? pieces)

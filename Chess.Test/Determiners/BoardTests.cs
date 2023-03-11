@@ -322,6 +322,29 @@ namespace Chess.Test.Domain.Determiners
         }
 
         [TestMethod]
+        public void KingH8_IsCheck_CanBeLifted()
+        {
+            //Arrange
+            var king = new King { Position = new(File.F, 8), Color = Color.Black };
+            var pieces = new List<Piece>
+            {
+                king,
+                new Pawn {Position = new(File.E, 8), Color = Color.Black},
+                new Pawn {Position = new(File.E, 7), Color = Color.Black},
+                new Pawn {Position = new(File.G, 8), Color = Color.Black},
+                new Pawn {Position = new(File.G, 7), Color = Color.Black},
+                new Rook {Position = new(File.A, 2), Color = Color.Black},
+                new Rook {Position = new(File.F, 1), Color = Color.White},
+            };
+
+            //Act
+            var result = Board.IsCheckMate(king, pieces);
+
+            //Assert
+            result.ShouldBeFalse();
+        }
+
+        [TestMethod]
         public void IsStalemate_ScenarioA()
         {
             //Arrange
