@@ -9,6 +9,7 @@ using Chess.Domain.Events;
 using Chess.Domain.Factories;
 using Chess.Domain.ValueObjects;
 using Chess.Domain.Models;
+using Chess.Domain.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 

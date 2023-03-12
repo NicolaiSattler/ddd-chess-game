@@ -17,7 +17,6 @@ public class Board
         return !KingIsUnreachable(king, pieces) && GetPiecesThatReachKing(king, pieces).Any();
     }
 
-    //TODO: allied pieces can lift check....
     public static bool IsCheckMate(King? king, IEnumerable<Piece>? pieces)
     {
         Guard.Against.Null<King?>(king, nameof(King));
@@ -58,17 +57,6 @@ public class Board
         }
 
         return pieceHasNoValidMoves && kingHasNoValidMoves;
-    }
-
-    /// <summary>
-    /// Retrieve all valid pawn movements.
-    /// </summary>
-    private static IEnumerable<Square> GetAvailablePawnMoves(IEnumerable<Piece>? pieces, Piece piece)
-    {
-        var opponentPieces = pieces?.Where(p => p.Color != piece.Color);
-        return piece.GetAttackRange()
-                    .Where(p => (p.File != piece.Position?.File && (opponentPieces?.All(q => q.Position == p) ?? false))
-                                || p.File == piece.Position?.File);
     }
 
     public static IEnumerable<Piece> GetPiecesThatCanReachPosition(Square? position, IEnumerable<Piece>? pieces, IEnumerable<Piece>? opponentPieces)
@@ -159,6 +147,17 @@ public class Board
         return path?.Any(p => GetPiecesThatCanReachPosition(p, pieces, defendingPieces).Any()) ?? false;
     }
 
+    /// <summary>
+    /// Retrieve all valid pawn movements.
+    /// </summary>
+    private static IEnumerable<Square> GetAvailablePawnMoves(IEnumerable<Piece>? pieces, Piece piece)
+    {
+        var opponentPieces = pieces?.Where(p => p.Color != piece.Color);
+        return piece.GetAttackRange()
+                    .Where(p => (p.File != piece.Position?.File && (opponentPieces?.All(q => q.Position == p) ?? false))
+                                || p.File == piece.Position?.File);
+    }
+
     private static bool KingIsUnreachable(King? king, IEnumerable<Piece>? pieces)
                         => king?.GetAttackRange()?.All(s => pieces?.Any(p => p.Position == s) ?? false) ?? false;
 
@@ -182,7 +181,9 @@ public class Board
     }
 
     private static Func<Square?, Square?, bool> IsSameFile = (a, b) => a?.File == b?.File;
+
     private static Func<Square?, Square?, bool> IsSameRank = (a, b) => a?.Rank == b?.Rank;
+
     private static bool? DirectionIsObstructedForPawn(IEnumerable<Piece>? pieces, Piece? pawn, Square? end)
     {
         if (pieces?.Any(p => p.Position == end) ?? false) return true;

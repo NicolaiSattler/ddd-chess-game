@@ -2,7 +2,7 @@ using Ardalis.GuardClauses;
 using Chess.Domain.Events;
 using Chess.Domain.ValueObjects;
 
-namespace Chess.Domain.Determiners;
+namespace Chess.Domain.Utilities;
 
 public class Elo
 {
