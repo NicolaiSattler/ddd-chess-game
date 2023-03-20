@@ -80,6 +80,6 @@ public class TurnTimerTests
     [TestCleanup]
     public void Cleanup()
     {
-        _sut?.Dispose();
+        _sut.Dispose();
     }
 }

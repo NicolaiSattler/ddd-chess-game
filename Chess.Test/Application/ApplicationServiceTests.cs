@@ -1,5 +1,4 @@
 using Chess.Application;
-using Chess.Application.Models;
 using Chess.Domain.Commands;
 using System;
 
@@ -35,19 +34,9 @@ public class ApplicationServiceTests
             MemberOneId = whiteId,
             MemberTwoId = blackId
         };
-        var whiteTurn = new TakeTurn
-        {
-            MemberId = whiteId,
-            StartPosition = new Square(File.A, 2),
-            EndPosition = new Square(File.A, 4)
-        };
 
-        var blackTurn = new TakeTurn
-        {
-            MemberId = blackId,
-            StartPosition = new Square(File.C, 7),
-            EndPosition = new Square(File.C, 5)
-        };
+        var whiteTurn = new TakeTurn(whiteId, new(File.A, 2), new(File.A, 4), false);
+        var blackTurn = new TakeTurn(blackId, new(File.C, 7), new(File.C, 5), false);
 
         //Act
         var aggregateId = _sut.StartMatch(startMatchCommand);

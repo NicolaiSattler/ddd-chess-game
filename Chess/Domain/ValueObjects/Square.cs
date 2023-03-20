@@ -1,6 +1,6 @@
 namespace Chess.Domain.ValueObjects;
 
-public record Square(File File, int? Rank)
+public record Square(File File, int Rank)
 {
     public override string ToString() => $"{File}{Rank}";
 }

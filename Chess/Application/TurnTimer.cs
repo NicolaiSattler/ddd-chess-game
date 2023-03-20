@@ -15,9 +15,9 @@ public class TurnTimer : ITurnTimer, IDisposable
     private readonly IMatchRepository _repository;
     private bool _disposing;
 
-    private Timer? Timer { get; set; }
-    private Guid? AggregateId { get; set; }
-    private Guid? MemberId { get; set; }
+    private Timer Timer { get; set; } = new();
+    private Guid AggregateId { get; set; }
+    private Guid MemberId { get; set; }
 
 
     public TurnTimer(IMatchRepository repository)
@@ -40,8 +40,8 @@ public class TurnTimer : ITurnTimer, IDisposable
 
     public void Stop()
     {
-        Timer?.Stop();
-        Timer?.Dispose();
+        Timer.Stop();
+        Timer.Dispose();
     }
 
     public void Dispose() => Dispose(true);
@@ -61,7 +61,7 @@ public class TurnTimer : ITurnTimer, IDisposable
 
     private DomainEvent? SaveEvent(IMatch match)
     {
-        var @event = match.Events.Last();
+        var @event = match.Events.LastOrDefault();
 
         if (@event != null)
         {
@@ -71,10 +71,10 @@ public class TurnTimer : ITurnTimer, IDisposable
         return @event;
     }
 
-    private void TurnEnded(object? source, ElapsedEventArgs? args)
+    private void TurnEnded(object source, ElapsedEventArgs args)
     {
-        var id = Guard.Against.Null<Guid?>(AggregateId, nameof(AggregateId))!.Value;
-        var memberId = Guard.Against.Null<Guid?>(MemberId, nameof(MemberId))!.Value;
+        var id = Guard.Against.Null<Guid>(AggregateId, nameof(AggregateId));
+        var memberId = Guard.Against.Null<Guid>(MemberId, nameof(MemberId));
         var match = _repository.Get(id);
         var command = new ForfeitCommand() { MemberId = memberId };
 
@@ -82,6 +82,6 @@ public class TurnTimer : ITurnTimer, IDisposable
 
         SaveEvent(match);
 
-        Timer?.Stop();
+        Timer.Stop();
     }
 }

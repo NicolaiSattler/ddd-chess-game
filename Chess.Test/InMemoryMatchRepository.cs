@@ -36,7 +36,7 @@ public class InMemoryMatchRepository : IMatchRepository
             Id = Guid.NewGuid(),
             AggregateId = aggregateId,
             Version = version,
-            Type = @event.GetType()?.Name,
+            Type = @event.GetType().Name,
             Data = JsonSerializer.Serialize(@event, @event.GetType())
         };
     }
@@ -48,7 +48,7 @@ public class InMemoryMatchRepository : IMatchRepository
         if (_events.ContainsKey(aggregateId))
         {
             var newVersion = _events[aggregateId].Max(e => e.Version) + 1;
-            _events[aggregateId].Add(CreateEvent(aggregateId, newVersion!.Value, @event));
+            _events[aggregateId].Add(CreateEvent(aggregateId, newVersion, @event));
         }
         else _events[aggregateId] = new List<Event>
         {
@@ -56,10 +56,10 @@ public class InMemoryMatchRepository : IMatchRepository
         };
     }
 
-    private static DomainEvent DeserializeEvent(Event item) => item?.Type switch
+    private static DomainEvent DeserializeEvent(Event item) => item.Type switch
     {
-        nameof(MatchStarted) => JsonSerializer.Deserialize<MatchStarted>(item?.Data ?? string.Empty),
-        nameof(TurnTaken) => JsonSerializer.Deserialize<TurnTaken>(item?.Data ?? string.Empty),
+        nameof(MatchStarted) => JsonSerializer.Deserialize<MatchStarted>(item.Data),
+        nameof(TurnTaken) => JsonSerializer.Deserialize<TurnTaken>(item.Data),
         _ => throw new InvalidOperationException("Type is unknown."),
     };
 }

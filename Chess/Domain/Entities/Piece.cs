@@ -7,15 +7,18 @@ namespace Chess.Domain.Entities.Pieces;
 public abstract class Piece : Entity
 {
     public Color Color { get; init; }
-    public Square? Position { get; set; }
+    public Square Position { get; set; }
     public abstract PieceType Type { get; init; }
     public abstract MovementType Movement { get; init; }
 
-    public Piece(Guid id) : base(id) { }
+    public Piece(Guid id) : base(id)
+    {
+        Position = new(File.Undefined, 0);
+    }
 
     public abstract IEnumerable<Square> GetAttackRange();
 
-    public override string ToString() => $"{Type.ToString()} - {Position?.ToString()}";
+    public override string ToString() => $"{Type.ToString()} - {Position.ToString()}";
 }
 
 public enum MovementType

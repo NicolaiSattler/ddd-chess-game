@@ -12,14 +12,14 @@ namespace Chess.Domain.BusinessRules;
 public class PieceInvalidMove : BusinessRule
 {
     private readonly TakeTurn _command;
-    private readonly IEnumerable<Piece>? _pieces;
-    private readonly IEnumerable<Turn>? _turns;
+    private readonly IEnumerable<Piece> _pieces;
+    private readonly IEnumerable<Turn> _turns;
 
-    public PieceInvalidMove(TakeTurn command, IEnumerable<Piece>? pieces, IEnumerable<Turn>? turns)
+    public PieceInvalidMove(TakeTurn command, IEnumerable<Piece> pieces, IEnumerable<Turn> turns)
     {
         _command = Guard.Against.Null<TakeTurn>(command, nameof(command));
-        _pieces = Guard.Against.Null<IEnumerable<Piece>?>(pieces, nameof(pieces));
-        _turns = Guard.Against.Null<IEnumerable<Turn>?>(turns, nameof(turns));
+        _pieces = Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        _turns = Guard.Against.Null<IEnumerable<Turn>>(turns, nameof(turns));
     }
 
     public override IEnumerable<BusinessRuleViolation> CheckRule()

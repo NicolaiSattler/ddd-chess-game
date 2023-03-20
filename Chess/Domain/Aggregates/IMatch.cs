@@ -8,9 +8,9 @@ namespace Chess.Domain.Aggregates;
 
 public interface IMatch : IAggregateRoot
 {
-    MatchOptions? Options { get; }
-    Player? White { get; }
-    Player? Black { get; }
+    MatchOptions Options { get; }
+    Player White { get; }
+    Player Black { get; }
 
     void Start(StartMatch command);
     void Draw(Draw command);

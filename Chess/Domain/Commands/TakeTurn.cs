@@ -2,10 +2,4 @@ using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Commands;
 
-public record TakeTurn
-{
-    public Guid MemberId { get; init; }
-    public Square? StartPosition { get; init; }
-    public Square? EndPosition { get; init; }
-    public bool? IsCastling { get; init; }
-}
+public record TakeTurn(Guid MemberId, Square StartPosition, Square EndPosition, bool IsCastling);

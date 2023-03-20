@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
+using Ardalis.GuardClauses;
 using Chess.Core.BusinessRules;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
@@ -11,10 +11,12 @@ namespace Chess.Domain.Factories;
 public class RuleFactory
 {
     public static IEnumerable<BusinessRule> GetTurnRules(TakeTurn command,
-                                                         IEnumerable<Piece>? pieces,
-                                                         IEnumerable<Turn>? turns)
+                                                         IEnumerable<Piece> pieces,
+                                                         IEnumerable<Turn> turns)
     {
-        var currentTurn = turns?.Last();
+        Guard.Against.Null<TakeTurn>(command, nameof(command));
+        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null<IEnumerable<Turn>>(turns, nameof(turns));
 
         return new List<BusinessRule>
         {

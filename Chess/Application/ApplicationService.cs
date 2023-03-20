@@ -37,7 +37,7 @@ public class ApplicationService : IApplicationService
     //TODO: result of move should be returned to the end user.
     public void TakeTurn(Guid aggregateId, TakeTurn command)
     {
-        _timer?.Stop();
+        _timer.Stop();
 
         var match = _repository.Get(aggregateId) ?? throw new ApplicationException($"Match could not be found with id {aggregateId}");
         match.TakeTurn(command);
@@ -46,10 +46,10 @@ public class ApplicationService : IApplicationService
 
         if (@event is TurnTaken turn)
         {
-            var playerAtTurn = command.MemberId == match.White?.MemberId ? match.White : match.Black;
-            var maxTurnLengthInSeconds = match.Options!.MaxTurnTime.Seconds;
+            var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
+            var maxTurnLengthInSeconds = match.Options.MaxTurnTime.Seconds;
 
-            _timer?.Start(aggregateId, playerAtTurn!.MemberId, maxTurnLengthInSeconds);
+            _timer.Start(aggregateId, playerAtTurn!.MemberId, maxTurnLengthInSeconds);
         }
         else if (@event is MatchEnded matchEnd)
         {
@@ -64,7 +64,7 @@ public class ApplicationService : IApplicationService
 
     public void Draw(Guid aggregateId, Draw command)
     {
-        _timer?.Stop();
+        _timer.Stop();
 
         var match = _repository.Get(aggregateId);
         match.Draw(command);

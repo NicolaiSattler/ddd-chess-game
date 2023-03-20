@@ -1,6 +1,6 @@
 using System;
-using Chess.Domain.Determiners;
 using Chess.Domain.Events;
+using Chess.Domain.Utilities;
 
 namespace Chess.Test.Domain.Determiners;
 

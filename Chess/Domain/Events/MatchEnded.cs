@@ -1,3 +1,4 @@
+using Ardalis.GuardClauses;
 using Chess.Core;
 using Chess.Domain.ValueObjects;
 
@@ -16,14 +17,14 @@ public enum MatchResult
 
 public class MatchEnded : DomainEvent
 {
-    public Player? White { get; }
-    public Player? Black { get; }
+    public Player White { get; }
+    public Player Black { get; }
     public MatchResult Result { get; }
 
     public MatchEnded(Player? white, Player? black, MatchResult result)
     {
-        White = white;
-        Black = black;
+        White = Guard.Against.Null<Player?>(white, nameof(white))!;
+        Black = Guard.Against.Null<Player?>(black, nameof(black))!;
         Result = result;
     }
 }

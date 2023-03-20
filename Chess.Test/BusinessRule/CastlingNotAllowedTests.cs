@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
@@ -13,15 +14,11 @@ public class CastlingNotAllowedTests
     [DataRow(File.C, 1, Color.White)]
     [DataRow(File.G, 8, Color.Black)]
     [DataRow(File.C, 8, Color.Black)]
-    public void  TakeTurn_CheckRule_IsValid(File file, int rank, Color color)
+    public void TakeTurn_CheckRule_IsValid(File file, int rank, Color color)
     {
         //Arrange
-        var command = new TakeTurn()
-        {
-            StartPosition = new(File.E, rank),
-            EndPosition = new(file, rank),
-            IsCastling = true
-        };
+
+        var command = new TakeTurn(Guid.Empty, new(File.E, rank), new(file, rank), true);
         var pieces = new List<Piece>()
         {
             new Rook { Color = color, Position = new(File.A, rank)},
@@ -43,15 +40,10 @@ public class CastlingNotAllowedTests
     [DataRow(File.C, 1, Color.White)]
     [DataRow(File.G, 8, Color.Black)]
     [DataRow(File.C, 8, Color.Black)]
-    public void  TakeTurn_CheckRule_IsNotValid_RookMoved(File file, int rank, Color color)
+    public void TakeTurn_CheckRule_IsNotValid_RookMoved(File file, int rank, Color color)
     {
         //Arrange
-        var command = new TakeTurn()
-        {
-            StartPosition = new(File.E, rank),
-            EndPosition = new(file, rank),
-            IsCastling = true
-        };
+        var command = new TakeTurn(Guid.Empty, new(File.E, rank), new(file, rank), true);
         var pieces = new List<Piece>()
         {
             new Rook { Color = color, Position = new(File.A, rank)},
@@ -79,15 +71,10 @@ public class CastlingNotAllowedTests
     [DataRow(File.C, 1, Color.White)]
     [DataRow(File.G, 8, Color.Black)]
     [DataRow(File.C, 8, Color.Black)]
-    public void  TakeTurn_CheckRule_IsNotValid_KingMoved(File file, int rank, Color color)
+    public void TakeTurn_CheckRule_IsNotValid_KingMoved(File file, int rank, Color color)
     {
         //Arrange
-        var command = new TakeTurn()
-        {
-            StartPosition = new(File.E, rank),
-            EndPosition = new(file, rank),
-            IsCastling = true
-        };
+        var command = new TakeTurn(Guid.Empty, new(File.E, rank), new(file, rank), true);
         var pieces = new List<Piece>()
         {
             new Rook { Color = color, Position = new(File.A, rank)},
@@ -111,15 +98,10 @@ public class CastlingNotAllowedTests
     }
 
     [TestMethod]
-    public void  TakeTurn_CheckRule_IsNotValid_KingIsInCheck()
+    public void TakeTurn_CheckRule_IsNotValid_KingIsInCheck()
     {
         //Arrange
-        var command = new TakeTurn()
-        {
-            StartPosition = new(File.E, 1),
-            EndPosition = new(File.G, 1),
-            IsCastling = true
-        };
+        var command = new TakeTurn(Guid.Empty, new(File.E, 1), new(File.G, 1), true);
         var pieces = new List<Piece>()
         {
             new Rook { Color = Color.Black, Position = new(File.E, 7)},
@@ -136,15 +118,10 @@ public class CastlingNotAllowedTests
     }
 
     [TestMethod]
-    public void  TakeTurn_CheckRule_IsNotValid_MoveIsBlocked()
+    public void TakeTurn_CheckRule_IsNotValid_MoveIsBlocked()
     {
         //Arrange
-        var command = new TakeTurn()
-        {
-            StartPosition = new(File.E, 1),
-            EndPosition = new(File.G, 1),
-            IsCastling = true
-        };
+        var command = new TakeTurn(Guid.Empty, new(File.E, 1), new(File.G, 1), true);
         var pieces = new List<Piece>()
         {
             new King { Color = Color.White, Position = new(File.E, 1)},

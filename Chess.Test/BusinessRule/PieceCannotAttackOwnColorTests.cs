@@ -14,7 +14,7 @@ public class PieceCannotAttackOwnColorTests
     private TakeTurn _command;
 
     [TestMethod]
-    public void  TakeTurn_CheckRule_IsValidMove ()
+    public void TakeTurn_CheckRule_IsValidMove()
     {
         //Arrange
         _pieces = new()
@@ -23,12 +23,7 @@ public class PieceCannotAttackOwnColorTests
             new Pawn() { Color = Color.Black, Position = new(File.C, 2) }
         };
 
-        _command = new()
-        {
-            MemberId = Guid.NewGuid(),
-            StartPosition = new(File.C, 2),
-            EndPosition = new(File.C, 3)
-        };
+        _command = new(Guid.NewGuid(), new(File.C, 2), new(File.C, 3), false);
 
         _sut = new PieceCannotAttackOwnColor(_command, _pieces);
 
@@ -40,7 +35,7 @@ public class PieceCannotAttackOwnColorTests
     }
 
     [TestMethod]
-    public void  TakeTurn_CheckRule_IsInvalidMove()
+    public void TakeTurn_CheckRule_IsInvalidMove()
     {
         //Arrange
         _pieces = new();
@@ -56,12 +51,7 @@ public class PieceCannotAttackOwnColorTests
             Position = new(File.C, 2)
         });
 
-        _command = new()
-        {
-            MemberId = Guid.NewGuid(),
-            StartPosition = new(File.C, 2),
-            EndPosition = new(File.C, 3)
-        };
+        _command = new(Guid.NewGuid(), new(File.C, 2), new(File.C, 3), false);
 
         _sut = new PieceCannotAttackOwnColor(_command, _pieces);
 

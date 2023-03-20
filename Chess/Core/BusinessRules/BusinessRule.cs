@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Chess.Core.BusinessRules
 {
@@ -55,7 +53,7 @@ namespace Chess.Core.BusinessRules
         /// <param name="firstRule">first rule</param>
         /// <param name="secondRule">second rule</param>
         /// <returns>the combined rule</returns>
-        public static BusinessRule operator & (BusinessRule firstRule, BusinessRule secondRule)
+        public static BusinessRule operator &(BusinessRule firstRule, BusinessRule secondRule)
         {
             return new AndBusinessRule(firstRule, secondRule);
         }

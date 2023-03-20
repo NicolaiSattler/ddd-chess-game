@@ -13,26 +13,26 @@ public class Navigator
 {
     private static Func<int?, bool> isValidAxis = (dim) => dim >= 1 && dim <= 8;
 
-    public static IEnumerable<Square> CalculateMovement(Square? position,
-                                                        MovementType? movement,
+    public static IEnumerable<Square> CalculateMovement(Square position,
+                                                        MovementType movement,
                                                         int range = 2,
                                                         Color color = Color.Undefined)
     {
-        Guard.Against.Null<Square?>(position, nameof(position));
-        Guard.Against.Null<MovementType?>(movement, nameof(movement));
+        Guard.Against.Null<Square>(position, nameof(position));
+        Guard.Against.Null<MovementType>(movement, nameof(movement));
 
         var result = new List<Square>();
 
-        if (movement?.HasFlag(MovementType.Diagonal) ?? false)
+        if (movement.HasFlag(MovementType.Diagonal))
             result.AddRange(GetDiagonalMovements(position, range));
 
-        if (movement?.HasFlag(MovementType.FileAndRank) ?? false)
+        if (movement.HasFlag(MovementType.FileAndRank))
             result.AddRange(GetFileAndRankMovement(position, range));
 
-        if (movement?.HasFlag(MovementType.Leap) ?? false)
+        if (movement.HasFlag(MovementType.Leap))
             result.AddRange(GetLeapMovements(position));
 
-        if (movement?.HasFlag(MovementType.Pawn) ?? false)
+        if (movement.HasFlag(MovementType.Pawn))
             result.AddRange(GetPawnMovements(position, color));
 
         return result.Where(p => isValidAxis((int)p.File) && isValidAxis(p.Rank))
@@ -89,12 +89,12 @@ public class Navigator
     };
 
 
-    private static IEnumerable<Square> GetPawnMovements(Square? position, Color color)
+    private static IEnumerable<Square> GetPawnMovements(Square position, Color color)
     {
-        var rank = color == Color.Black ? position?.Rank - 1 : position?.Rank + 1;
+        var rank = color == Color.Black ? position.Rank - 1 : position.Rank + 1;
 
-        if ((color == Color.White && position?.Rank == 2)
-            || (color == Color.Black && position?.Rank == 7))
+        if ((color == Color.White && position.Rank == 2)
+            || (color == Color.Black && position.Rank == 7))
         {
             var increaseRank = position.Rank == 2;
             var result = new List<Square>()
@@ -104,6 +104,7 @@ public class Navigator
                 new Square(position.File.ChangeFile(-1), position.Rank + (increaseRank ? 1 : -1)),
                 new Square(position.File, position.Rank + (increaseRank ? 2 : -2))
             };
+
             return result;
         }
 

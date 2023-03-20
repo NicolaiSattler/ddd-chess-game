@@ -75,7 +75,7 @@ namespace Chess.Test.Domain.Determiners
             var result = Board.DirectionIsObstructed(pieces, new(File.A, 1), new(File.E, 5));
 
             //Assert
-            result.ShouldNotBeNull().ShouldBeTrue();
+            result.ShouldBeTrue();
         }
 
         [TestMethod]
@@ -93,7 +93,7 @@ namespace Chess.Test.Domain.Determiners
             var result = Board.DirectionIsObstructed(pieces, new(File.A, 1), new(File.E, 5));
 
             //Assert
-            result.ShouldNotBeNull().ShouldBeFalse();
+            result.ShouldBeFalse();
         }
         [TestMethod]
         public void KingC7_IsNotInCheck_IsProtected_ByPawnC6()

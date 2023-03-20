@@ -6,5 +6,5 @@ public record StartMatch
 {
     public Guid MemberOneId { get; set; }
     public Guid MemberTwoId { get; set; }
-    public MatchOptions? Options { get; set; }
+    public MatchOptions Options { get; set; } = new();
 }

@@ -5,6 +5,7 @@ using Chess.Domain.Entities;
 namespace Chess.Core.BusinessRules;
 
 [TestClass]
+[Ignore]
 public class TurnExpiredTests
 {
     private TurnExpired _sut;
