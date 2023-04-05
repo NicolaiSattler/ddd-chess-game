@@ -1,0 +1,15 @@
+.field {
+    width: 5rem;
+    height: 5rem;
+    position: relative;
+    display: flex;
+    float: left;
+}
+
+.dark-field {
+    background-color: darkblue;
+}
+
+.light-field {
+    background-color: lightgrey;
+}
