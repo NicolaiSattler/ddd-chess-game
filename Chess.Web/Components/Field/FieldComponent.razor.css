@@ -8,8 +8,62 @@
 
 .dark-field {
     background-color: darkblue;
+    color: lightgrey;
 }
 
 .light-field {
     background-color: lightgrey;
+}
+
+.fileText {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+
+.white-king {
+    background: url('./svg/pieces-sprite.svg#white-king');
+}
+
+.black-king {
+    background: url('./svg/pieces-sprite.svg#black-king');
+}
+.white-queen {
+    background: url('./svg/pieces-sprite.svg#white-queen');
+}
+
+.black-queen {
+    background: url('./svg/pieces-sprite.svg#white-king');
+}
+
+.white-bishop {
+    background: url('./svg/pieces-sprite.svg#white-bishop');
+}
+
+.black-bishop {
+    background: url('./svg/pieces-sprite.svg#black-bishop');
+}
+
+.white-rook {
+    background: url('./svg/pieces-sprite.svg#white-rook');
+}
+
+.black-rook {
+    background: url('./svg/pieces-sprite.svg#black-rook');
+}
+
+.white-knight {
+    background: url('./svg/pieces-sprite.svg#white-knight');
+}
+
+.black-knight {
+    background: url('./svg/pieces-sprite.svg#black-knight');
+}
+
+.white-pawn {
+    background: url('./svg/pieces-sprite.svg#white-pawn');
+}
+
+.black-pawn {
+    background: url('./svg/pieces-sprite.svg#black-pawn');
 }

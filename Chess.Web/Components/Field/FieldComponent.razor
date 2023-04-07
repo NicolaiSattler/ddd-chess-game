@@ -1,2 +1,11 @@
 <div class=@HtmlClasses>
+    @if(@ShowRank)
+    {
+        <div class="rankText m-1">@Rank</div>
+    }
+
+    @if(@ShowFile)
+    {
+        <div class="fileText m-1">@File.ToString()</div>
+    }
 </div>
