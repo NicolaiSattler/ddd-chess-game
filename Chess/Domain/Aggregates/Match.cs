@@ -17,12 +17,12 @@ namespace Chess.Domain.Aggregates;
 
 public class Match : AggregateRoot, IMatch
 {
-    private List<Piece> Pieces { get; set; }
     private List<Turn> Turns { get; set; }
 
     public MatchOptions Options { get; private set; }
     public Player White { get; private set; }
     public Player Black { get; private set; }
+    public List<Piece> Pieces { get; private set; }
 
     public Match(Guid id) : base(id)
     {

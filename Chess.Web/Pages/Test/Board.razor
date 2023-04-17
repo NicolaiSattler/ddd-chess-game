@@ -1,11 +1,22 @@
 @using Chess.Domain.ValueObjects;
+@using Chess.Web.Components.Piece
 @page "/test/board"
 
 <div class="board">
-    @for (int i = 1; i < 9; i++)
-    @for (int j = 1; j < 9; j++)
-    {
-       <FieldComponent Rank=i File=(File)j />
-    }
+    <CascadingValue Value="this">
 
+        @for (int i = 1; i < 9; i++)
+        @for (int j = 1; j < 9; j++)
+        {
+            var piece = @SelectPiece(i, j);
+
+            <FieldComponent Rank=i File=(File)j>
+                @if(@piece != null)
+                {
+                    <PieceComponent PieceId="@piece.Id" Color="@piece.Color" Type="@piece.Type" />
+                }
+            </FieldComponent>
+        }
+
+    </CascadingValue>
 </div>
