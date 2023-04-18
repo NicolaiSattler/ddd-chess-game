@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Chess.Test;
 
@@ -13,7 +14,7 @@ public class InMemoryMatchRepository : IMatchRepository
 {
     private readonly Dictionary<Guid, List<Event>> _events = new();
 
-    public IMatch Get(Guid aggregateId)
+    public async Task<IMatch> GetAsync(Guid aggregateId)
     {
         if (_events.TryGetValue(aggregateId, out List<Event> aggregateEvents))
         {
@@ -40,7 +41,7 @@ public class InMemoryMatchRepository : IMatchRepository
             Data = JsonSerializer.Serialize(@event, @event.GetType())
         };
     }
-    public void Save(Guid aggregateId, DomainEvent @event)
+    public async Task SaveAsync(Guid aggregateId, DomainEvent @event)
     {
         if (aggregateId == Guid.Empty) throw new ArgumentNullException(nameof(aggregateId));
         if (@event == null) throw new ArgumentNullException(nameof(@event));

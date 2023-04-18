@@ -1,4 +1,4 @@
-namespace Chess.Application.Models;
+namespace Chess.Application;
 
 public interface ITurnTimer
 {

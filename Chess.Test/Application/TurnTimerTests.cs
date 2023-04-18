@@ -39,21 +39,21 @@ public class TurnTimerTests
             new MatchStarted { WhiteMemberId = memberId, BlackMemberId = otherMemberId }
         };
 
-        _mockedRepository.Setup(m => m.Get(aggregateId)).Returns(_mockedMatch.Object);
-        _mockedRepository.Setup(m => m.Save(aggregateId, It.IsAny<DomainEvent>()));
+        _mockedRepository.Setup(m => m.GetAsync(aggregateId)).ReturnsAsync(_mockedMatch.Object);
+        _mockedRepository.Setup(m => m.SaveAsync(aggregateId, It.IsAny<DomainEvent>()));
 
         _mockedMatch.SetupGet(m => m.Events).Returns(events);
-        _mockedMatch.Setup(m => m.Forfeit(It.IsAny<ForfeitCommand>()));
+        _mockedMatch.Setup(m => m.Forfeit(It.IsAny<Forfeit>()));
 
         //Act
         _sut.Start(aggregateId, memberId, seconds);
         Thread.Sleep(1500);
 
         //Assert
-        _mockedRepository.Verify(m => m.Get(It.IsAny<Guid>()), Times.Once);
-        _mockedRepository.Verify(m => m.Save(It.IsAny<Guid>(), It.IsAny<DomainEvent>()), Times.Once);
+        _mockedRepository.Verify(m => m.GetAsync(It.IsAny<Guid>()), Times.Once);
+        _mockedRepository.Verify(m => m.SaveAsync(It.IsAny<Guid>(), It.IsAny<DomainEvent>()), Times.Once);
 
-        _mockedMatch.Verify(m => m.Forfeit(It.IsAny<ForfeitCommand>()), Times.Once);
+        _mockedMatch.Verify(m => m.Forfeit(It.IsAny<Forfeit>()), Times.Once);
     }
 
 
@@ -71,10 +71,10 @@ public class TurnTimerTests
         _sut.Stop();
 
         //Assert
-        _mockedRepository.Verify(m => m.Get(It.IsAny<Guid>()), Times.Never);
-        _mockedRepository.Verify(m => m.Save(It.IsAny<Guid>(), It.IsAny<DomainEvent>()), Times.Never);
+        _mockedRepository.Verify(m => m.GetAsync(It.IsAny<Guid>()), Times.Never);
+        _mockedRepository.Verify(m => m.SaveAsync(It.IsAny<Guid>(), It.IsAny<DomainEvent>()), Times.Never);
 
-        _mockedMatch.Verify(m => m.Forfeit(It.IsAny<ForfeitCommand>()), Times.Never);
+        _mockedMatch.Verify(m => m.Forfeit(It.IsAny<Forfeit>()), Times.Never);
     }
 
     [TestCleanup]

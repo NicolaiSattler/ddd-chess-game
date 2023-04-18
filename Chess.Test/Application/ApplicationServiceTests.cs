@@ -1,6 +1,8 @@
 using Chess.Application;
 using Chess.Domain.Commands;
+using Moq;
 using System;
+using System.Threading.Tasks;
 
 namespace Chess.Test.Application;
 
@@ -11,19 +13,19 @@ public class ApplicationServiceTests
     private Guid BlackId { get; }
     private Guid AggregateId { get; }
     private InMemoryMatchRepository _repository;
-    //private Mock<ITurnTimer> _mockedTimer;
+    private Mock<ITurnTimer> _mockedTimer;
     private ApplicationService _sut;
 
     [TestInitialize]
     public void Initialize()
     {
         _repository = new();
-        //_sut = new(_repository);
+        _mockedTimer = new();
+        _sut = new(_repository, _mockedTimer.Object);
     }
 
     [TestMethod]
-    [Ignore("Needs to be fixed")]
-    public void StartGame_ShouldAddEvent()
+    public async Task StartGame_ShouldAddEvent()
     {
         //Arrange
         var whiteId = Guid.NewGuid();
@@ -39,12 +41,12 @@ public class ApplicationServiceTests
         var blackTurn = new TakeTurn(blackId, new(File.C, 7), new(File.C, 5), false);
 
         //Act
-        var aggregateId = _sut.StartMatch(startMatchCommand);
-        _sut.TakeTurn(aggregateId, whiteTurn);
-        _sut.TakeTurn(aggregateId, blackTurn);
+        var aggregateId = await _sut.StartMatchAsync(startMatchCommand);
+        await _sut.TakeTurnAsync(aggregateId, whiteTurn);
+        await _sut.TakeTurnAsync(aggregateId, blackTurn);
 
         //Assert
-        var match = _repository.Get(aggregateId);
+        var match = await _repository.GetAsync(aggregateId);
         match.Version.ShouldBe(3);
     }
 }

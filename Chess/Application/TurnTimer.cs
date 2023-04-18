@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using Ardalis.GuardClauses;
 using Chess.Core;
@@ -19,7 +20,6 @@ public class TurnTimer : ITurnTimer, IDisposable
     private Guid AggregateId { get; set; }
     private Guid MemberId { get; set; }
 
-
     public TurnTimer(IMatchRepository repository)
     {
         _repository = repository;
@@ -33,7 +33,7 @@ public class TurnTimer : ITurnTimer, IDisposable
         var interval = maxTurnLengthInSeconds * MilliSecords;
 
         Timer = new(maxTurnLengthInSeconds) { Interval = interval };
-        Timer.Elapsed += TurnEnded;
+        Timer.Elapsed += TurnEndedAsync;
         Timer.AutoReset = false;
         Timer.Enabled = true;
     }
@@ -59,28 +59,28 @@ public class TurnTimer : ITurnTimer, IDisposable
         }
     }
 
-    private DomainEvent? SaveEvent(IMatch match)
+    private async Task<DomainEvent?> SaveEventAsync(IMatch match)
     {
         var @event = match.Events.LastOrDefault();
 
         if (@event != null)
         {
-            _repository.Save(match.Id, @event);
+            await _repository.SaveAsync(match.Id, @event);
         }
 
         return @event;
     }
 
-    private void TurnEnded(object source, ElapsedEventArgs args)
+    private async void TurnEndedAsync(object? source, ElapsedEventArgs? args)
     {
         var id = Guard.Against.Null<Guid>(AggregateId, nameof(AggregateId));
         var memberId = Guard.Against.Null<Guid>(MemberId, nameof(MemberId));
-        var match = _repository.Get(id);
-        var command = new ForfeitCommand() { MemberId = memberId };
+        var match = await _repository.GetAsync(id);
+        var command = new Forfeit() { MemberId = memberId };
 
         match.Forfeit(command);
 
-        SaveEvent(match);
+        await SaveEventAsync(match);
 
         Timer.Stop();
     }

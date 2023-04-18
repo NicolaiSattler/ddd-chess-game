@@ -17,30 +17,15 @@ namespace Chess.Domain.Aggregates;
 
 public class Match : AggregateRoot, IMatch
 {
-    private List<Turn> Turns { get; set; }
+    private List<Turn> Turns { get; set; } = new();
 
-    public MatchOptions Options { get; private set; }
-    public Player White { get; private set; }
-    public Player Black { get; private set; }
-    public List<Piece> Pieces { get; private set; }
+    public MatchOptions Options { get; private set; } = new();
+    public Player White { get; private set; } = new();
+    public Player Black { get; private set; } = new();
+    public List<Piece> Pieces { get; private set; } = new();
 
-    public Match(Guid id) : base(id)
-    {
-        Pieces = new();
-        Turns = new();
-        White = new();
-        Black = new();
-        Options = new();
-    }
-
-    public Match(Guid id, IEnumerable<DomainEvent?>? events) : base(id, events)
-    {
-        Pieces = new();
-        Turns = new();
-        White = new();
-        Black = new();
-        Options = new();
-    }
+    public Match(Guid id) : base(id) { }
+    public Match(Guid id, IEnumerable<DomainEvent?>? events) : base(id, events) { }
 
 
     protected override void When(DomainEvent? domainEvent)
@@ -54,7 +39,7 @@ public class Match : AggregateRoot, IMatch
     {
         Guard.Against.InvalidInput(command,
                                    nameof(command),
-                                   (cmd) => cmd.MemberOneId == cmd.MemberTwoId,
+                                   (cmd) => cmd.MemberOneId != cmd.MemberTwoId,
                                    Constants.InvalidStartMatchError);
 
         var colorPicker = new Random(1);
@@ -110,9 +95,9 @@ public class Match : AggregateRoot, IMatch
         return new() { Violations = violations };
     }
 
-    public void Forfeit(ForfeitCommand command)
+    public void Forfeit(Forfeit command)
     {
-        Guard.Against.Null<ForfeitCommand>(command, nameof(command));
+        Guard.Against.Null<Forfeit>(command, nameof(command));
 
         var matchResult = command.MemberId == White.MemberId
                         ? MatchResult.WhiteForfeit
