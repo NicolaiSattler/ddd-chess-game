@@ -1,40 +1,57 @@
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Ardalis.GuardClauses;
 using Chess.Core;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
+using Chess.Domain.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Chess.Application.Models;
 
-//TODO: Unit tests
-public class TurnTimer : ITurnTimer, IDisposable
+public class TurnTimer : ITurnTimer
 {
-    private const int MilliSecords = 1000;
-
     private readonly IMatchRepository _repository;
+    private readonly IOptions<MatchOptions> _options;
     private bool _disposing;
 
-    private Timer Timer { get; set; } = new();
+    private System.Timers.Timer Timer { get; set; } = new();
     private Guid AggregateId { get; set; }
     private Guid MemberId { get; set; }
 
-    public TurnTimer(IMatchRepository repository)
+    public TurnTimer(IMatchRepository repository, IOptions<MatchOptions> options)
     {
         _repository = repository;
+        _options = options;
     }
 
-    public void Start(Guid aggregateId, Guid memberId, int maxTurnLengthInSeconds)
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        var maxTime = _options.Value.MaxTurnTime;
+
+        Timer = new(maxTime.Seconds) { Interval = maxTime.Milliseconds };
+        Timer.Elapsed += TurnEndedAsync;
+        Timer.AutoReset = false;
+
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        Stop();
+
+        return Task.CompletedTask;
+    }
+
+    public void Dispose() => Dispose(true);
+
+    public void Start(Guid aggregateId, Guid memberId)
     {
         AggregateId = aggregateId;
         MemberId = memberId;
 
-        var interval = maxTurnLengthInSeconds * MilliSecords;
-
-        Timer = new(maxTurnLengthInSeconds) { Interval = interval };
-        Timer.Elapsed += TurnEndedAsync;
-        Timer.AutoReset = false;
         Timer.Enabled = true;
     }
 
@@ -43,8 +60,6 @@ public class TurnTimer : ITurnTimer, IDisposable
         Timer.Stop();
         Timer.Dispose();
     }
-
-    public void Dispose() => Dispose(true);
 
     protected virtual void Dispose(bool disposing)
     {

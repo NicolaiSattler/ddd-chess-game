@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace Chess.Application;
 
-//TODO: unit test ITurnTimer
 public class ApplicationService : IApplicationService
 {
     private readonly IMatchRepository _repository;
@@ -35,7 +34,8 @@ public class ApplicationService : IApplicationService
 
     public async Task<IEnumerable<Piece>> GetPiecesAsync(Guid aggregateId)
     {
-        var match = await _repository.GetAsync(aggregateId) ?? throw new ApplicationException($"Match could not be found with id {aggregateId}");
+        var match = await _repository.GetAsync(aggregateId)
+                  ?? throw new ApplicationException($"Match could not be found with id {aggregateId}");
         throw new NotImplementedException();
     }
 
@@ -45,7 +45,8 @@ public class ApplicationService : IApplicationService
     {
         _timer.Stop();
 
-        var match = await _repository.GetAsync(aggregateId) ?? throw new ApplicationException($"Match could not be found with id {aggregateId}");
+        var match = await _repository.GetAsync(aggregateId)
+                  ?? throw new ApplicationException($"Match could not be found with id {aggregateId}");
         match.TakeTurn(command);
 
         var @event = await SaveEventAsync(match);
@@ -55,7 +56,7 @@ public class ApplicationService : IApplicationService
             var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
             var maxTurnLengthInSeconds = match.Options.MaxTurnTime.Seconds;
 
-            _timer.Start(aggregateId, playerAtTurn!.MemberId, maxTurnLengthInSeconds);
+            _timer.Start(aggregateId, playerAtTurn!.MemberId);
         }
         else if (@event is MatchEnded matchEnd)
         {
@@ -101,4 +102,3 @@ public class ApplicationService : IApplicationService
         return @event;
     }
 }
-
