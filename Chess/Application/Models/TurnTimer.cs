@@ -7,9 +7,17 @@ using Chess.Core;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
 using Chess.Domain.Configuration;
+using Chess.Infrastructure;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 namespace Chess.Application.Models;
+
+public interface ITurnTimer: IHostedService, IDisposable
+{
+    void Start(Guid aggregateId, Guid memberId);
+    void Stop();
+}
 
 public class TurnTimer : ITurnTimer
 {

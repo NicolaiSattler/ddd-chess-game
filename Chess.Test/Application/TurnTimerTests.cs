@@ -46,7 +46,7 @@ public class TurnTimerTests
         _mockedMatch.Setup(m => m.Forfeit(It.IsAny<Forfeit>()));
 
         //Act
-        _sut.Start(aggregateId, memberId, seconds);
+        _sut.Start(aggregateId, memberId);
         Thread.Sleep(1500);
 
         //Assert

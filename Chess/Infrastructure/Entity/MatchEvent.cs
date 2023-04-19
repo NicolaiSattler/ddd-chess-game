@@ -1,6 +1,6 @@
-namespace Chess.Application;
+namespace Chess.Infrastructure.Entity;
 
-public record Event
+public record MatchEvent
 {
     public Guid Id { get; init; }
     public Guid AggregateId { get; init; }

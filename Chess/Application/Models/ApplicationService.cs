@@ -1,14 +1,23 @@
-using Chess.Application.Models;
 using Chess.Core;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
+using Chess.Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Chess.Application;
+namespace Chess.Application.Models;
+
+public interface IApplicationService
+{
+    Task<Guid> StartMatchAsync(StartMatch command);
+    Task TakeTurnAsync(Guid aggregateId, TakeTurn command);
+    Task ResignAsync(Guid aggregateId, Resign command);
+    Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
+    Task DrawAsync(Guid aggregateId, Draw command);
+}
 
 public class ApplicationService : IApplicationService
 {
