@@ -4,6 +4,7 @@ using Chess.Domain.Events;
 using Chess.Infrastructure;
 using Chess.Infrastructure.Entity;
 using Chess.Infrastructure.Extensions;
+using Chess.Infrastructure.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,25 +13,19 @@ using System.Threading.Tasks;
 
 namespace Chess.Test;
 
-public class InMemoryMatchRepository : IMatchRepository
+public class InMemoryMatchRepository : IMatchEventRepository
 {
     private readonly Dictionary<Guid, List<MatchEvent>> _events = new();
 
-    public async Task<IMatch> GetAsync(Guid aggregateId)
+    public async Task<IEnumerable<MatchEvent>> GetAsync(Guid aggregateId)
     {
         if (_events.TryGetValue(aggregateId, out List<MatchEvent> aggregateEvents))
         {
-            var events = aggregateEvents.OrderBy(e => e.Version)
-                                        .Select(e => e.ToDomainEvent());
-
-            var startEvent = events.FirstOrDefault(e => e is MatchStarted) as MatchStarted;
-
-            return new Match(aggregateId, events);
+            return aggregateEvents;
         }
 
         return default;
     }
-
 
     private static MatchEvent CreateEvent(Guid aggregateId, int version, DomainEvent @event)
     {
@@ -43,10 +38,12 @@ public class InMemoryMatchRepository : IMatchRepository
             Data = JsonSerializer.Serialize(@event, @event.GetType())
         };
     }
-    public async Task SaveAsync(Guid aggregateId, DomainEvent @event)
+    public async Task AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true)
     {
         if (aggregateId == Guid.Empty) throw new ArgumentNullException(nameof(aggregateId));
         if (@event == null) throw new ArgumentNullException(nameof(@event));
+
+        await Task.CompletedTask;
 
         if (_events.ContainsKey(aggregateId))
         {

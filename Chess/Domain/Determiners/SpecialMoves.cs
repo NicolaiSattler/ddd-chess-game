@@ -23,14 +23,14 @@ public class SpecialMoves
             return false;
         }
 
-        var isWhiteMove = lastTurn.Player.Color == Color.White;
+        var isWhiteMove = lastTurn.Player!.Color == Color.White;
         var pawnWasMoved = lastTurn.PieceType == PieceType.Pawn;
 
         if (!pawnWasMoved) return false;
 
         var opponentPawnMovedTwoRanks = isWhiteMove
-            ? (lastTurn.EndPosition.Rank - lastTurn.StartPosition.Rank) > 1
-            : (lastTurn.StartPosition.Rank - lastTurn.EndPosition.Rank) > 1;
+            ? (lastTurn.EndPosition!.Rank - lastTurn.StartPosition!.Rank) > 1
+            : (lastTurn.StartPosition!.Rank - lastTurn.EndPosition!.Rank) > 1;
 
         var enPassantRankPosition = isWhiteMove
             ? lastTurn.EndPosition!.Rank - 1

@@ -1,7 +1,10 @@
 using Chess.Application;
+using Chess.Application.Models;
 using Chess.Domain.Commands;
+using Chess.Infrastructure.Repository;
 using Moq;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Chess.Test.Application;
@@ -12,16 +15,18 @@ public class ApplicationServiceTests
     private Guid WhiteId { get; }
     private Guid BlackId { get; }
     private Guid AggregateId { get; }
-    private InMemoryMatchRepository _repository;
+    private Mock<IMatchRepository> _mockedMatchRepository;
+    private InMemoryMatchRepository _eventRepository;
     private Mock<ITurnTimer> _mockedTimer;
     private ApplicationService _sut;
 
     [TestInitialize]
     public void Initialize()
     {
-        _repository = new();
+        _eventRepository = new();
         _mockedTimer = new();
-        _sut = new(_repository, _mockedTimer.Object);
+        _mockedMatchRepository = new();
+        _sut = new(_mockedMatchRepository.Object, _eventRepository, _mockedTimer.Object);
     }
 
     [TestMethod]
@@ -46,7 +51,7 @@ public class ApplicationServiceTests
         await _sut.TakeTurnAsync(aggregateId, blackTurn);
 
         //Assert
-        var match = await _repository.GetAsync(aggregateId);
-        match.Version.ShouldBe(3);
+        var result = await _eventRepository.GetAsync(aggregateId);
+        result.Max(m => m.Version).ShouldBe(3);
     }
 }

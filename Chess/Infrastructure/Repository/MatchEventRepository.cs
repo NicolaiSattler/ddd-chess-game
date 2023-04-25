@@ -1,43 +1,38 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Chess.Core;
-using Chess.Domain.Aggregates;
 using Chess.Infrastructure.Entity;
-using Chess.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Chess.Infrastructure;
+namespace Chess.Infrastructure.Repository;
 
-public interface IMatchRepository
+public interface IMatchEventRepository
 {
-    Task<IMatch> GetAsync(Guid aggregateId);
-    Task SaveAsync(Guid aggregateId, DomainEvent @event);
+    Task<IEnumerable<MatchEvent>> GetAsync(Guid aggregateId);
+    Task AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true);
 }
 
-public class MatchRepository : IMatchRepository
+public class MatchEventRepository : IMatchEventRepository
 {
-    private readonly ILogger<MatchRepository> _logger;
+    private readonly ILogger<MatchEventRepository> _logger;
     private readonly MatchDbContext _dbContext;
 
-    public MatchRepository(ILogger<MatchRepository> logger, MatchDbContext dbContext)
+    public MatchEventRepository(ILogger<MatchEventRepository> logger, MatchDbContext dbContext)
     {
         _logger = logger;
         _dbContext = dbContext;
     }
 
-    public async Task<IMatch> GetAsync(Guid aggregateId)
+    public async Task<IEnumerable<MatchEvent>> GetAsync(Guid aggregateId)
     {
         try
         {
-            var result = await _dbContext.Events!.Where(m => m.AggregateId == aggregateId)
+            return await _dbContext.Events!.Where(m => m.AggregateId == aggregateId)
                                                  .OrderBy(m => m.Version)
                                                  .ToListAsync();
-
-            var events = result.Select(m => m.ToDomainEvent());
-
-            return new Match(aggregateId, events);
         }
         catch (Exception ex)
         {
@@ -47,7 +42,7 @@ public class MatchRepository : IMatchRepository
         }
     }
 
-    public async Task SaveAsync(Guid aggregateId, DomainEvent @event)
+    public async Task AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true)
     {
         try
         {
@@ -63,7 +58,11 @@ public class MatchRepository : IMatchRepository
             };
 
             _dbContext.Events!.Add(matchEvent);
-            await _dbContext.SaveChangesAsync();
+
+            if (saveChanges)
+            {
+                await _dbContext.SaveChangesAsync();
+            }
         }
         catch (Exception ex)
         {

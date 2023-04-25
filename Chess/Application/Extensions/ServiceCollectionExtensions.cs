@@ -5,7 +5,7 @@ namespace Chess.Application.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static ServiceCollection AddApplication(this ServiceCollection collection)
+    public static IServiceCollection AddApplication(this IServiceCollection collection)
     {
         collection.AddScoped<IApplicationService, ApplicationService>();
         collection.AddHostedService<TurnTimer>();

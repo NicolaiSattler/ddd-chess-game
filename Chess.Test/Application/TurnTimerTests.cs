@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading;
-using Chess.Application;
 using Chess.Application.Models;
 using Chess.Core;
-using Chess.Domain.Aggregates;
-using Chess.Domain.Commands;
+using Chess.Domain.Configuration;
 using Chess.Domain.Events;
+using Chess.Infrastructure.Entity;
+using Chess.Infrastructure.Repository;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Chess.Tests.Application;
@@ -15,15 +17,17 @@ namespace Chess.Tests.Application;
 public class TurnTimerTests
 {
     private TurnTimer _sut;
-    private Mock<IMatchRepository> _mockedRepository;
-    private Mock<IMatch> _mockedMatch;
+    private Mock<IMatchEventRepository> _mockedRepository;
+    private Mock<IEnumerable<MatchEvent>> _mockedEvents;
 
     [TestInitialize]
     public void Initialize()
     {
-        _mockedRepository = new Mock<IMatchRepository>();
-        _mockedMatch = new Mock<IMatch>();
-        _sut = new TurnTimer(_mockedRepository.Object);
+        var options = Options.Create(new MatchOptions() { MaxTurnTime = new(0, 0, 1) });
+
+        _mockedRepository = new();
+        _mockedEvents = new();
+        _sut = new TurnTimer(_mockedRepository.Object, options);
     }
 
     [TestMethod]
@@ -33,27 +37,30 @@ public class TurnTimerTests
         var aggregateId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
         var otherMemberId = Guid.NewGuid();
-        var seconds = 1;
-        var events = new List<DomainEvent>
+        var events = new List<MatchEvent>
         {
-            new MatchStarted { WhiteMemberId = memberId, BlackMemberId = otherMemberId }
+            new()
+            {
+                Id = Guid.NewGuid(),
+                AggregateId = aggregateId,
+                Type = nameof(MatchStarted),
+                Version = 1,
+                Data = JsonSerializer.Serialize(new MatchStarted { WhiteMemberId = memberId, BlackMemberId = otherMemberId })
+            }
         };
 
-        _mockedRepository.Setup(m => m.GetAsync(aggregateId)).ReturnsAsync(_mockedMatch.Object);
-        _mockedRepository.Setup(m => m.SaveAsync(aggregateId, It.IsAny<DomainEvent>()));
-
-        _mockedMatch.SetupGet(m => m.Events).Returns(events);
-        _mockedMatch.Setup(m => m.Forfeit(It.IsAny<Forfeit>()));
+        _mockedRepository.Setup(m => m.GetAsync(aggregateId)).ReturnsAsync(events);
+        _mockedRepository.Setup(m => m.AddAsync(aggregateId, It.IsAny<DomainEvent>(), It.IsAny<bool>()));
 
         //Act
+        _sut.StartAsync(CancellationToken.None);
         _sut.Start(aggregateId, memberId);
+
         Thread.Sleep(1500);
 
         //Assert
         _mockedRepository.Verify(m => m.GetAsync(It.IsAny<Guid>()), Times.Once);
-        _mockedRepository.Verify(m => m.SaveAsync(It.IsAny<Guid>(), It.IsAny<DomainEvent>()), Times.Once);
-
-        _mockedMatch.Verify(m => m.Forfeit(It.IsAny<Forfeit>()), Times.Once);
+        _mockedRepository.Verify(m => m.AddAsync(It.IsAny<Guid>(), It.IsAny<MatchEnded>(), It.IsAny<bool>()), Times.Once);
     }
 
 
@@ -63,18 +70,15 @@ public class TurnTimerTests
         //Arrange
         var aggregateId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var seconds = 1;
 
         //Act
-        _sut.Start(aggregateId, memberId, seconds);
+        _sut.Start(aggregateId, memberId);
         Thread.Sleep(500);
-        _sut.Stop();
+        _sut.StopAsync(CancellationToken.None);
 
         //Assert
         _mockedRepository.Verify(m => m.GetAsync(It.IsAny<Guid>()), Times.Never);
-        _mockedRepository.Verify(m => m.SaveAsync(It.IsAny<Guid>(), It.IsAny<DomainEvent>()), Times.Never);
-
-        _mockedMatch.Verify(m => m.Forfeit(It.IsAny<Forfeit>()), Times.Never);
+        _mockedRepository.Verify(m => m.AddAsync(It.IsAny<Guid>(), It.IsAny<MatchEnded>(), It.IsAny<bool>()), Times.Never);
     }
 
     [TestCleanup]

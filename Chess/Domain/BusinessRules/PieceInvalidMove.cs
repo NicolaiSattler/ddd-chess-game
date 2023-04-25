@@ -57,7 +57,7 @@ public class PieceInvalidMove : BusinessRule
     {
         //Move results in check.
         var opponentPieces = _pieces?.Where(p => p.Color != king?.Color);
-        var positionIsSafe = Board.GetPiecesThatCanReachPosition(_command.EndPosition, _pieces, opponentPieces) == null;
+        var positionIsSafe = Board.GetPiecesThatCanReachPosition(_command.EndPosition, _pieces!, opponentPieces!) == null;
 
         return positionIsSafe;
     }

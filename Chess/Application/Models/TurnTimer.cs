@@ -7,7 +7,8 @@ using Chess.Core;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
 using Chess.Domain.Configuration;
-using Chess.Infrastructure;
+using Chess.Infrastructure.Extensions;
+using Chess.Infrastructure.Repository;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
@@ -21,7 +22,7 @@ public interface ITurnTimer: IHostedService, IDisposable
 
 public class TurnTimer : ITurnTimer
 {
-    private readonly IMatchRepository _repository;
+    private readonly IMatchEventRepository _repository;
     private readonly IOptions<MatchOptions> _options;
     private bool _disposing;
 
@@ -29,7 +30,7 @@ public class TurnTimer : ITurnTimer
     private Guid AggregateId { get; set; }
     private Guid MemberId { get; set; }
 
-    public TurnTimer(IMatchRepository repository, IOptions<MatchOptions> options)
+    public TurnTimer(IMatchEventRepository repository, IOptions<MatchOptions> options)
     {
         _repository = repository;
         _options = options;
@@ -38,8 +39,9 @@ public class TurnTimer : ITurnTimer
     public Task StartAsync(CancellationToken cancellationToken)
     {
         var maxTime = _options.Value.MaxTurnTime;
+        var milliseconds = 1000;
 
-        Timer = new(maxTime.Seconds) { Interval = maxTime.Milliseconds };
+        Timer = new(maxTime.Seconds) { Interval = maxTime.Seconds * milliseconds };
         Timer.Elapsed += TurnEndedAsync;
         Timer.AutoReset = false;
 
@@ -88,7 +90,7 @@ public class TurnTimer : ITurnTimer
 
         if (@event != null)
         {
-            await _repository.SaveAsync(match.Id, @event);
+            await _repository.AddAsync(match.Id, @event);
         }
 
         return @event;
@@ -98,7 +100,9 @@ public class TurnTimer : ITurnTimer
     {
         var id = Guard.Against.Null<Guid>(AggregateId, nameof(AggregateId));
         var memberId = Guard.Against.Null<Guid>(MemberId, nameof(MemberId));
-        var match = await _repository.GetAsync(id);
+        var result = await _repository.GetAsync(id);
+        var events = result.Select(e => e.ToDomainEvent());
+        var match = new Match(id, events);
         var command = new Forfeit() { MemberId = memberId };
 
         match.Forfeit(command);
