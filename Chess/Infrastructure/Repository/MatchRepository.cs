@@ -10,7 +10,7 @@ namespace Chess.Infrastructure.Repository;
 public interface IMatchRepository
 {
     Task<Match?> GetAsync(Guid aggregateId);
-    Task AddAsync(MatchStarted @event, bool saveChanges);
+    Task<Match?> AddAsync(MatchStarted @event, bool saveChanges);
 }
 
 public class MatchRepository : IMatchRepository
@@ -38,7 +38,7 @@ public class MatchRepository : IMatchRepository
         }
     }
 
-    public async Task AddAsync(MatchStarted @event, bool saveChanges = true)
+    public async Task<Match?> AddAsync(MatchStarted @event, bool saveChanges = true)
     {
         try
         {
@@ -57,6 +57,8 @@ public class MatchRepository : IMatchRepository
             {
                 await _context.SaveChangesAsync();
             }
+
+            return match;
         }
         catch (Exception ex)
         {
