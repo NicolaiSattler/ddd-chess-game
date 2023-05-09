@@ -8,16 +8,22 @@ public class MatchEntityTypeConfiguration : IEntityTypeConfiguration<Match>
 {
     public void Configure(EntityTypeBuilder<Match> builder)
     {
-        builder.HasKey(m => m.AggregateId);
+       builder.HasKey(m => m.AggregateId);
 
-        builder.Property(m => m.BlackPlayerId)
-               .IsRequired();
+       builder.Property(m => m.BlackPlayerId)
+              .IsRequired();
 
-        builder.Property(m => m.WhitePlayerId)
-               .IsRequired();
+       builder.Property(m => m.WhitePlayerId)
+              .IsRequired();
 
-        builder.Property(m => m.StartTime)
-               .IsRequired();
+       builder.Property(m => m.StartTime)
+              .IsRequired();
+
+       builder.HasMany(m => m.Events)
+              .WithOne(m => m.Match)
+              .HasForeignKey(m => m.AggregateId)
+              .HasConstraintName("FK_Match_MatchEvent_AggregateId")
+              .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

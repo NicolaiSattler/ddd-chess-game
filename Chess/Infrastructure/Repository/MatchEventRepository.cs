@@ -12,7 +12,7 @@ namespace Chess.Infrastructure.Repository;
 public interface IMatchEventRepository
 {
     Task<IEnumerable<MatchEvent>> GetAsync(Guid aggregateId);
-    Task AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true);
+    Task<MatchEvent> AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true);
 }
 
 public class MatchEventRepository : IMatchEventRepository
@@ -31,8 +31,8 @@ public class MatchEventRepository : IMatchEventRepository
         try
         {
             return await _dbContext.Events!.Where(m => m.AggregateId == aggregateId)
-                                                 .OrderBy(m => m.Version)
-                                                 .ToListAsync();
+                                           .OrderBy(m => m.Version)
+                                           .ToListAsync();
         }
         catch (Exception ex)
         {
@@ -42,12 +42,18 @@ public class MatchEventRepository : IMatchEventRepository
         }
     }
 
-    public async Task AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true)
+    public async Task<MatchEvent> AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true)
     {
         try
         {
-            var latestVersion = await _dbContext.Events!.Where(m => m.AggregateId == aggregateId)
+            var latestVersion = 0;
+
+            if (_dbContext.Events!.Any())
+            {
+                latestVersion = await _dbContext.Events!.Where(m => m.AggregateId == aggregateId)
                                                         .MaxAsync(m => m.Version);
+            }
+
             var matchEvent = new MatchEvent()
             {
                 Id = Guid.NewGuid(),
@@ -63,6 +69,8 @@ public class MatchEventRepository : IMatchEventRepository
             {
                 await _dbContext.SaveChangesAsync();
             }
+
+            return matchEvent;
         }
         catch (Exception ex)
         {

@@ -7,4 +7,6 @@ public record MatchEvent
     public int Version { get; init; }
     public string Type { get; init; } = string.Empty;
     public string Data { get; init; } = string.Empty;
+
+    public Match? Match { get; set; }
 }

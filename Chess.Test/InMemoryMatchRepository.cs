@@ -38,7 +38,7 @@ public class InMemoryMatchRepository : IMatchEventRepository
             Data = JsonSerializer.Serialize(@event, @event.GetType())
         };
     }
-    public async Task AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true)
+    public async Task<MatchEvent> AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true)
     {
         if (aggregateId == Guid.Empty) throw new ArgumentNullException(nameof(aggregateId));
         if (@event == null) throw new ArgumentNullException(nameof(@event));
@@ -48,11 +48,17 @@ public class InMemoryMatchRepository : IMatchEventRepository
         if (_events.ContainsKey(aggregateId))
         {
             var newVersion = _events[aggregateId].Max(e => e.Version) + 1;
-            _events[aggregateId].Add(CreateEvent(aggregateId, newVersion, @event));
+            var result = CreateEvent(aggregateId, newVersion, @event);
+            _events[aggregateId].Add(result);
+
+            return result;
         }
-        else _events[aggregateId] = new List<MatchEvent>
+        else
         {
-            CreateEvent(aggregateId, 1, @event)
-        };
+            var result = CreateEvent(aggregateId, 1, @event);
+            _events[aggregateId] = new List<MatchEvent> { result };
+
+            return result;
+        }
     }
 }

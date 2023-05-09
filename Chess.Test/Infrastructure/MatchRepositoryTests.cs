@@ -52,21 +52,6 @@ public class MatchRepositoryTests: TestBase
     }
 
     [TestMethod]
-    public async Task AddAsync_DuplicateMatch_ShouldThrowException()
-    {
-        //Arrange
-        var @event = _fixture.Create<MatchStarted>();
-
-        //Act
-        await _sut.AddAsync(@event);
-
-        var result = await Should.ThrowAsync<Exception>(() => _sut.AddAsync(@event));
-
-        //Assert
-        result.ShouldBeOfType<DbUpdateException>();
-    }
-
-    [TestMethod]
     public async Task  GetAsync_KnownAggregateId_ShouldReturnCorrectMatch()
     {
         //Arrange

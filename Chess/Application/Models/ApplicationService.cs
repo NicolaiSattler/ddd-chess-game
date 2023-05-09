@@ -3,7 +3,6 @@ using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
-using Chess.Infrastructure;
 using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
 using System.Collections.Generic;
