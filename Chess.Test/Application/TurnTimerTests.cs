@@ -8,6 +8,8 @@ using Chess.Domain.Configuration;
 using Chess.Domain.Events;
 using Chess.Infrastructure.Entity;
 using Chess.Infrastructure.Repository;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -19,6 +21,7 @@ public class TurnTimerTests
     private TurnTimer _sut;
     private Mock<IMatchEventRepository> _mockedRepository;
     private Mock<IEnumerable<MatchEvent>> _mockedEvents;
+    private Mock<IServiceProvider> _mockedServiceProvider;
 
     [TestInitialize]
     public void Initialize()
@@ -27,7 +30,20 @@ public class TurnTimerTests
 
         _mockedRepository = new();
         _mockedEvents = new();
-        _sut = new TurnTimer(_mockedRepository.Object, options);
+
+        var mockedServiceScope = new Mock<IServiceScope>();
+        mockedServiceScope.Setup(x => x.ServiceProvider.GetService(typeof(IMatchEventRepository)))
+                          .Returns(_mockedRepository.Object);
+
+        var mockedScopeFactory = new Mock<IServiceScopeFactory>();
+        mockedScopeFactory.Setup(x => x.CreateScope())
+                          .Returns(mockedServiceScope.Object);
+
+        _mockedServiceProvider = new();
+        _mockedServiceProvider.Setup(m => m.GetService(typeof(IServiceScopeFactory)))
+                              .Returns(mockedScopeFactory.Object);
+
+        _sut = new TurnTimer(Mock.Of<ILogger<TurnTimer>>(), _mockedServiceProvider.Object, options);
     }
 
     [TestMethod]

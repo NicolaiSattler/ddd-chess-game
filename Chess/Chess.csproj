@@ -16,5 +16,9 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
   </ItemGroup>
 
+  <Target Name="Generate SQL Script" AfterTargets="Build" Condition="!Exists('SQL/ChessDb.sql')">
+    <Message Text="Generating Sqlite script..."/>
+    <Exec Command="dotnet ef migrations script -c MatchDbContext -o 'SQL/ChessDb.sql' --no-build" />
+  </Target>
 
 </Project>

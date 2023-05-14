@@ -9,7 +9,9 @@ using Chess.Domain.Commands;
 using Chess.Domain.Configuration;
 using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Chess.Application.Models;
@@ -22,7 +24,8 @@ public interface ITurnTimer: IHostedService, IDisposable
 
 public class TurnTimer : ITurnTimer
 {
-    private readonly IMatchEventRepository _repository;
+    private readonly ILogger<TurnTimer> _logger;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IOptions<MatchOptions> _options;
     private bool _disposing;
 
@@ -30,9 +33,10 @@ public class TurnTimer : ITurnTimer
     private Guid AggregateId { get; set; }
     private Guid MemberId { get; set; }
 
-    public TurnTimer(IMatchEventRepository repository, IOptions<MatchOptions> options)
+    public TurnTimer(ILogger<TurnTimer> logger, IServiceProvider serviceProvider, IOptions<MatchOptions> options)
     {
-        _repository = repository;
+        _logger = logger;
+        _serviceProvider = serviceProvider;
         _options = options;
     }
 
@@ -41,7 +45,7 @@ public class TurnTimer : ITurnTimer
         var maxTime = _options.Value.MaxTurnTime;
         var milliseconds = 1000;
 
-        Timer = new(maxTime.Seconds) { Interval = maxTime.Seconds * milliseconds };
+        Timer = new(maxTime.TotalSeconds) { Interval = maxTime.TotalSeconds * milliseconds };
         Timer.Elapsed += TurnEndedAsync;
         Timer.AutoReset = false;
 
@@ -84,30 +88,23 @@ public class TurnTimer : ITurnTimer
         }
     }
 
-    private async Task<DomainEvent?> SaveEventAsync(IMatch match)
-    {
-        var @event = match.Events.LastOrDefault();
-
-        if (@event != null)
-        {
-            await _repository.AddAsync(match.Id, @event);
-        }
-
-        return @event;
-    }
-
     private async void TurnEndedAsync(object? source, ElapsedEventArgs? args)
     {
         var id = Guard.Against.Null<Guid>(AggregateId, nameof(AggregateId));
         var memberId = Guard.Against.Null<Guid>(MemberId, nameof(MemberId));
-        var result = await _repository.GetAsync(id);
+
+        using var scope = _serviceProvider.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IMatchEventRepository>();
+
+        var result = await repository.GetAsync(id);
         var events = result.Select(e => e.ToDomainEvent());
         var match = new Match(id, events);
         var command = new Forfeit() { MemberId = memberId };
 
         match.Forfeit(command);
 
-        await SaveEventAsync(match);
+        var @event = match.Events.Last();
+        await repository.AddAsync(match.Id, @event);
 
         Timer.Stop();
     }

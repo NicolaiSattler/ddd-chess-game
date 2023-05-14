@@ -18,12 +18,6 @@ public class MatchEntityTypeConfiguration : IEntityTypeConfiguration<Match>
 
        builder.Property(m => m.StartTime)
               .IsRequired();
-
-       builder.HasMany(m => m.Events)
-              .WithOne(m => m.Match)
-              .HasForeignKey(m => m.AggregateId)
-              .HasConstraintName("FK_Match_MatchEvent_AggregateId")
-              .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

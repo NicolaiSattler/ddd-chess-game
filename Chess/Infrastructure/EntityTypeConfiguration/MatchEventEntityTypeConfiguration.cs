@@ -8,17 +8,20 @@ public class MatchEventEntityTypeConfiguration : IEntityTypeConfiguration<MatchE
 {
     public void Configure(EntityTypeBuilder<MatchEvent> builder)
     {
-        builder.HasKey(m => m.Id);
+       builder.HasKey(m => m.Id);
 
-        builder.Property(m => m.AggregateId)
-               .IsRequired();
-        builder.Property(m => m.Data)
-               .IsRequired();
-        builder.Property(m => m.Type)
-               .IsRequired();
-        builder.Property(m => m.Version)
-               .IsRequired();
+       builder.Property(m => m.AggregateId)
+              .IsRequired();
+       builder.Property(m => m.Data)
+              .IsRequired();
+       builder.Property(m => m.Type)
+              .IsRequired();
+       builder.Property(m => m.Version)
+              .IsRequired();
 
-        builder.HasIndex(m => m.AggregateId, "AggregateId_Index");
+       builder.HasOne(m => m.Match)
+              .WithMany(m => m.Events)
+              .HasForeignKey("FK_MatchEvent_AggregateId")
+              .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -10,7 +10,7 @@ namespace Chess.Infrastructure.Repository;
 public interface IMatchRepository
 {
     Task<Match?> GetAsync(Guid aggregateId);
-    Task<Match?> AddAsync(MatchStarted @event, bool saveChanges);
+    Task<Match?> AddAsync(MatchStarted @event, bool saveChanges = true);
 }
 
 public class MatchRepository : IMatchRepository
@@ -44,7 +44,7 @@ public class MatchRepository : IMatchRepository
         {
             var match = new Match
             {
-                AggregateId = Guid.NewGuid(),
+                AggregateId = @event.AggregateId,
                 BlackPlayerId = @event.BlackMemberId,
                 WhitePlayerId = @event.WhiteMemberId,
                 StartTime = @event.StartTime,

@@ -24,6 +24,7 @@ public class Match : AggregateRoot, IMatch
     public Player Black { get; private set; } = new();
     public List<Piece> Pieces { get; private set; } = new();
 
+    public Match(): base(Guid.Empty) {}
     public Match(Guid id) : base(id) { }
     public Match(Guid id, IEnumerable<DomainEvent?>? events) : base(id, events) { }
 
@@ -48,6 +49,7 @@ public class Match : AggregateRoot, IMatch
         var blackId = !memberOneIsWhite ? command.MemberOneId : command.MemberTwoId;
         var @event = new MatchStarted()
         {
+            AggregateId = command.AggregateId,
             WhiteMemberId = whiteId,
             BlackMemberId = blackId,
             StartTime = DateTime.UtcNow
