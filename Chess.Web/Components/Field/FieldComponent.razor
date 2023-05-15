@@ -1,4 +1,10 @@
-<div class=@HtmlClasses>
+<div class="@BgClasses @DropClasses"
+     ondragover="event.preventDefault()"
+     ondragstart="event.dataTransfer.setData('', event.target.id)"
+     @ondrop="HandleDropAsync"
+     @ondragenter="HandleDragEnter"
+     @ondragleave="HandleDragLeave">
+
     @if(@ShowRank)
     {
         <div class="rankText m-1">@Rank</div>

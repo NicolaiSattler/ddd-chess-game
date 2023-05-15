@@ -3,6 +3,8 @@ using Chess.Domain.ValueObjects;
 using Chess.Web.Pages.Test;
 using Microsoft.AspNetCore.Components;
 
+using Board = Chess.Web.Pages.Match.BoardPage;
+
 namespace Chess.Web.Components.Piece;
 
 public partial class PieceComponent
@@ -35,6 +37,12 @@ public partial class PieceComponent
         PieceType.Pawn => "pawn",
         _ => throw new IndexOutOfRangeException(Type.ToString())
     };
+
+    private void HandleDragStart(Guid pieceId)
+    {
+        if (Parent != null)
+            Parent.ActivePieceId = pieceId;
+    }
 
     protected override void OnParametersSet()
     {

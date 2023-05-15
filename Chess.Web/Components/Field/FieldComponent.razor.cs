@@ -2,6 +2,7 @@ using Chess.Web.Pages.Test;
 using Microsoft.AspNetCore.Components;
 
 using File = Chess.Domain.ValueObjects.File;
+using Board = Chess.Web.Pages.Match.BoardPage;
 
 namespace Chess.Web.Components.Field;
 
@@ -10,7 +11,8 @@ public partial class FieldComponent
     private const string DarkFieldCssClass = "dark-field field";
     private const string LightFieldCssClass = "light-field field";
 
-    private string? HtmlClasses { get; set; }
+    private string? BgClasses { get; set; }
+    private string? DropClasses { get; set; }
     private bool ShowRank => this.File == File.A;
     private bool ShowFile => this.Rank == 8;
 
@@ -28,7 +30,7 @@ public partial class FieldComponent
 
     protected override void OnInitialized()
     {
-        HtmlClasses = DetermineBackgroundColour();
+        BgClasses = DetermineBackgroundColour();
 
         base.OnInitialized();
     }
@@ -42,5 +44,24 @@ public partial class FieldComponent
                     ? LightFieldCssClass : DarkFieldCssClass
                : (file % 2) == 1
                     ? DarkFieldCssClass : LightFieldCssClass;
+    }
+
+    private void HandleDragEnter()
+    {
+        //TODO: Highlight Field
+    }
+
+    private void HandleDragLeave()
+    {
+        //TODO: Reset css
+    }
+
+    private async Task HandleDropAsync()
+    {
+        if (Parent != null)
+        {
+            await Parent.UpdateBoardAsync(Rank, File);
+            Parent.ActivePieceId = Guid.Empty;
+        }
     }
 }
