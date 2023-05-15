@@ -15,7 +15,7 @@
 }
 
 .black-queen {
-    background: url('./svg/pieces-sprite.svg#white-king');
+    background: url('./svg/pieces-sprite.svg#black-queen');
 }
 
 .white-bishop {
