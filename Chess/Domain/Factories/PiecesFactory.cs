@@ -11,8 +11,6 @@ public class PiecesFactory
         { 1, PieceType.Rook },
         { 2, PieceType.Knight },
         { 3, PieceType.Bishop },
-        { 4, PieceType.Queen },
-        { 5, PieceType.King },
         { 6, PieceType.Bishop },
         { 7, PieceType.Knight },
         { 8, PieceType.Rook },
@@ -37,10 +35,19 @@ public class PiecesFactory
 
         for (int i = 1; i < 9; i++)
         {
-            var pieceType = StartPositions[i];
             result.Add(CreatePiece(PieceType.Pawn, new Square((File)i, pawnRow), Guid.NewGuid(), color));
-            result.Add(CreatePiece(pieceType, new Square((File)i, startRow), Guid.NewGuid(), color));
+
+            if (StartPositions.ContainsKey(i))
+            {
+                var pieceType = StartPositions[i];
+                result.Add(CreatePiece(pieceType, new Square((File)i, startRow), Guid.NewGuid(), color));
+            }
         }
+
+        result.Add(CreatePiece(PieceType.Queen, new Square(File.E, 8), Guid.NewGuid(), Color.Black));
+        result.Add(CreatePiece(PieceType.King, new Square(File.D, 8), Guid.NewGuid(), Color.Black));
+        result.Add(CreatePiece(PieceType.Queen, new Square(File.E, 1), Guid.NewGuid(), Color.White));
+        result.Add(CreatePiece(PieceType.King, new Square(File.D, 1), Guid.NewGuid(), Color.White));
 
         return result;
     }
