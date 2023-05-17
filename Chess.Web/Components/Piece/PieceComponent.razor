@@ -1,4 +1,5 @@
 <div class=@HtmlClasses
      draggable="true"
-     @ondragstart="@(() => HandleDragStarted(PieceId))">
+     @ondragstart="@(() => HandleDragStarted(PieceId))"
+     @ondragend="@(() => HandleDragEnded())">
 </div>

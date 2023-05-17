@@ -2,6 +2,7 @@ using Chess.Application.Models;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
+using Chess.Web.Components.Field;
 using Microsoft.AspNetCore.Components;
 
 using File = Chess.Domain.ValueObjects.File;
@@ -16,13 +17,32 @@ public partial class BoardPage
     public IApplicationService? ApplicationService { get; set; }
     public IEnumerable<Piece> Pieces { get; private set; } = Enumerable.Empty<Piece>();
     public Guid ActivePieceId { get; set; }
+    public List<FieldComponent> Fields { get; } = new();
+
+    private void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
+    {
+        foreach (var item in fields)
+            item.Highlight(highlighted);
+    }
 
     public Piece? SelectPiece(int rank, int file)
         => Pieces?.FirstOrDefault(p => p.Position == new Square((File)file, rank));
 
-    public IEnumerable<Square> ShowAvailableMoves(Guid pieceId)
+    public void HideAvailableMoves() => SetFieldHighlight(Fields, false);
+    public void ShowAvailableMoves(Guid pieceId)
     {
-        throw new NotImplementedException();
+        SetFieldHighlight(Fields, false);
+
+        var piece = Pieces.First(p => p.Id == pieceId);
+        var moves = piece.GetAttackRange();
+        var fields = Fields.Where(f => moves.Any(m => m.File == f.File && m.Rank == f.Rank));
+
+        SetFieldHighlight(fields, true);
+    }
+
+    public void AddChild(FieldComponent fieldComponent)
+    {
+        Fields.Add(fieldComponent);
     }
 
     public async Task UpdateBoardAsync(int rank, File file)
@@ -46,4 +66,5 @@ public partial class BoardPage
             Pieces = await ApplicationService.GetPiecesAsync(aggregateId);
         }
     }
+
 }

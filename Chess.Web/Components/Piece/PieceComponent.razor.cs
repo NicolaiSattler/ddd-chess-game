@@ -1,6 +1,5 @@
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
-using Chess.Web.Pages.Test;
 using Microsoft.AspNetCore.Components;
 
 using Board = Chess.Web.Pages.Match.BoardPage;
@@ -23,10 +22,9 @@ public partial class PieceComponent
     [CascadingParameter]
     private Board? Parent { get; set;}
 
-    private void HandleDragStarted(Guid pieceId)
-    {
-        Parent?.ShowAvailableMoves(pieceId);
-    }
+    private void HandleDragStarted(Guid pieceId) => Parent?.ShowAvailableMoves(pieceId);
+    private void HandleDragEnded() => Parent?.HideAvailableMoves();
+
     private string GetPieceClass() => Type switch
     {
         PieceType.King => "king",

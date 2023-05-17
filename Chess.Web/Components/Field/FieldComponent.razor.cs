@@ -1,4 +1,3 @@
-using Chess.Web.Pages.Test;
 using Microsoft.AspNetCore.Components;
 
 using File = Chess.Domain.ValueObjects.File;
@@ -10,6 +9,7 @@ public partial class FieldComponent
 {
     private const string DarkFieldCssClass = "dark-field field";
     private const string LightFieldCssClass = "light-field field";
+    private const string HighlightCssClass = "highlight";
 
     private string? BgClasses { get; set; }
     private string? DropClasses { get; set; }
@@ -27,13 +27,6 @@ public partial class FieldComponent
 
     [Parameter]
     public RenderFragment? ChildContent { get; set;}
-
-    protected override void OnInitialized()
-    {
-        BgClasses = DetermineBackgroundColour();
-
-        base.OnInitialized();
-    }
 
     private string DetermineBackgroundColour()
     {
@@ -62,6 +55,29 @@ public partial class FieldComponent
         {
             await Parent.UpdateBoardAsync(Rank, File);
             Parent.ActivePieceId = Guid.Empty;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        BgClasses = DetermineBackgroundColour();
+
+        Parent?.AddChild(this);
+
+        base.OnInitialized();
+    }
+
+    public void Highlight(bool enabled)
+    {
+        if (enabled && string.IsNullOrEmpty(DropClasses))
+        {
+            DropClasses = HighlightCssClass;
+            StateHasChanged();
+        }
+        else if (!enabled && !string.IsNullOrEmpty(DropClasses))
+        {
+            DropClasses = string.Empty;
+            StateHasChanged();
         }
     }
 }
