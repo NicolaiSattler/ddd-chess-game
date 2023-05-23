@@ -35,6 +35,8 @@ public class Board
 
     public static bool IsStalemate(Color color, IEnumerable<Piece> pieces)
     {
+        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+
         var king = pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King) ?? throw new InvalidOperationException("King cannot be found!");
         var atTurnPieces = pieces.Where(p => p.Color == color) ?? Enumerable.Empty<Piece>();
         var opponentPieces = pieces.Where(p => p.Color != color) ?? Enumerable.Empty<Piece>();
@@ -61,7 +63,9 @@ public class Board
 
     public static IEnumerable<Piece> GetPiecesThatCanReachPosition(Square position, IEnumerable<Piece> pieces, IEnumerable<Piece> opponentPieces)
     {
-        Guard.Against.Null<IEnumerable<Piece>>(opponentPieces);
+        Guard.Against.Null<Square>(position, nameof(position));
+        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null<IEnumerable<Piece>>(opponentPieces, nameof(opponentPieces));
 
         var result = new List<Piece>();
 
@@ -87,6 +91,9 @@ public class Board
 
     public static bool PieceIsCaptured(TurnTaken @event, IEnumerable<Piece> pieces)
     {
+        Guard.Against.Null<TurnTaken>(@event, nameof(@event));
+        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+
         var movingPiece = pieces.FirstOrDefault(p => p.Position == @event.StartPosition)
                         ?? throw new InvalidOperationException("Piece does not exists!");
 
@@ -95,10 +102,22 @@ public class Board
 
     public static bool DirectionIsObstructed(IEnumerable<Piece> pieces, Square start, Square end)
     {
-        var piece = pieces.FirstOrDefault(p => p.Position == start && p.Type == PieceType.Pawn);
+        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null<Square>(start, nameof(start));
+        Guard.Against.Null<Square>(end, nameof(end));
 
-        return piece is Pawn ? DirectionIsObstructedForPawn(pieces, piece, end)
-                             : DirectionIsObstructed(pieces, GetMoveDirection(start, end), start, end);
+        var piece = pieces.FirstOrDefault(p => p.Position == start);
+        var direction = GetMoveDirection(start, end);
+
+        if (piece == null) return false;
+
+        return piece switch
+        {
+            Pawn => DirectionIsObstructedForPawn(pieces, piece, end),
+            Knight => DirectionIsObstructedForKnight(pieces, piece, end),
+            _ => DirectionIsObstructed(pieces, direction, start, end)
+                 || pieces.Any(p => p.Position == end && p.Color == piece.Color)
+        };
     }
 
     private static IEnumerable<Piece> GetPiecesThatReachKing(King king, IEnumerable<Piece> pieces)
@@ -204,6 +223,8 @@ public class Board
         return false;
     }
 
+    private static bool DirectionIsObstructedForKnight(IEnumerable<Piece> pieces, Piece piece, Square end) => pieces.Any(p => p.Color == piece.Color && p.Position == end);
+
     private static bool DirectionIsObstructed(IEnumerable<Piece> pieces, DirectionType direction, Square start, Square end) => (direction) switch
     {
         DirectionType.Left => pieces.Any(p => (int)p.Position.File < (int)start.File && (int)p.Position.File > (int)end.File && IsSameRank(start, p.Position)),
@@ -242,9 +263,11 @@ public class Board
     {
         var y = start.File - 1;
 
-        for (var x = end.Rank - 1; x > start.Rank; x--)
+        for (var x = start.Rank - 1; x > end.Rank; x--)
         {
-            if (pieces.Any(p => p.Position == new Square((File)y, x)))
+            var position = new Square((File)y, x);
+
+            if (pieces.Any(p => p.Position == position))
                 return true;
 
             if (y > end.File)

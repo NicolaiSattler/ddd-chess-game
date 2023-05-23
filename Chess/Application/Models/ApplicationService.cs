@@ -3,9 +3,9 @@ using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
+using Chess.Domain.Models;
 using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,11 +15,12 @@ namespace Chess.Application.Models;
 public interface IApplicationService
 {
     Task StartMatchAsync(StartMatch command);
-    Task TakeTurnAsync(Guid aggregateId, TakeTurn command);
+    Task<TurnResult> TakeTurnAsync(Guid aggregateId, TakeTurn command);
     Task ResignAsync(Guid aggregateId, Resign command);
     Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
     Task DrawAsync(Guid aggregateId, Draw command);
     Task<IEnumerable<Piece>> GetPiecesAsync(Guid aggregateId);
+    //Task<Guid> GetActivePlayer();
 }
 
 public class ApplicationService : IApplicationService
@@ -45,6 +46,12 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
+    //public async Task<Guid> GetActivePlayer(Guid aggregateId)
+    //{
+    //    var match = await GetAggregateById(aggregateId) ;
+    //    return match.
+    //}
+
     public async Task<IEnumerable<Piece>> GetPiecesAsync(Guid aggregateId)
     {
         var match = await GetAggregateById(aggregateId);
@@ -54,27 +61,31 @@ public class ApplicationService : IApplicationService
     //TODO: Make sure the timer is not disposed when the instance of ApplicationService is disposing.
     //TODO: result of move should be returned to the end user.
     //TODO: Piece promotion?
-    public async Task TakeTurnAsync(Guid aggregateId, TakeTurn command)
+    public async Task<TurnResult> TakeTurnAsync(Guid aggregateId, TakeTurn command)
     {
         _timer.Stop();
 
         var match = await GetAggregateById(aggregateId);
+        var result = match.TakeTurn(command);
 
-        match.TakeTurn(command);
-
-        var @event = await SaveEventAsync(match);
-
-        if (@event is TurnTaken turn)
+        if (!result.Violations?.Any() ?? false)
         {
-            var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
-            var maxTurnLengthInSeconds = match.Options.MaxTurnTime.Seconds;
+            var @event = await SaveEventAsync(match);
 
-            _timer.Start(aggregateId, playerAtTurn!.MemberId);
+            if (@event is TurnTaken turn)
+            {
+                var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
+                var maxTurnLengthInSeconds = match.Options.MaxTurnTime.Seconds;
+
+                _timer.Start(aggregateId, playerAtTurn!.MemberId);
+            }
+            else if (@event is MatchEnded matchEnd)
+            {
+                //TODO: update elo of players.
+            }
         }
-        else if (@event is MatchEnded matchEnd)
-        {
-            //TODO: update elo of players.
-        }
+
+        return result;
     }
 
     public async Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command)

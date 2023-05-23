@@ -61,13 +61,14 @@ namespace Chess.Test.Domain.Determiners
 
         [TestMethod]
         [DataRow(File.B, 2)]
-        [DataRow(File.D, 4)]
+        [DataRow(File.C, 3)]
         [DataRow(File.D, 4)]
         public void A1_To_E5_IsBlocked(File file, int rank)
         {
             //Arrange
             var pieces = new List<Piece>
             {
+                new Bishop {Color = Color.White, Position = new(File.A, 1)},
                 new Pawn { Color = Color.Black, Position = new(file, rank)}
             };
 
