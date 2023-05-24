@@ -44,10 +44,8 @@ public class PiecesFactory
             }
         }
 
-        result.Add(CreatePiece(PieceType.Queen, new Square(File.E, 8), Guid.NewGuid(), Color.Black));
-        result.Add(CreatePiece(PieceType.King, new Square(File.D, 8), Guid.NewGuid(), Color.Black));
-        result.Add(CreatePiece(PieceType.Queen, new Square(File.E, 1), Guid.NewGuid(), Color.White));
-        result.Add(CreatePiece(PieceType.King, new Square(File.D, 1), Guid.NewGuid(), Color.White));
+        result.Add(CreatePiece(PieceType.Queen, new Square(File.E, startRow), Guid.NewGuid(), color));
+        result.Add(CreatePiece(PieceType.King, new Square(File.D, startRow), Guid.NewGuid(), color));
 
         return result;
     }

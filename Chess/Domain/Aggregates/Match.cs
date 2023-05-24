@@ -64,7 +64,8 @@ public class Match : AggregateRoot, IMatch
     {
         var matchResult = MatchResult.Undefined;
         var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
-                                    .SelectMany(r => r.CheckRule());
+                                    .SelectMany(r => r.CheckRule())
+                                    .ToList();
 
         Func<Guid?, MatchResult> GetMatchResult = (memberId)
             => memberId == White.MemberId ? MatchResult.WhiteWins : MatchResult.BlackWins;
