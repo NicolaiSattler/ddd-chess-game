@@ -205,7 +205,8 @@ public class Board
 
     private static bool DirectionIsObstructedForPawn(IEnumerable<Piece> pieces, Piece pawn, Square end)
     {
-        if (pieces.Any(p => p.Position == end)) return true;
+        if (pieces.Any(p => p.Position == end && p.Color == pawn.Color)) return true;
+        if (pieces.Any(p => p.Position == end) && pawn.Position.File == end.File) return true;
 
         var ranks = pawn.Color == Color.White
                   ? end.Rank - pawn.Position.Rank
@@ -301,11 +302,14 @@ public class Board
 
     private static bool ValidateDiagonalLeftUpObstruction(IEnumerable<Piece> pieces, Square start, Square end)
     {
-        var y = start.File + 1;
+
+        var y = start.File - 1;
 
         for (var x = start.Rank + 1; x < end.Rank; x++)
         {
-            if (pieces.Any(p => p.Position == new Square((File)y, x)))
+            var position = new Square((File)y, x);
+
+            if (pieces.Any(p => p.Position == position))
                 return true;
 
             if (y > end.File)
