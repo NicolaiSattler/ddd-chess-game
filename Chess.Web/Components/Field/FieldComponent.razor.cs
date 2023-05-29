@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 
 using File = Chess.Domain.ValueObjects.File;
-using Board = Chess.Web.Pages.Match.BoardPage;
+using Board = Chess.Web.Pages.Match.Board.BoardPage;
 
 namespace Chess.Web.Components.Field;
 
@@ -54,7 +54,8 @@ public partial class FieldComponent
         if (Parent != null)
         {
             await Parent.UpdateBoardAsync(Rank, File);
-            Parent.ActivePieceId = Guid.Empty;
+
+            StateHasChanged();
         }
     }
 
@@ -65,6 +66,11 @@ public partial class FieldComponent
         Parent?.AddChild(this);
 
         base.OnInitialized();
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
     }
 
     public void Highlight(bool enabled)

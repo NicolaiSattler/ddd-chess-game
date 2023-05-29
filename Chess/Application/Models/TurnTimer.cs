@@ -72,7 +72,6 @@ public class TurnTimer : ITurnTimer
     public void Stop()
     {
         Timer.Stop();
-        Timer.Dispose();
     }
 
     protected virtual void Dispose(bool disposing)

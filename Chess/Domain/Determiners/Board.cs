@@ -175,6 +175,7 @@ public class Board
     private static IEnumerable<Square> GetAvailablePawnMoves(IEnumerable<Piece> pieces, Piece piece)
     {
         var opponentPieces = pieces.Where(p => p.Color != piece.Color);
+
         return piece.GetAttackRange()
                     .Where(p => (p.File != piece.Position.File && (opponentPieces.All(q => q.Position == p)))
                                 || p.File == piece.Position.File);

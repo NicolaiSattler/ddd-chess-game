@@ -1,16 +1,17 @@
 using Chess.Application.Models;
 using Chess.Domain.Commands;
-using Chess.Domain.Determiners;
 using Chess.Domain.Entities.Pieces;
+using Chess.Domain.Events;
+using Chess.Domain.Models;
 using Chess.Domain.ValueObjects;
 using Chess.Web.Components.Field;
 using Microsoft.AspNetCore.Components;
 
 using File = Chess.Domain.ValueObjects.File;
 
-namespace Chess.Web.Pages.Match;
+namespace Chess.Web.Pages.Match.Board;
 
-public partial class BoardPage
+public partial class BoardPage: ComponentBase
 {
     private Guid TestId = new Guid("00000000-0000-0000-0000-000000000003");
 
@@ -18,10 +19,11 @@ public partial class BoardPage
     public ILogger<BoardPage>? Logger { get; set;}
     [Inject]
     public IApplicationService? ApplicationService { get; set; }
-    public IEnumerable<Piece> Pieces { get; private set; } = Enumerable.Empty<Piece>();
+    public IList<Piece> Pieces { get; private set; } = new List<Piece>();
     public Guid ActivePieceId { get; set; }
     public Guid ActiveMemberId { get; set; }
     public List<FieldComponent> Fields { get; } = new();
+    [Parameter] public EventCallback<Guid> OnPieceMoved { get; set; }
 
     private void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
     {
@@ -55,10 +57,14 @@ public partial class BoardPage
         try
         {
             var activePiece = Pieces.FirstOrDefault(p => p.Id == ActivePieceId) ?? throw new InvalidOperationException("Piece could not be found!");
-            var command = new TakeTurn(ActiveMemberId, activePiece.Position, new(file, rank), false);
+            var endPosition = new Square(file, rank);
+            var command = new TakeTurn(ActiveMemberId, activePiece.Position, endPosition, false);
 
-            if (ApplicationService != null)
-                await ApplicationService.TakeTurnAsync(TestId, command);
+            if (ApplicationService == null) return;
+
+            var turnResult = await ApplicationService.TakeTurnAsync(TestId, command);
+
+            await HandleTurnResultAsync(turnResult, activePiece, endPosition);
         }
         catch (Exception ex)
         {
@@ -93,13 +99,14 @@ public partial class BoardPage
     {
         var piece = Pieces.First(p => p.Id == pieceId);
         var moves = piece.GetAttackRange()
-                         .Where(m => !Board.DirectionIsObstructed(Pieces, piece.Position, m))
+                         .Where(m => !Chess.Domain.Determiners.Board.DirectionIsObstructed(Pieces, piece.Position, m))
                          .ToList();
 
         if (piece is Pawn)
         {
-            var unvalidAttackMoves = moves.Where(m => m.File != piece.Position.File)
-                                          .Where(m => !Pieces.Any(p => p.Color != piece.Color && p.Position == m));
+            //TODO: Add En Passant
+            var unvalidAttackMoves = moves.Where(m => m.File != piece.Position.File
+                                                      && !Pieces.Any(p => p.Color != piece.Color && p.Position == m));
 
             if (unvalidAttackMoves.Any())
             {
@@ -108,5 +115,31 @@ public partial class BoardPage
         }
 
         return moves;
+    }
+
+    public async Task HandleTurnResultAsync(TurnResult turnResult, Piece activePiece, Square endPosition)
+    {
+        if (turnResult?.Violations?.Any() ?? true) return;
+
+        activePiece.Position = endPosition;
+
+        var targetPiece = Pieces.FirstOrDefault(p => p.Position == endPosition && p.Color != activePiece.Color);
+
+        if (targetPiece != null) Pieces.Remove(targetPiece);
+
+        await OnPieceMoved.InvokeAsync(ActivePieceId);
+
+        if (turnResult.MatchResult != 0)
+        {
+            EndMatch(turnResult.MatchResult);
+        }
+
+        StateHasChanged();
+    }
+
+    private void EndMatch(MatchResult result)
+    {
+        //TODO: ...
+
     }
 }

@@ -19,7 +19,7 @@ public interface IApplicationService
     Task ResignAsync(Guid aggregateId, Resign command);
     Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
     Task DrawAsync(Guid aggregateId, Draw command);
-    Task<IEnumerable<Piece>> GetPiecesAsync(Guid aggregateId);
+    Task<IList<Piece>> GetPiecesAsync(Guid aggregateId);
     //Task<Guid> GetActivePlayer();
 }
 
@@ -52,7 +52,7 @@ public class ApplicationService : IApplicationService
     //    return match.
     //}
 
-    public async Task<IEnumerable<Piece>> GetPiecesAsync(Guid aggregateId)
+    public async Task<IList<Piece>> GetPiecesAsync(Guid aggregateId)
     {
         var match = await GetAggregateById(aggregateId);
         return match.Pieces;

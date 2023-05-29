@@ -2,7 +2,7 @@ using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 using Microsoft.AspNetCore.Components;
 
-using Board = Chess.Web.Pages.Match.BoardPage;
+using Board = Chess.Web.Pages.Match.Board.BoardPage;
 
 namespace Chess.Web.Components.Piece;
 
@@ -22,9 +22,6 @@ public partial class PieceComponent
     [CascadingParameter]
     private Board? Parent { get; set;}
 
-    private void HandleDragStarted(Guid pieceId) => Parent?.ShowAvailableMoves(pieceId);
-    private void HandleDragEnded() => Parent?.HideAvailableMoves();
-
     private string GetPieceClass() => Type switch
     {
         PieceType.King => "king",
@@ -36,11 +33,16 @@ public partial class PieceComponent
         _ => throw new IndexOutOfRangeException(Type.ToString())
     };
 
-    private void HandleDragStart(Guid pieceId)
+    private void HandleDragStarted()
     {
         if (Parent != null)
-            Parent.ActivePieceId = pieceId;
+        {
+            Parent.ShowAvailableMoves(PieceId);
+            Parent.ActivePieceId = PieceId;
+        }
     }
+
+    private void HandleDragEnded() => Parent?.HideAvailableMoves();
 
     protected override void OnParametersSet()
     {
