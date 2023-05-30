@@ -13,17 +13,19 @@ namespace Chess.Web.Pages.Match.Board;
 
 public partial class BoardPage: ComponentBase
 {
-    private Guid TestId = new Guid("00000000-0000-0000-0000-000000000003");
+    [Inject]
+    private ILogger<BoardPage>? Logger { get; set;}
+    [Inject]
+    private IApplicationService? ApplicationService { get; set; }
+    [Parameter]
+    public EventCallback<Guid> OnPieceMoved { get; set; }
+    [Parameter]
+    public Guid AggregateId { get; set; }
 
-    [Inject]
-    public ILogger<BoardPage>? Logger { get; set;}
-    [Inject]
-    public IApplicationService? ApplicationService { get; set; }
     public IList<Piece> Pieces { get; private set; } = new List<Piece>();
     public Guid ActivePieceId { get; set; }
     public Guid ActiveMemberId { get; set; }
     public List<FieldComponent> Fields { get; } = new();
-    [Parameter] public EventCallback<Guid> OnPieceMoved { get; set; }
 
     private void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
     {
@@ -62,7 +64,7 @@ public partial class BoardPage: ComponentBase
 
             if (ApplicationService == null) return;
 
-            var turnResult = await ApplicationService.TakeTurnAsync(TestId, command);
+            var turnResult = await ApplicationService.TakeTurnAsync(AggregateId, command);
 
             await HandleTurnResultAsync(turnResult, activePiece, endPosition);
         }
@@ -82,14 +84,9 @@ public partial class BoardPage: ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        var aggregateId = TestId;
-        //var command = new StartMatch() { AggregateId = aggregateId, MemberOneId = Guid.NewGuid(), MemberTwoId = Guid.NewGuid() };
-
         if (ApplicationService != null)
         {
-            //await ApplicationService.StartMatchAsync(command);
-
-            Pieces = await ApplicationService.GetPiecesAsync(aggregateId);
+            Pieces = await ApplicationService.GetPiecesAsync(AggregateId);
             // ActiveMemberId = ApplicationService.GetActiveMemberId();
         }
     }

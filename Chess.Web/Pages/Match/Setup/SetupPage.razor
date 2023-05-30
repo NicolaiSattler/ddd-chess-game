@@ -1,51 +1,37 @@
 @page "/match/setup"
 <div class="card">
   <div class="card-body">
-    @if(SetupModel != null)
-    {
-      <EditForm Model="@SetupModel">
-        <div class="mb-3 row">
-          <label for="memberOne" class="col-sm-2 col-form-label">Member One</label>
-          <div class="col-sm-10">
-            <InputText id="memberOne"
-                      class="form-control"
-                      @bind-Value=SetupModel.MemberOne
-                      placeholder="00000000-0000-0000-0000-000000000000"/>
-          </div>
+    <EditForm Model="Setup">
+      <div class="mb-3 row">
+        <label for="memberOne" class="col-sm-2 col-form-label">Member One</label>
+        <div class="col-sm-10">
+          <InputText id="memberOne" class="form-control" @bind-Value=Setup.MemberOne placeholder="00000000-0000-0000-0000-000000000000"/>
         </div>
-        <div class="mb-3 row">
-          <label for="memberTwo" class="col-sm-2 col-form-label">Member Two</label>
-          <div class="col-sm-10">
-            <InputText id="memberTwo"
-                      class="form-control"
-                      @bind-Value=SetupModel.MemberTwo
-                      placeholder="00000000-0000-0000-0000-000000000000"/>
-          </div>
+      </div>
+      <div class="mb-3 row">
+        <label for="memberTwo" class="col-sm-2 col-form-label">Member Two</label>
+        <div class="col-sm-10">
+          <InputText id="memberTwo" class="form-control" @bind-Value=Setup.MemberTwo placeholder="00000000-0000-0000-0000-000000000000"/>
         </div>
-        <div class="mb-3 row">
-          <label for="drawByRepition" class="col-sm-2 col-form-label">Draw by Repitition</label>
-          <div class="col-sm-10">
-            <InputDate id="maxTurnTime"
-                      Type="InputDateType.Time"
-                      readonly
-                      class="form-control"
-                      @bind-Value=SetupModel.MaxTurnTime
-                      placeholder="10:00"/>
-          </div>
+      </div>
+      <div class="mb-3 row">
+        <label for="drawByRepition" class="col-sm-2 col-form-label">Draw by Repitition</label>
+        <div class="col-sm-10">
+          <InputDate id="maxTurnTime" Type="InputDateType.Time" readonly class="form-control" @bind-Value=Setup.MaxTurnTime placeholder="10:00"/>
         </div>
-        <div class="mb-3 row">
-          <div class="col-sm-2"></div>
-          <div class="col-sm-10">
-            <InputCheckbox id="drawByRepition" class="form-control-input" @bind-Value=SetupModel.DrawByRepition />
-            <label class="form-check-label" for="defaultCheck1">
-              Draw by Repitition
-            </label>
-          </div>
+      </div>
+      <div class="mb-3 row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-10">
+          <InputCheckbox id="drawByRepition" class="form-control-input" @bind-Value=Setup.DrawByRepition />
+          <label class="form-check-label" for="defaultCheck1">
+            Draw by Repitition
+          </label>
         </div>
-        <div class="col-12">
-          <button type="submit" class="btn btn-primary float-end">Start Match</button>
-        </div>
-      </EditForm>
-    }
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary float-end" @onclick="(() => NavigateToBoard())">Start Match</button>
+      </div>
+    </EditForm>
   </div>
 </div>
