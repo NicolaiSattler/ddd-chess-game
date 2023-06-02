@@ -21,7 +21,7 @@ public partial class SetupPage: ComponentBase
     {
         var aggregateId = await StartMatchAsync();
 
-        NavigationManager?.NavigateTo(string.Format(BoardUri, aggregateId));
+        NavigationManager?.NavigateTo(string.Format(BoardUri, aggregateId), true);
     }
 
     private async Task<Guid> StartMatchAsync()

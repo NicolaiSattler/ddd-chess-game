@@ -1,7 +1,7 @@
 @using Chess.Domain.ValueObjects;
 @using Chess.Web.Components.Piece
 
-@page "/match/board/{AggregateId}"
+@page "/match/board/{AggregateId:guid}"
 
 <div class="board">
     <CascadingValue Value="this">
