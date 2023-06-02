@@ -5,8 +5,8 @@ namespace Chess.Infrastructure;
 
 public class MatchDbContext: DbContext
 {
-    public DbSet<Match>? Matches { get; set; }
-    public DbSet<MatchEvent>? Events { get; set; }
+    public DbSet<Match> Matches => Set<Match>();
+    public DbSet<MatchEvent> Events => Set<MatchEvent>();
 
     public MatchDbContext() : base() { }
     public MatchDbContext(DbContextOptions<MatchDbContext> options) : base(options) { }

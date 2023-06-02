@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Chess.Domain.Events;
@@ -9,7 +10,8 @@ namespace Chess.Infrastructure.Repository;
 
 public interface IMatchRepository
 {
-    Task<Match?> GetAsync(Guid aggregateId);
+    Task<Match> GetAsync(Guid aggregateId);
+    Task<IEnumerable<Match>> GetAsync();
     Task<Match?> AddAsync(MatchStarted @event, bool saveChanges = true);
 }
 
@@ -24,11 +26,17 @@ public class MatchRepository : IMatchRepository
         _context = context;
     }
 
-    public async Task<Match?> GetAsync(Guid aggregateId)
+    /// <summary>
+    /// Retrieve all active matches
+    /// </summary>
+    public async Task<IEnumerable<Match>> GetAsync() => await _context.Matches.ToListAsync();
+
+    public async Task<Match> GetAsync(Guid aggregateId)
     {
         try
         {
-            return await _context.Matches!.SingleOrDefaultAsync(m => m.AggregateId == aggregateId);
+            return await _context.Matches.SingleOrDefaultAsync(m => m.AggregateId == aggregateId)
+                ?? throw new ApplicationException($"No match was found for the id {aggregateId}");
         }
         catch (Exception ex)
         {
