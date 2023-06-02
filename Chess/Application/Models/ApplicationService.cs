@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using MatchEntity = Chess.Infrastructure.Entity.Match;
+
 namespace Chess.Application.Models;
 
 public interface IApplicationService
@@ -21,6 +23,7 @@ public interface IApplicationService
     Task DrawAsync(Guid aggregateId, Draw command);
     Task<IList<Piece>> GetPiecesAsync(Guid aggregateId);
     //Task<Guid> GetActivePlayer();
+    Task<IEnumerable<MatchEntity>> GetMatchesAsync();
 }
 
 public class ApplicationService : IApplicationService
@@ -93,6 +96,11 @@ public class ApplicationService : IApplicationService
         await Task.CompletedTask;
         throw new NotImplementedException();
         //TODO: Raise event in UI.
+    }
+
+    public async Task<IEnumerable<MatchEntity>> GetMatchesAsync()
+    {
+        return await _matchRepository.GetAsync();
     }
 
     public async Task DrawAsync(Guid aggregateId, Draw command)
