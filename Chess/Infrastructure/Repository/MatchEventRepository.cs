@@ -48,7 +48,7 @@ public class MatchEventRepository : IMatchEventRepository
         {
             var latestVersion = 0;
 
-            if (_dbContext.Events!.Any())
+            if (_dbContext.Events!.Any(e => e.AggregateId == aggregateId))
             {
                 latestVersion = await _dbContext.Events!.Where(m => m.AggregateId == aggregateId)
                                                         .MaxAsync(m => m.Version);
