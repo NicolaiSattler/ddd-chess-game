@@ -3,14 +3,14 @@ using Microsoft.AspNetCore.Components;
 
 using MatchEntity = Chess.Infrastructure.Entity.Match;
 
-namespace Chess.Web.Pages.Match;
+namespace Chess.Web.Pages.Match.Overview;
 
 public partial class OverviewPage: ComponentBase
 {
     [Inject]
-    private ApplicationService? ApplicationService { get; set; }
+    private IApplicationService? ApplicationService { get; set; }
 
-    private List<MatchEntity>? Matches { get; set;}
+    public List<MatchEntity> Matches { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
