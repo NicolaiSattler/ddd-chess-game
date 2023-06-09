@@ -35,7 +35,7 @@ public partial class PieceComponent
 
     private void HandleDragStarted()
     {
-        if (Parent != null)
+        if (Parent != null && Parent.ActiveColor == Color)
         {
             Parent.ShowAvailableMoves(PieceId);
             Parent.ActivePieceId = PieceId;

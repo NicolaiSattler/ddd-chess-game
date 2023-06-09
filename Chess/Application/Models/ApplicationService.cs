@@ -4,6 +4,7 @@ using Chess.Domain.Commands;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
 using Chess.Domain.Models;
+using Chess.Domain.ValueObjects;
 using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
 using System.Collections.Generic;
@@ -22,7 +23,8 @@ public interface IApplicationService
     Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
     Task DrawAsync(Guid aggregateId, Draw command);
     Task<IList<Piece>> GetPiecesAsync(Guid aggregateId);
-    //Task<Guid> GetActivePlayer();
+    Task<Color> GetColorAtTurnAsync(Guid aggregateId);
+    Task<Player> GetPlayer(Guid aggregateId, Color color);
     Task<IEnumerable<MatchEntity>> GetMatchesAsync();
 }
 
@@ -49,11 +51,20 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
-    //public async Task<Guid> GetActivePlayer(Guid aggregateId)
-    //{
-    //    var match = await GetAggregateById(aggregateId) ;
-    //    return match.
-    //}
+    public async Task<Player> GetPlayer(Guid aggregateId, Color color)
+    {
+        var match = await GetAggregateById(aggregateId) ;
+        return color == Color.White ? match.White : match.Black;
+    }
+
+    public async Task<Color> GetColorAtTurnAsync(Guid aggregateId)
+    {
+        var match = await GetAggregateById(aggregateId) ;
+
+        if (!match.Turns.Any()) return Color.White;
+
+        return match.Turns.Last().Player.Color == Color.White ? Color.Black  : Color.White;
+    }
 
     public async Task<IList<Piece>> GetPiecesAsync(Guid aggregateId)
     {

@@ -21,11 +21,18 @@ public partial class BoardPage: ComponentBase
     public EventCallback<Guid> OnPieceMoved { get; set; }
     [Parameter]
     public Guid AggregateId { get; set; }
+    [Parameter]
+    public EventCallback<Color> OnTurnEnded { get; set; }
 
+    private Guid ActiveMemberId => ActiveColor == Color.White ? White.MemberId : Black.MemberId;
     public IList<Piece> Pieces { get; private set; } = new List<Piece>();
-    public Guid ActivePieceId { get; set; }
-    public Guid ActiveMemberId { get; set; }
     public List<FieldComponent> Fields { get; } = new();
+    public Player White { get; private set; } = new();
+    public Player Black { get; private set; } = new();
+    public Color ActiveColor { get; private set; }
+    public Guid ActivePieceId { get; set; }
+
+
 
     private void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
     {
@@ -62,7 +69,7 @@ public partial class BoardPage: ComponentBase
             var endPosition = new Square(file, rank);
             var command = new TakeTurn(ActiveMemberId, activePiece.Position, endPosition, false);
 
-            if (ApplicationService == null) return;
+            if (ApplicationService == null) throw new ApplicationException("ApplicationService is null.");
 
             var turnResult = await ApplicationService.TakeTurnAsync(AggregateId, command);
 
@@ -78,7 +85,6 @@ public partial class BoardPage: ComponentBase
         finally
         {
             ActivePieceId = Guid.Empty;
-            ActiveMemberId = Guid.Empty; //TODO: switch memberid's
         }
     }
 
@@ -87,7 +93,7 @@ public partial class BoardPage: ComponentBase
         if (ApplicationService != null)
         {
             Pieces = await ApplicationService.GetPiecesAsync(AggregateId);
-            // ActiveMemberId = ApplicationService.GetActiveMemberId();
+            ActiveColor = await ApplicationService.GetColorAtTurnAsync(AggregateId);
         }
     }
 
@@ -130,6 +136,10 @@ public partial class BoardPage: ComponentBase
         {
             EndMatch(turnResult.MatchResult);
         }
+        else
+        {
+            ActiveColor = ActiveColor == Color.White ? Color.Black : Color.White;
+        }
 
         StateHasChanged();
     }
@@ -137,6 +147,5 @@ public partial class BoardPage: ComponentBase
     private void EndMatch(MatchResult result)
     {
         //TODO: ...
-
     }
 }

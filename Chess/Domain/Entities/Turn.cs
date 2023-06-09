@@ -10,7 +10,7 @@ public class Turn : Entity
     public Square? StartPosition { get; set; }
     public Square? EndPosition { get; set; }
     public DateTime StartTime { get; init; }
-    public Player? Player { get; init; }
+    public Player Player { get; init; } = new();
     public string Hash { get; set; } = string.Empty;
     public string Notation { get; set; } = string.Empty;
 

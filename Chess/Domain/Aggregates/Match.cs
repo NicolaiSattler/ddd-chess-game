@@ -17,12 +17,11 @@ namespace Chess.Domain.Aggregates;
 
 public class Match : AggregateRoot, IMatch
 {
-    private List<Turn> Turns { get; set; } = new();
-
     public MatchOptions Options { get; private set; } = new();
     public Player White { get; private set; } = new();
     public Player Black { get; private set; } = new();
     public List<Piece> Pieces { get; private set; } = new();
+    public List<Turn> Turns { get; private set; } = new();
 
     public Match(): base(Guid.Empty) {}
     public Match(Guid id) : base(id) { }
@@ -184,7 +183,10 @@ public class Match : AggregateRoot, IMatch
         movingPiece.Position = @event.EndPosition;
 
         EndTurn(@event, movingPiece.Type);
-        StartTurn(GetOpponent(@event.MemberId), DateTime.UtcNow);
+
+        var opponent = GetOpponent(@event.MemberId);
+
+        StartTurn(opponent, DateTime.UtcNow);
     }
 
     private void Handle(MatchEnded @event)
@@ -200,10 +202,10 @@ public class Match : AggregateRoot, IMatch
         }
     }
 
-    private Player? GetOpponent(Guid? memberId)
+    private Player GetOpponent(Guid memberId)
         => memberId != White.MemberId ? White : Black;
 
-    private void StartTurn(Player? player, DateTime startTime)
+    private void StartTurn(Player player, DateTime startTime)
         => Turns.Add(new() { Player = player, StartTime = startTime });
 
     //TODO: Unit Test in aggregate

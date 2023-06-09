@@ -5,6 +5,7 @@ using Chess.Domain.ValueObjects;
 using Chess.Domain.Configuration;
 using Chess.Domain.Entities.Pieces;
 using System.Collections.Generic;
+using Chess.Domain.Entities;
 
 namespace Chess.Domain.Aggregates;
 
@@ -14,6 +15,7 @@ public interface IMatch : IAggregateRoot
     Player White { get; }
     Player Black { get; }
     List<Piece> Pieces { get; }
+    List<Turn> Turns { get; }
 
     void Start(StartMatch command);
     void Draw(Draw command);
