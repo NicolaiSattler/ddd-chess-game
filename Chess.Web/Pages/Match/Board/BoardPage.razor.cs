@@ -144,6 +144,11 @@ public partial class BoardPage: ComponentBase
         StateHasChanged();
     }
 
+    //TODO: Ask for draw by aggrement
+    //TODO: Ask for draw by repitition
+    //TODO: draw by insufficient material (automatically)
+    //TODO: draw by fifty-move
+
     private void EndMatch(MatchResult result)
     {
         //TODO: ...

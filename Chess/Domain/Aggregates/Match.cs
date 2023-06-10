@@ -12,6 +12,8 @@ using Chess.Domain.Models;
 using Chess.Domain.Utilities;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Chess.Domain.Aggregates;
 
@@ -215,10 +217,12 @@ public class Match : AggregateRoot, IMatch
         pieceType = Guard.Against.Null<PieceType>(pieceType, nameof(pieceType));
 
         var turn = Turns.LastOrDefault() ?? throw new InvalidOperationException("No turns found!");
+        var player = White.MemberId == @event.MemberId ? White : Black;
 
         turn.StartPosition = @event.StartPosition;
         turn.EndPosition = @event.EndPosition;
         turn.PieceType = pieceType;
+        turn.Hash = CalculateHash(player.Color);
     }
 
     //TODO: Unit Test in aggregate
@@ -268,8 +272,25 @@ public class Match : AggregateRoot, IMatch
     //TODO: Unit Test in aggregate
     private bool IsStalemate(TakeTurn command)
     {
-        var movingPiece = Pieces.FirstOrDefault(p => p.Position == command.StartPosition) ?? throw new InvalidOperationException("Piece not found!");
+        var movingPiece = Pieces.First(p => p.Position == command.StartPosition)
+                ?? throw new InvalidOperationException("Piece not found!");
 
         return Board.IsStalemate(movingPiece.Color, Pieces);
+    }
+
+    public string CalculateHash(Color color)
+    {
+        const string separator = "";
+        using var md5 = MD5.Create();
+
+        var pieceNotations = Pieces.Where(p => p.Color == color)
+                                   .Select(p => p.ToString());
+        var aggregate = string.Join(separator, pieceNotations);
+        var inputBytes = Encoding.UTF8.GetBytes(aggregate);
+
+        var hexdecimalCollection = md5.ComputeHash(inputBytes)
+                                      .Select(m => m.ToString("x2"));
+
+        return string.Join(separator, hexdecimalCollection);
     }
 }
