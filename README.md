@@ -20,9 +20,9 @@ Follow these steps:
     ```
     sqlite3 Chess.db
     .read Chess/SQL/ChessDb.sql
+    .exit
     ```
 - Run `dotnet watch`
-
 
 ## TO DO
 - Draw:
