@@ -1,7 +1,10 @@
 @using Chess.Domain.ValueObjects;
 @using Chess.Web.Components.Piece
+@using Chess.Web.Components.Status
 
 @page "/match/board/{AggregateId:guid}"
+
+<StatusComponent Model="Status"/>
 
 <div class="board">
     <CascadingValue Value="this">
@@ -21,3 +24,4 @@
 
     </CascadingValue>
 </div>
+
