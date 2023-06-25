@@ -1,4 +1,4 @@
-namespace Namespace;
+namespace Chess.Test.Pieces;
 
 [TestClass]
 public class BishopTests

@@ -56,7 +56,7 @@ public class SpecialMoves
         return false;
     }
 
-    public static bool IsCastling(Square startPosition, Square endPosition, IEnumerable<Piece> pieces)
+    public static CastlingType IsCastling(Square startPosition, Square endPosition, IEnumerable<Piece> pieces)
     {
         Guard.Against.Null<Square>(startPosition, nameof(startPosition));
         Guard.Against.Null<Square>(endPosition, nameof(endPosition));
@@ -64,11 +64,21 @@ public class SpecialMoves
 
         var king = pieces.FirstOrDefault(p => p.Position == startPosition);
 
-        if (king == null) return false;
+        if (king == null) return CastlingType.Undefined;
 
-        var rightSideCastling = startPosition.File == File.E && endPosition.File == File.G;
-        var leftSideCastling = startPosition.File == File.E && endPosition.File == File.C;
+        if (startPosition.File == File.E && endPosition.File == File.G)
+            return CastlingType.KingSide;
 
-        return leftSideCastling || rightSideCastling;
+        if (startPosition.File == File.E && endPosition.File == File.C)
+            return CastlingType.QueenSide;
+
+        return CastlingType.Undefined;
     }
+}
+
+public enum CastlingType
+{
+    Undefined = 0,
+    KingSide = 1,
+    QueenSide = 2
 }

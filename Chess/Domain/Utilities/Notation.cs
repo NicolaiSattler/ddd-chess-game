@@ -1,23 +1,11 @@
 using System.Text;
+using Chess.Domain.Determiners;
 using Chess.Domain.Entities.Pieces;
 
 namespace Chess.Domain.Utilities;
 
 public class NotationBuilder
 {
-
-    //TODO:
-    //Castling
-    //  0-0: kingside castle
-    //  0-0-0: queenside castle
-    //
-    //Ambiguous origin both rooks are in same file/rank
-    //
-    //x: captures
-    //+: check
-    //#: checkmate
-    //
-
     private readonly StringBuilder _builder;
 
     public NotationBuilder()
@@ -25,11 +13,9 @@ public class NotationBuilder
         _builder = new();
     }
 
-    public NotationBuilder HasPiece(Piece piece)
+    public NotationBuilder HasPiece(PieceType pieceType)
     {
-        if (piece is Pawn) return this;
-
-        var pieceNotation = GetPieceNotation(piece);
+        var pieceNotation = GetPieceNotation(pieceType);
         _builder.Append(pieceNotation);
 
         return this;
@@ -47,6 +33,43 @@ public class NotationBuilder
         return this;
     }
 
+    public NotationBuilder IsCheck()
+    {
+        _builder.Append("+");
+
+        return this;
+    }
+
+    public NotationBuilder IsCheckMate()
+    {
+        _builder.Append("#");
+
+        return this;
+    }
+
+    public NotationBuilder IsCastling(CastlingType type)
+    {
+        if (type == CastlingType.KingSide)
+        {
+            _builder.Append("0-0");
+        }
+        else if (type == CastlingType.QueenSide)
+        {
+            _builder.Append("0-0-0");
+        }
+
+        return this;
+    }
+
+    public NotationBuilder IsPromotion(PieceType promotionType)
+    {
+        var pieceNotation = GetPieceNotation(promotionType);
+
+        _builder.Append($"={pieceNotation}");
+
+        return this;
+    }
+
     public NotationBuilder EndsAtPosition(Piece piece)
     {
         _builder.Append(piece.Position.ToString());
@@ -56,14 +79,14 @@ public class NotationBuilder
 
     public string Build() => _builder.ToString();
 
-
-    private string GetPieceNotation(Piece piece) => piece.Type switch
+    private string GetPieceNotation(PieceType pieceType) => pieceType switch
     {
         PieceType.King => "K",
         PieceType.Queen => "Q",
         PieceType.Rook => "R",
         PieceType.Bishop => "B",
         PieceType.Knight => "N",
+        PieceType.Pawn => "P",
         _ => throw new IndexOutOfRangeException("Unknown PieceType")
     };
 }

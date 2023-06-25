@@ -67,7 +67,7 @@ public class MatchRepositoryTests: TestBase
     }
 
     [TestMethod]
-    public async Task  GetAsync_UnknownAggregateId_ShouldReturnNull()
+    public async Task  GetAsync_UnknownAggregateId_ShouldThrowApplicationException()
     {
         //Arrange
         var @event = _fixture.Create<MatchStarted>();
@@ -75,9 +75,9 @@ public class MatchRepositoryTests: TestBase
         //Act
         var match = await _sut.AddAsync(@event);
         var randomId = Guid.NewGuid();
-        var result = await _sut.GetAsync(randomId);
+        var result = Should.Throw<ApplicationException>(_sut.GetAsync(randomId));
 
         //Assert
-        result?.ShouldBeNull();
+        result.Message.ShouldContain(randomId.ToString());
     }
 }

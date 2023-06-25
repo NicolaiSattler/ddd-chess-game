@@ -151,9 +151,10 @@ public class Match : AggregateRoot, IMatch
         Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.White));
         Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.Black));
 
-        StartTurn(White, @event.StartTime);
+        StartTurn(@event.StartTime);
     }
 
+    //TODO: test notation
     private void Handle(TurnTaken @event)
     {
         Guard.Against.Null<TurnTaken>(@event, nameof(@event));
@@ -165,8 +166,11 @@ public class Match : AggregateRoot, IMatch
 
         var targetPiece = Pieces.FirstOrDefault(p => p.Position == @event.EndPosition);
         var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);
-        var isCastling = SpecialMoves.IsCastling(@event.StartPosition, @event.EndPosition, Pieces);
+        var castling = SpecialMoves.IsCastling(@event.StartPosition, @event.EndPosition, Pieces);
         var pieceIsCaptured = Board.PieceIsCaptured(@event, Pieces) || isEnPassant;
+        var isCheck = PlayerIsInCheck(movingPiece.Color);
+        var promotionType = Promotion(@event, movingPiece);
+        var notation = DetermineNotation(movingPiece, targetPiece, castling, promotionType, isCheck);
 
         if (isEnPassant)
         {
@@ -174,21 +178,52 @@ public class Match : AggregateRoot, IMatch
             targetPiece = Pieces.FirstOrDefault(p => p.Id == pieceId);
         }
 
-        if (isCastling)
+        if (castling != CastlingType.Undefined)
+        {
             MoveCastingPieces(movingPiece, @event.EndPosition);
+        }
 
         if (targetPiece != null && pieceIsCaptured)
+        {
             Pieces.Remove(targetPiece);
-
-        CheckPromotion(@event, movingPiece);
+        }
 
         movingPiece.Position = @event.EndPosition;
 
-        EndTurn(@event, movingPiece.Type);
+        EndTurn(@event, movingPiece.Type, notation);
+        StartTurn(DateTime.UtcNow);
+    }
 
-        var opponent = GetOpponent(@event.MemberId);
+    private string DetermineNotation(Piece movingPiece,
+                                     Piece? targetPiece,
+                                     CastlingType castling,
+                                     PieceType? promotionType,
+                                     bool isCheck)
+    {
+        var notation = new NotationBuilder();
 
-        StartTurn(opponent, DateTime.UtcNow);
+        notation.HasPiece(movingPiece.Type);
+
+        if (castling != CastlingType.Undefined)
+            notation.IsCastling(castling);
+        else if (targetPiece != null)
+            notation.HasCapturedPiece(targetPiece);
+
+        notation.EndsAtPosition(movingPiece);
+
+        if (promotionType != null)
+            notation.IsPromotion(promotionType.Value);
+
+        if (isCheck)
+            notation.IsCheck();
+
+        return notation.Build();
+    }
+
+    private bool PlayerIsInCheck(Color color)
+    {
+        var king = Pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King) as King;
+        return king != null ? Board.IsCheck(king, Pieces) : false;
     }
 
     private void Handle(MatchEnded @event)
@@ -207,11 +242,21 @@ public class Match : AggregateRoot, IMatch
     private Player GetOpponent(Guid memberId)
         => memberId != White.MemberId ? White : Black;
 
-    private void StartTurn(Player player, DateTime startTime)
-        => Turns.Add(new() { Player = player, StartTime = startTime });
+    private void StartTurn(DateTime startTime)
+    {
+        var player = White;
+
+        if (Turns.Any())
+        {
+            var playerAtTurn = Turns.Last().Player.MemberId;
+            player = GetOpponent(playerAtTurn);
+        }
+
+         Turns.Add(new() { Player = player, StartTime = startTime });
+    }
 
     //TODO: Unit Test in aggregate
-    private void EndTurn(TurnTaken @event, PieceType pieceType)
+    private void EndTurn(TurnTaken @event, PieceType pieceType, string notation)
     {
         @event = Guard.Against.Null<TurnTaken>(@event, nameof(@event));
         pieceType = Guard.Against.Null<PieceType>(pieceType, nameof(pieceType));
@@ -223,11 +268,12 @@ public class Match : AggregateRoot, IMatch
         turn.EndPosition = @event.EndPosition;
         turn.PieceType = pieceType;
         turn.Hash = CalculateHash(player.Color);
+        turn.Notation = notation;
     }
 
     //TODO: Unit Test in aggregate
     //TODO: User should be given a choice to which kind the piece it will be promoted to.
-    private void CheckPromotion(TurnTaken @event, Piece movingPiece)
+    private PieceType? Promotion(TurnTaken @event, Piece movingPiece)
     {
         if (SpecialMoves.PawnIsPromoted(movingPiece, @event.EndPosition) && movingPiece != null)
         {
@@ -235,7 +281,11 @@ public class Match : AggregateRoot, IMatch
 
             Pieces.Remove(movingPiece);
             Pieces.Add(queen);
+
+            return queen.Type;
         }
+
+        return null;
     }
 
     //TODO: Unit Test in aggregate

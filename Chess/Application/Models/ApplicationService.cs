@@ -51,19 +51,11 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
-    public async Task<Player> GetPlayer(Guid aggregateId, Color color)
-    {
-        var match = await GetAggregateById(aggregateId) ;
-        return color == Color.White ? match.White : match.Black;
-    }
-
     public async Task<Color> GetColorAtTurnAsync(Guid aggregateId)
     {
         var match = await GetAggregateById(aggregateId) ;
 
-        if (!match.Turns.Any()) return Color.White;
-
-        return match.Turns.Last().Player.Color == Color.White ? Color.Black  : Color.White;
+        return match.Turns.Last().Player.Color;
     }
 
     public async Task<IList<Piece>> GetPiecesAsync(Guid aggregateId)
@@ -102,6 +94,7 @@ public class ApplicationService : IApplicationService
         return result;
     }
 
+    //TODO: Unit Test
     public async Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command)
     {
         await Task.CompletedTask;
@@ -109,11 +102,13 @@ public class ApplicationService : IApplicationService
         //TODO: Raise event in UI.
     }
 
+    //TODO: Unit Test
     public async Task<IEnumerable<MatchEntity>> GetMatchesAsync()
     {
         return await _matchRepository.GetAsync();
     }
 
+    //TODO: Unit Test
     public async Task DrawAsync(Guid aggregateId, Draw command)
     {
         _timer.Stop();
@@ -124,6 +119,7 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
+    //TODO: Unit Test
     public async Task ResignAsync(Guid aggregateId, Resign command)
     {
         _timer.Stop();

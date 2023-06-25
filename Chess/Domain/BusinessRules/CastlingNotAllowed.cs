@@ -41,7 +41,7 @@ public class CastlingNotAllowed : BusinessRule
         var rank = movingPiece.Color == Color.Black ? 8 : 1;
         var file = _command.StartPosition.File < _command.EndPosition.File ? File.A : File.H;
 
-        var isCastling = SpecialMoves.IsCastling(_command.StartPosition, _command.EndPosition, _pieces);
+        var isCastling = SpecialMoves.IsCastling(_command.StartPosition, _command.EndPosition, _pieces) != CastlingType.Undefined;
         var rookHasMoved = _turns.Any(p => p.PieceType == PieceType.Rook && p.StartPosition == new Square(file, rank));
         var kingHasMoved = _turns.Any(p => p.PieceType == PieceType.King);
         var kingIsInCheck = Board.IsCheck((King)king, _pieces);

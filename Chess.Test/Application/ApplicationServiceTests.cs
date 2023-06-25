@@ -104,4 +104,67 @@ public class ApplicationServiceTests: TestBase
         //Act & Assert
         var result = Should.ThrowAsync<ApplicationException>(async () => await _sut.GetPiecesAsync(Guid.Empty));
     }
+
+    [TestMethod]
+    public async Task GetColorAtTurn_ShouldReturnCorrectColor()
+    {
+        //Arrange
+        var whiteId = Guid.NewGuid();
+        var blackId = Guid.NewGuid();
+        var aggregateId = Guid.NewGuid();
+
+        var startMatchCommand = new StartMatch
+        {
+            AggregateId = aggregateId,
+            MemberOneId = whiteId,
+            MemberTwoId = blackId
+        };
+
+        //Act
+        await _sut.StartMatchAsync(startMatchCommand);
+        var firstAtTurn = await _sut.GetColorAtTurnAsync(aggregateId);
+
+        await _sut.TakeTurnAsync(aggregateId, new(whiteId, new(File.B, 2), new(File.B, 3), false));
+        var secondAtTurn = await _sut.GetColorAtTurnAsync(aggregateId);
+
+        await _sut.TakeTurnAsync(aggregateId, new(blackId, new(File.B, 7), new(File.B, 5), false));
+        var thirdAtTurn = await _sut.GetColorAtTurnAsync(aggregateId);
+
+        //Assert
+        firstAtTurn.ShouldBe(Color.White);
+        secondAtTurn.ShouldBe(Color.Black);
+        thirdAtTurn.ShouldBe(Color.White);
+    }
+
+    [TestMethod]
+    public async Task GetPiecesAsync_ShouldReturnCorrectAmountOfPieces()
+    {
+        //Arrange
+        var whiteId = Guid.NewGuid();
+        var blackId = Guid.NewGuid();
+        var aggregateId = Guid.NewGuid();
+
+        var startMatchCommand = new StartMatch
+        {
+            AggregateId = aggregateId,
+            MemberOneId = whiteId,
+            MemberTwoId = blackId
+        };
+
+        //Act
+        await _sut.StartMatchAsync(new(){ AggregateId = aggregateId, MemberOneId = whiteId, MemberTwoId = blackId});
+
+        var firstCount = (await _sut.GetPiecesAsync(aggregateId)).Count;
+
+        await _sut.TakeTurnAsync(aggregateId, new(whiteId, new(File.B, 2), new(File.B, 3), false));
+        await _sut.TakeTurnAsync(aggregateId, new(blackId, new(File.C, 7), new(File.C, 5), false));
+        await _sut.TakeTurnAsync(aggregateId, new(whiteId, new(File.B, 3), new(File.B, 4), false));
+        await _sut.TakeTurnAsync(aggregateId, new(blackId, new(File.C, 5), new(File.B, 4), false));
+
+        var secondCount = (await _sut.GetPiecesAsync(aggregateId)).Count;
+
+        //Assert
+        firstCount.ShouldBe(32);
+        secondCount.ShouldBe(31);
+    }
 }
