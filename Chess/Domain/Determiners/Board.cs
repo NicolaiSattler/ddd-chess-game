@@ -136,7 +136,9 @@ public class Board
         Guard.Against.NullOrEmpty(allPieces, nameof(allPieces));
         Guard.Against.NullOrEmpty(opponentPieces, nameof(opponentPieces));
 
-        var attackingPieces = king.GetAttackRange().SelectMany(square => GetPiecesThatCanReachPosition(square, allPieces, opponentPieces));
+        var attackingPieces = king.GetAttackRange()
+                                  .SelectMany(square => GetPiecesThatCanReachPosition(square, allPieces, opponentPieces))
+                                  .Distinct();
 
         if (attackingPieces != null)
         {

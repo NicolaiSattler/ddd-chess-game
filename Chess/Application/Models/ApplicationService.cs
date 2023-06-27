@@ -24,7 +24,6 @@ public interface IApplicationService
     Task DrawAsync(Guid aggregateId, Draw command);
     Task<IList<Piece>> GetPiecesAsync(Guid aggregateId);
     Task<Color> GetColorAtTurnAsync(Guid aggregateId);
-    Task<Player> GetPlayer(Guid aggregateId, Color color);
     Task<IEnumerable<MatchEntity>> GetMatchesAsync();
 }
 
