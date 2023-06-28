@@ -1,5 +1,6 @@
 using Chess.Infrastructure.Extensions;
 using Chess.Application.Extensions;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddServerSideBlazor();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 
