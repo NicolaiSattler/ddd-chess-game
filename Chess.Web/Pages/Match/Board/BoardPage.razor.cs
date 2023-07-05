@@ -30,11 +30,7 @@ public partial class BoardPage: ComponentBase
     public Player Black { get; private set; } = new();
     public Color ActiveColor { get; private set; }
     public Guid ActivePieceId { get; set; }
-
-    private void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
-    {
-        foreach (var item in fields) item.Highlight(highlighted);
-    }
+    public string? NotationSummary { get; set; }
 
     public Piece? SelectPiece(int rank, int file) => Pieces?.FirstOrDefault(p => p.Position == new Square((File)file, rank));
 
@@ -107,6 +103,7 @@ public partial class BoardPage: ComponentBase
         else
         {
             ActiveColor = ActiveColor == Color.White ? Color.Black : Color.White;
+            NotationSummary = await ApplicationService!.GetNotations(AggregateId);
 
             SetPlayerAtTurnStatus();
         }
@@ -121,7 +118,12 @@ public partial class BoardPage: ComponentBase
 
     private void SetPlayerAtTurnStatus()
     {
-        var content = ActiveColor == Color.Black ? "Black at turn" : "White at turn";
+        var content = ActiveColor == Color.Black ? "Black is at turn" : "White is at turn";
         Status = new(content, StatusType.Information);
+    }
+
+    private static void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
+    {
+        foreach (var item in fields) item.Highlight(highlighted);
     }
 }

@@ -9,6 +9,7 @@ using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using MatchEntity = Chess.Infrastructure.Entity.Match;
@@ -24,6 +25,7 @@ public interface IApplicationService
     Task DrawAsync(Guid aggregateId, Draw command);
     Task<IList<Piece>> GetPiecesAsync(Guid aggregateId);
     Task<Color> GetColorAtTurnAsync(Guid aggregateId);
+    Task<string> GetNotations(Guid aggregateId);
     Task<IEnumerable<MatchEntity>> GetMatchesAsync();
 }
 
@@ -52,7 +54,7 @@ public class ApplicationService : IApplicationService
 
     public async Task<Color> GetColorAtTurnAsync(Guid aggregateId)
     {
-        var match = await GetAggregateById(aggregateId) ;
+        var match = await GetAggregateById(aggregateId);
 
         return match.Turns.Last().Player.Color;
     }
@@ -129,6 +131,33 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
+    public async Task<string> GetNotations(Guid aggregateId)
+    {
+        var sb = new StringBuilder();
+        var match = await GetAggregateById(aggregateId);
+        var notationsByTurn = match.Turns.Select((m, Index) => new { m.Notation, Index })
+                                         .GroupBy(m => m.Index / 2, m => m.Notation)
+                                         .Select(m => m.ToList());
+
+        for (var i = 0; i < notationsByTurn.Count(); i++)
+        {
+            var group = notationsByTurn.ElementAt(i);
+
+            sb.Append(i)
+              .Append('.')
+              .Append(group.FirstOrDefault());
+
+            if (group.Count > 1)
+            {
+                sb.Append(' ');
+                sb.Append(group.LastOrDefault());
+                sb.Append(' ');
+            }
+        }
+
+        return sb.ToString();
+    }
+
     private async Task<DomainEvent?> SaveEventAsync(IMatch aggregate)
     {
         var @event = aggregate.Events.Last();
@@ -143,16 +172,16 @@ public class ApplicationService : IApplicationService
         return @event;
     }
 
-    private async Task<Match> GetAggregateById(Guid aggregateId)
+private async Task<Match> GetAggregateById(Guid aggregateId)
+{
+    var result = await _eventRepository.GetAsync(aggregateId);
+
+    if (!result.Any())
     {
-        var result = await _eventRepository.GetAsync(aggregateId);
-
-        if (!result.Any())
-        {
-            throw new ApplicationException($"No match events found for {aggregateId}");
-        }
-
-        var matchEvents = result.Select(e => e.ToDomainEvent());
-        return new(aggregateId, matchEvents);
+        throw new ApplicationException($"No match events found for {aggregateId}");
     }
+
+    var matchEvents = result.Select(e => e.ToDomainEvent());
+    return new(aggregateId, matchEvents);
+}
 }

@@ -1,5 +1,55 @@
 @page "/match/setup"
-<div class="card">
+@using FluentValidation;
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-6">
+  <MudCard>
+    <MudForm Model="@Setup" @ref="@_form" Validation="@Validator.ValidateValue" ValidationDelay="0">
+      <MudCardContent>
+		    <MudTextField @bind-Value="Setup.MemberOne"
+		    					  For="@(() => Setup.MemberOne)"
+                    Placeholder="00000000-0000-0000-0000-000000000000"
+		    					  Immediate="true"
+		    					  Label="Member One" />
+
+		    <MudTextField @bind-Value="Setup.MemberTwo"
+		    					  For="@(() => Setup.MemberTwo)"
+                    Placeholder="00000000-0000-0000-0000-000000000000"
+		    					  Immediate="true"
+		    					  Label="Member Two" />
+
+        <MudNumericField @bind-Value="Setup.MaxTurnTime"
+                      For="@(() => Setup.MaxTurnTime)"
+                      Label="Max Turntime"
+                      Variant="Variant.Text"
+                      Immediate="true"
+                      Min="0"
+                      Max="60"/>
+
+        <MudCheckBox @bind-Checked="Setup.DrawByRepition"
+                     For="@(() => Setup.DrawByRepition)"
+                     Label="Draw by Repitition"
+                     Disabled="true" />
+      </MudCardContent>
+    </MudForm>
+    <MudCardActions>
+      <MudButton Variant="Variant.Filled"
+                 StartIcon="@Icons.Material.Filled.ArrowBack"
+                 Color="Color.Secondary"
+                 Class="ml-auto"
+                 OnClick="(() => Back())">
+          Back
+      </MudButton>
+      <MudButton Variant="Variant.Filled"
+                 StartIcon="@Icons.Material.Filled.Save"
+                 Color="Color.Primary"
+                 Class="ml-1"
+                 OnClick="(() => NavigateToBoard())">
+        Start
+      </MudButton>
+    </MudCardActions>
+  </MudCard>
+</MudContainer>
+<!-- <div class="card">
   <div class="card-body">
     <EditForm Model="Setup">
       <div class="mb-3 row">
@@ -34,4 +84,4 @@
       </div>
     </EditForm>
   </div>
-</div>
+</div> -->

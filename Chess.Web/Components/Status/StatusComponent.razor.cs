@@ -14,9 +14,9 @@ public partial class StatusComponent : ComponentBase
 
     private string GetCalloutTypeClass(StatusType status) => status switch
     {
-        StatusType.Information => "callout-info",
-        StatusType.Warning => "callout-warning",
-        StatusType.Error => "callout-error",
+        StatusType.Information => "Color.Info",
+        StatusType.Warning => "Color.Warning",
+        StatusType.Error => "Color.Error",
         _ => string.Empty
     };
 

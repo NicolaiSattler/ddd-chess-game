@@ -1,14 +1,20 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider/>
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" />
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
     <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudSpacer />
+        <MudSwitch @bind-Checked="@_isDarkMode" Color="Color.Primary" Class="object-right" T="bool" Label="Dark Mode"/>
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Href="https://github.com/NicolaiSattler/ddd-chess-game" Target="blank" />
+        <MudMenu Icon="@Icons.Material.Filled.Person">
+            <MudMenuItem>Login</MudMenuItem>
+        </MudMenu>
     </MudAppBar>
-    <MudDrawer @bind-Open="@_drawerOpen">
+    <MudDrawer @bind-Open="@_isDrawerOpen">
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
@@ -16,10 +22,11 @@
     </MudMainContent>
 </MudLayout>
 @code {
-    bool _drawerOpen = true;
+    bool _isDrawerOpen = true;
+    bool _isDarkMode = true;
 
     void DrawerToggle()
     {
-        _drawerOpen = !_drawerOpen;
+        _isDrawerOpen = !_isDrawerOpen;
     }
 }

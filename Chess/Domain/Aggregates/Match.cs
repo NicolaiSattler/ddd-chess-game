@@ -194,7 +194,7 @@ public class Match : AggregateRoot, IMatch
         StartTurn(DateTime.UtcNow);
     }
 
-    private string DetermineNotation(Piece movingPiece,
+    private static string DetermineNotation(Piece movingPiece,
                                      Piece? targetPiece,
                                      CastlingType castling,
                                      PieceType? promotionType,
@@ -222,8 +222,8 @@ public class Match : AggregateRoot, IMatch
 
     private bool PlayerIsInCheck(Color color)
     {
-        var king = Pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King) as King;
-        return king != null ? Board.IsCheck(king, Pieces) : false;
+        return Pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King) is King king
+               && Board.IsCheck(king, Pieces);
     }
 
     private void Handle(MatchEnded @event)
