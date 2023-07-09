@@ -1,6 +1,7 @@
-@using Chess.Domain.ValueObjects;
+@using Chess.Domain.ValueObjects
 @using Chess.Web.Components.Piece
 @using Chess.Web.Components.Status
+@using Chess.Web.Components.Timeline
 
 @page "/match/board/{AggregateId:guid}"
 
@@ -32,27 +33,15 @@
             <StatusComponent Model="Status" />
         </MudPaper>
 
-        <MudDivider/>
-
-        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8 overflow-auto" MaxHeight="50vh" >
-            <MudTimeline Reverse="true">
-                <MudTimelineItem>
-                    <MudText>Item A</MudText>
-                </MudTimelineItem>
-                <MudTimelineItem>
-                    <MudText Align="Align.End">Item B</MudText>
-                </MudTimelineItem>
-                <MudTimelineItem>
-                    <MudText>Item C</MudText>
-                </MudTimelineItem>
-                <MudTimelineItem>
-                    <MudText Align="Align.End">Item D</MudText>
-                </MudTimelineItem>
-                <MudTimelineItem>
-                    <MudText>Item E</MudText>
-                </MudTimelineItem>
-            </MudTimeline>
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8 mt-2 overflow-auto" MaxHeight="50vh" >
+            <TimelineComponent />
         </MudPaper>
+
+        <MudButtonGroup Variant="Variant.Filled" Class="d-flex align-center justify-center mud-width-full mt-2 overflow-auto">
+            <MudButton StartIcon="@Icons.Material.Filled.AlarmAdd">Test</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.AlarmAdd">Test1</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.AlarmAdd">Test2</MudButton>
+        </MudButtonGroup>
     </MudItem>
 </MudGrid>
 
