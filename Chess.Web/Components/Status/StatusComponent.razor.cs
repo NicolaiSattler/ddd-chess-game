@@ -12,7 +12,7 @@ public partial class StatusComponent : ComponentBase
 
     private string? HtmlClass { get; set; }
 
-    private string GetCalloutTypeClass(StatusType status) => status switch
+    private static string GetCalloutTypeClass(StatusType status) => status switch
     {
         StatusType.Information => "Color.Info",
         StatusType.Warning => "Color.Warning",

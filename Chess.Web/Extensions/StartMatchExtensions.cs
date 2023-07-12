@@ -25,6 +25,5 @@ public static class Extensions
                 MaxTurnTime = new TimeSpan(0, model.MaxTurnTime, 0)
             }
         };
-
     }
 }

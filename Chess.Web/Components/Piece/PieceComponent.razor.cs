@@ -1,8 +1,5 @@
-using Chess.Domain.Entities.Pieces;
-using Chess.Domain.ValueObjects;
+using Chess.Web.Components.Board;
 using Microsoft.AspNetCore.Components;
-
-using Board = Chess.Web.Pages.Match.Board.BoardPage;
 
 namespace Chess.Web.Components.Piece;
 
@@ -20,7 +17,7 @@ public partial class PieceComponent
     public string? HtmlClasses { get; private set; }
 
     [CascadingParameter]
-    private Board? Parent { get; set;}
+    private BoardComponent? Parent { get; set;}
 
     private string GetPieceClass() => Type switch
     {

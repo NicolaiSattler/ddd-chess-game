@@ -23,10 +23,11 @@ public interface IApplicationService
     Task ResignAsync(Guid aggregateId, Resign command);
     Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
     Task DrawAsync(Guid aggregateId, Draw command);
-    Task<IList<Piece>> GetPiecesAsync(Guid aggregateId);
+    Task<List<Piece>> GetPiecesAsync(Guid aggregateId);
     Task<Color> GetColorAtTurnAsync(Guid aggregateId);
     Task<string> GetNotations(Guid aggregateId);
     Task<IEnumerable<MatchEntity>> GetMatchesAsync();
+    Task<Player> GetPlayerAsync(Guid aggregateId, Color color);
 }
 
 public class ApplicationService : IApplicationService
@@ -59,10 +60,16 @@ public class ApplicationService : IApplicationService
         return match.Turns.Last().Player.Color;
     }
 
-    public async Task<IList<Piece>> GetPiecesAsync(Guid aggregateId)
+    public async Task<List<Piece>> GetPiecesAsync(Guid aggregateId)
     {
         var match = await GetAggregateById(aggregateId);
         return match.Pieces;
+    }
+
+    public async Task<Player> GetPlayerAsync(Guid aggregateId, Color color)
+    {
+        var match = await GetAggregateById(aggregateId);
+        return color == Color.White ? match.White : match.Black;
     }
 
     //TODO: Make sure the timer is not disposed when the instance of ApplicationService is disposing.
@@ -172,16 +179,17 @@ public class ApplicationService : IApplicationService
         return @event;
     }
 
-private async Task<Match> GetAggregateById(Guid aggregateId)
-{
-    var result = await _eventRepository.GetAsync(aggregateId);
-
-    if (!result.Any())
+    //TODO: add caching?
+    private async Task<Match> GetAggregateById(Guid aggregateId)
     {
-        throw new ApplicationException($"No match events found for {aggregateId}");
-    }
+        var result = await _eventRepository.GetAsync(aggregateId);
 
-    var matchEvents = result.Select(e => e.ToDomainEvent());
-    return new(aggregateId, matchEvents);
-}
+        if (!result.Any())
+        {
+            throw new ApplicationException($"No match events found for {aggregateId}");
+        }
+
+        var matchEvents = result.Select(e => e.ToDomainEvent());
+        return new(aggregateId, matchEvents);
+    }
 }

@@ -1,7 +1,7 @@
+using Chess.Web.Components.Board;
 using Microsoft.AspNetCore.Components;
 
 using File = Chess.Domain.ValueObjects.File;
-using Board = Chess.Web.Pages.Match.Board.BoardPage;
 
 namespace Chess.Web.Components.Field;
 
@@ -17,7 +17,7 @@ public partial class FieldComponent
     private bool ShowFile => this.Rank == 8;
 
     [CascadingParameter]
-    private Board? Parent { get; set; }
+    private BoardComponent? Parent { get; set; }
 
     [Parameter, EditorRequired]
     public int Rank { get; set; }
