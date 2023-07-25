@@ -2,7 +2,7 @@
 @using Chess.Web.Components.Board
 @using Chess.Web.Components.Piece
 @using Chess.Web.Components.Status
-@using Chess.Web.Components.Timeline
+@using Chess.Web.Components.Summary
 
 @page "/match/board/{AggregateId:guid}"
 
@@ -14,11 +14,10 @@
     </MudItem>
     <MudItem xs="12" md="4">
         <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
-            <StatusComponent Model="Status" />
+            <StatusComponent Model="@Status" />
         </MudPaper>
-
-        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8 mt-2 overflow-auto" MaxHeight="50vh" >
-            <TimelineComponent />
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8 mt-2" Style="overflow:auto;" Height="400px">
+            <SummaryComponent Notations="@Notations" />
         </MudPaper>
 
         <MudButtonGroup Variant="Variant.Filled" Class="d-flex align-center justify-center mud-width-full mt-2 overflow-auto">

@@ -1,0 +1,34 @@
+<!-- Made issue at MudBlazor #7257 for line issue-->
+<MudTimeline @ref="Timeline" Reverse="true" TimelineOrientation="TimelineOrientation.Vertical" Style="height:100%">
+    @if (Notations != null)
+    {
+        @foreach(var item in Notations)
+        {
+            if (!string.IsNullOrEmpty(item.Notation))
+            {
+                if (Notations?.IndexOf(item) == (Notations!.Count - 2))
+                {
+                    <MudTimelineItem Color="Color.Info" Style="text-align:center;">
+                        <MudText Typo="Typo.body1">@item.Notation</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">@item.Time</MudText>
+                    </MudTimelineItem>
+                }
+                else
+                {
+                    <MudTimelineItem Style="text-align:center;">
+                        <MudText Typo="Typo.body1">@item.Notation</MudText>
+                        <MudText Typo="Typo.body2"Class="mud-text-secondary">@item.Time</MudText>
+                    </MudTimelineItem>
+                }
+            }
+        }
+    }
+</MudTimeline>
+
+@code {
+
+    public MudTimeline Timeline { get; set; }
+
+    [Parameter, EditorRequired]
+    public List<NotationModel>? Notations { get; set; } = new();
+}

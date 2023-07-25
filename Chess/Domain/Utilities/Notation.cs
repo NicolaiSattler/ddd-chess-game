@@ -6,6 +6,12 @@ namespace Chess.Domain.Utilities;
 
 public class NotationBuilder
 {
+    private const char CapturedSymbol = 'x';
+    private const char CheckSymbol = '+';
+    private const char CheckMateSymbol = '#';
+    private const string CastlingKingsideSymbols = "0-0";
+    private const string CastlingQueensideSymbols = "0-0-0";
+
     private readonly StringBuilder _builder;
 
     public NotationBuilder()
@@ -15,34 +21,36 @@ public class NotationBuilder
 
     public NotationBuilder HasPiece(PieceType pieceType)
     {
+        if (pieceType == PieceType.Pawn) return this;
+
         var pieceNotation = GetPieceNotation(pieceType);
         _builder.Append(pieceNotation);
 
         return this;
     }
 
-    public NotationBuilder HasCapturedPiece(Piece piece)
+    public NotationBuilder HasCapturedPiece(Piece movingPiece)
     {
-        if (piece is Pawn)
+        if (movingPiece is Pawn)
         {
-            _builder.Append(piece.Position.File);
+            _builder.Append(movingPiece.Position.File);
         }
 
-        _builder.Append("x");
+        _builder.Append(CapturedSymbol);
 
         return this;
     }
 
     public NotationBuilder IsCheck()
     {
-        _builder.Append("+");
+        _builder.Append(CheckSymbol);
 
         return this;
     }
 
     public NotationBuilder IsCheckMate()
     {
-        _builder.Append("#");
+        _builder.Append(CheckMateSymbol);
 
         return this;
     }
@@ -51,11 +59,11 @@ public class NotationBuilder
     {
         if (type == CastlingType.KingSide)
         {
-            _builder.Append("0-0");
+            _builder.Append(CastlingKingsideSymbols);
         }
         else if (type == CastlingType.QueenSide)
         {
-            _builder.Append("0-0-0");
+            _builder.Append(CastlingQueensideSymbols);
         }
 
         return this;
@@ -79,14 +87,13 @@ public class NotationBuilder
 
     public string Build() => _builder.ToString();
 
-    private string GetPieceNotation(PieceType pieceType) => pieceType switch
+    private static char GetPieceNotation(PieceType pieceType) => pieceType switch
     {
-        PieceType.King => "K",
-        PieceType.Queen => "Q",
-        PieceType.Rook => "R",
-        PieceType.Bishop => "B",
-        PieceType.Knight => "N",
-        PieceType.Pawn => "P",
+        PieceType.King => 'K',
+        PieceType.Queen => 'Q',
+        PieceType.Rook => 'R',
+        PieceType.Bishop => 'B',
+        PieceType.Knight => 'N',
         _ => throw new IndexOutOfRangeException("Unknown PieceType")
     };
 }

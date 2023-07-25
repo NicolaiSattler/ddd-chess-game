@@ -132,7 +132,7 @@ public class Board
 
     private static bool KingCannotEscapeCheck(King king, IEnumerable<Piece> allPieces, IEnumerable<Piece> opponentPieces)
     {
-        Guard.Against.Null<King>(king, nameof(king));
+        Guard.Against.Null(king, nameof(king));
         Guard.Against.NullOrEmpty(allPieces, nameof(allPieces));
         Guard.Against.NullOrEmpty(opponentPieces, nameof(opponentPieces));
 
@@ -140,23 +140,22 @@ public class Board
                                   .SelectMany(square => GetPiecesThatCanReachPosition(square, allPieces, opponentPieces))
                                   .Distinct();
 
-        if (attackingPieces != null)
+        if (!attackingPieces.Any())
         {
-            if (attackingPieces.Count() == 1)
-            {
-                var opponent = attackingPieces.First();
-                var alliedPieces = allPieces.Where(p => p.Color != opponent.Color);
-                var alliedPieceCanReachAttacker = GetPiecesThatCanReachPosition(opponent.Position, allPieces, alliedPieces).Any();
-
-                return !alliedPieceCanReachAttacker && !AttackCanBeBlocked(opponent, king, allPieces);
-            }
-            else
-            {
-                return true;
-            }
+            return false;
         }
+        else if (attackingPieces.Count() == 1)
+        {
+            var opponent = attackingPieces.First();
+            var alliedPieces = allPieces.Where(p => p.Color != opponent.Color);
+            var alliedPieceCanReachAttacker = GetPiecesThatCanReachPosition(opponent.Position, allPieces, alliedPieces).Any();
 
-        return false;
+            return !alliedPieceCanReachAttacker && !AttackCanBeBlocked(opponent, king, allPieces);
+        }
+        else
+        {
+            return true;
+        }
     }
 
     private static bool AttackCanBeBlocked(Piece attackingPiece, Piece defender, IEnumerable<Piece> pieces)

@@ -1,6 +1,7 @@
 using Chess.Core;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
+using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
 using Chess.Domain.Models;
@@ -25,7 +26,7 @@ public interface IApplicationService
     Task DrawAsync(Guid aggregateId, Draw command);
     Task<List<Piece>> GetPiecesAsync(Guid aggregateId);
     Task<Color> GetColorAtTurnAsync(Guid aggregateId);
-    Task<string> GetNotations(Guid aggregateId);
+    Task<IEnumerable<Turn>> GetTurns(Guid aggregateId);
     Task<IEnumerable<MatchEntity>> GetMatchesAsync();
     Task<Player> GetPlayerAsync(Guid aggregateId, Color color);
 }
@@ -86,14 +87,13 @@ public class ApplicationService : IApplicationService
         {
             var @event = await SaveEventAsync(match);
 
-            if (@event is TurnTaken turn)
+            if (@event is TurnTaken)
             {
                 var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
-                var maxTurnLengthInSeconds = match.Options.MaxTurnTime.Seconds;
 
                 _timer.Start(aggregateId, playerAtTurn!.MemberId);
             }
-            else if (@event is MatchEnded matchEnd)
+            else if (@event is MatchEnded)
             {
                 //TODO: update elo of players.
             }
@@ -138,31 +138,11 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
-    public async Task<string> GetNotations(Guid aggregateId)
+    public async Task<IEnumerable<Turn>> GetTurns(Guid aggregateId)
     {
-        var sb = new StringBuilder();
         var match = await GetAggregateById(aggregateId);
-        var notationsByTurn = match.Turns.Select((m, Index) => new { m.Notation, Index })
-                                         .GroupBy(m => m.Index / 2, m => m.Notation)
-                                         .Select(m => m.ToList());
 
-        for (var i = 0; i < notationsByTurn.Count(); i++)
-        {
-            var group = notationsByTurn.ElementAt(i);
-
-            sb.Append(i)
-              .Append('.')
-              .Append(group.FirstOrDefault());
-
-            if (group.Count > 1)
-            {
-                sb.Append(' ');
-                sb.Append(group.LastOrDefault());
-                sb.Append(' ');
-            }
-        }
-
-        return sb.ToString();
+        return match.Turns.ToList();
     }
 
     private async Task<DomainEvent?> SaveEventAsync(IMatch aggregate)

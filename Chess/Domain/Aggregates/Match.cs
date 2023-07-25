@@ -92,7 +92,7 @@ public class Match : AggregateRoot, IMatch
                 return new() { MatchResult = MatchResult.Stalemate };
             }
 
-            var turnTakenEvent = new TurnTaken(command.MemberId, command.StartPosition, command.EndPosition);
+            var turnTakenEvent = new TurnTaken(command.MemberId, command.StartPosition, command.EndPosition, DateTime.UtcNow);
             RaiseEvent(turnTakenEvent);
         }
 
@@ -157,8 +157,8 @@ public class Match : AggregateRoot, IMatch
     //TODO: test notation
     private void Handle(TurnTaken @event)
     {
-        Guard.Against.Null<TurnTaken>(@event, nameof(@event));
-        Guard.Against.Null<List<Turn>>(Turns, nameof(Turns));
+        Guard.Against.Null(@event, nameof(@event));
+        Guard.Against.Null(Turns, nameof(Turns));
 
         var movingPiece = Pieces.FirstOrDefault(p => p.Position == @event.StartPosition);
 
@@ -166,11 +166,8 @@ public class Match : AggregateRoot, IMatch
 
         var targetPiece = Pieces.FirstOrDefault(p => p.Position == @event.EndPosition);
         var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);
-        var castling = SpecialMoves.IsCastling(@event.StartPosition, @event.EndPosition, Pieces);
         var pieceIsCaptured = Board.PieceIsCaptured(@event, Pieces) || isEnPassant;
-        var isCheck = PlayerIsInCheck(movingPiece.Color);
-        var promotionType = Promotion(@event, movingPiece);
-        var notation = DetermineNotation(movingPiece, targetPiece, castling, promotionType, isCheck);
+        var castling = SpecialMoves.IsCastling(@event.StartPosition, @event.EndPosition, Pieces);
 
         if (isEnPassant)
         {
@@ -190,8 +187,12 @@ public class Match : AggregateRoot, IMatch
 
         movingPiece.Position = @event.EndPosition;
 
+        var promotionType = Promotion(@event, movingPiece);
+        var isCheck = OpponentIsInCheck(movingPiece.Color);
+        var notation = DetermineNotation(movingPiece, targetPiece, castling, promotionType, isCheck);
+
         EndTurn(@event, movingPiece.Type, notation);
-        StartTurn(DateTime.UtcNow);
+        StartTurn(@event.EndTime);
     }
 
     private static string DetermineNotation(Piece movingPiece,
@@ -207,7 +208,7 @@ public class Match : AggregateRoot, IMatch
         if (castling != CastlingType.Undefined)
             notation.IsCastling(castling);
         else if (targetPiece != null)
-            notation.HasCapturedPiece(targetPiece);
+            notation.HasCapturedPiece(movingPiece);
 
         notation.EndsAtPosition(movingPiece);
 
@@ -220,10 +221,10 @@ public class Match : AggregateRoot, IMatch
         return notation.Build();
     }
 
-    private bool PlayerIsInCheck(Color color)
+    private bool OpponentIsInCheck(Color currentPlayerColor)
     {
-        return Pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King) is King king
-               && Board.IsCheck(king, Pieces);
+        var piece =  Pieces.FirstOrDefault(p => p.Color != currentPlayerColor && p.Type == PieceType.King);
+        return piece is King king && Board.IsCheck(king, Pieces);
     }
 
     private void Handle(MatchEnded @event)

@@ -12,7 +12,7 @@ public partial class BoardPage: ComponentBase
     [Parameter]
     public Guid AggregateId { get; set; }
     public StatusModel Status { get; set; } = StatusModel.Empty();
-    public string? NotationSummary { get; set; }
+    public List<NotationModel> Notations { get; set; } = new();
     public Color ActiveColor { get; private set; }
 
     protected override async Task OnInitializedAsync()
@@ -20,6 +20,11 @@ public partial class BoardPage: ComponentBase
         if (ApplicationService != null)
         {
             ActiveColor =  await ApplicationService.GetColorAtTurnAsync(AggregateId);
+            Notations = (await ApplicationService.GetTurns(AggregateId))
+                                                 .Select(m => new NotationModel(m.Notation, m.StartTime.GetVerbalTimeDisplay()))
+                                                 .ToList();
+            Notations.Reverse();
+
             SetPlayerAtTurnStatus();
         }
     }
@@ -34,7 +39,10 @@ public partial class BoardPage: ComponentBase
         }
         else
         {
-            NotationSummary = await ApplicationService!.GetNotations(AggregateId);
+            var turns = await ApplicationService!.GetTurns(AggregateId);
+            Notations = turns.Select(m => new NotationModel(m.Notation, m.StartTime.GetVerbalTimeDisplay())).ToList();
+            Notations.Reverse();
+
             ActiveColor = ActiveColor == Color.White ? Color.Black : Color.White;
 
             SetPlayerAtTurnStatus();

@@ -19,7 +19,7 @@ Follow these steps:
 - Run the following command to create the database (from project root).
     ```
     sqlite3 Chess.db
-    .read Chess/SQL/ChessDb.sql
+    .read ../Chess/SQL/ChessDb.sql
     .exit
     ```
 - Run `dotnet watch`

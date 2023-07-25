@@ -6,14 +6,16 @@ namespace Chess.Domain.Events;
 
 public class TurnTaken : DomainEvent
 {
-    public Guid MemberId { get; }
-    public Square StartPosition { get; }
-    public Square EndPosition { get; }
+    public Guid MemberId { get; init; }
+    public Square StartPosition { get; init; }
+    public Square EndPosition { get; init; }
+    public DateTime EndTime { get; init; }
 
-    public TurnTaken(Guid memberId, Square startPosition, Square endPosition)
+    public TurnTaken(Guid memberId, Square startPosition, Square endPosition, DateTime endTime)
     {
         MemberId = memberId;
-        StartPosition = Guard.Against.Null<Square>(startPosition, nameof(startPosition));
-        EndPosition = Guard.Against.Null<Square>(endPosition, nameof(endPosition));
+        StartPosition = Guard.Against.Null(startPosition, nameof(startPosition));
+        EndPosition = Guard.Against.Null(endPosition, nameof(endPosition));
+        EndTime = endTime;
     }
 }

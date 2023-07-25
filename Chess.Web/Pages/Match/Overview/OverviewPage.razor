@@ -3,28 +3,37 @@
 @using Chess.Infrastructure.Entity;
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
-    <MudDataGrid T="Match" Items="@Matches" Filterable="false" SortMode="@SortMode.None" Groupable="false">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Match Overview</MudText>
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/match/setup">New Match</MudButton>
-        </ToolBarContent>
-        <Columns>
-            <PropertyColumn Property="x => Matches.IndexOf(x) + 1" />
-            <PropertyColumn Property="x => x.WhitePlayerId" Title="White" />
-            <PropertyColumn Property="x => x.BlackPlayerId" Title="Black" />
-            <PropertyColumn Property="x => x.StartTime" Title="Start Time" />
-            <TemplateColumn CellClass="d-flex justify-end">
-                <CellTemplate>
-                    <MudStack Row>
-                        <MudButton Size="@Size.Small" Variant="@Variant.Text" Color="@Color.Primary"
-                            OnClick="@(() => this.OnViewClick(context.Item))">View</MudButton>
-                    </MudStack>
-                </CellTemplate>
-            </TemplateColumn>
-        </Columns>
-        <PagerContent>
-            <MudDataGridPager T="Match" />
-        </PagerContent>
-    </MudDataGrid>
+
+    @if(Matches != null && Matches.Any())
+    {
+        <MudDataGrid T="Match" Items="@Matches" Filterable="false" SortMode="@SortMode.None" Groupable="false">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Match Overview</MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/match/setup">New Match</MudButton>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x => Matches.IndexOf(x) + 1" />
+                <PropertyColumn Property="x => x.WhitePlayerId" Title="White" />
+                <PropertyColumn Property="x => x.BlackPlayerId" Title="Black" />
+                <PropertyColumn Property="x => x.StartTime" Title="Start Time" />
+                <TemplateColumn CellClass="d-flex justify-end">
+                    <CellTemplate>
+                        <MudStack Row>
+                            <MudButton Size="@Size.Small" Variant="@Variant.Text" Color="@Color.Primary"
+                                OnClick="@(() => this.OnViewClick(context.Item))">View</MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Match" />
+            </PagerContent>
+        </MudDataGrid>
+    }
+    else
+    {
+        <MudText>No matches yet!</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/match/setup">New Match</MudButton>
+    }
 </MudContainer>
