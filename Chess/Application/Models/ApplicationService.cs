@@ -10,7 +10,6 @@ using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using MatchEntity = Chess.Infrastructure.Entity.Match;
@@ -74,7 +73,6 @@ public class ApplicationService : IApplicationService
     }
 
     //TODO: Make sure the timer is not disposed when the instance of ApplicationService is disposing.
-    //TODO: result of move should be returned to the end user.
     //TODO: Piece promotion?
     public async Task<TurnResult> TakeTurnAsync(Guid aggregateId, TakeTurn command)
     {
@@ -96,6 +94,7 @@ public class ApplicationService : IApplicationService
             else if (@event is MatchEnded)
             {
                 //TODO: update elo of players.
+                //Make sure elo isn't updated several times.
             }
         }
 
@@ -147,16 +146,23 @@ public class ApplicationService : IApplicationService
 
     private async Task<DomainEvent?> SaveEventAsync(IMatch aggregate)
     {
-        var @event = aggregate.Events.Last();
+        var lastEvent = aggregate.Events.Last();
 
-        if (@event is MatchStarted matchStartedEvent)
+        if (lastEvent is MatchStarted matchStartedEvent)
         {
             await _matchRepository.AddAsync(matchStartedEvent, false);
         }
+        else if (lastEvent is MatchEnded)
+        {
+            var lastTurnIndex = aggregate.Events.Count() - 2;
+            var lastTurnEvent = aggregate.Events.ElementAt(lastTurnIndex);
 
-        await _eventRepository.AddAsync(aggregate.Id, @event);
+            await _eventRepository.AddAsync(aggregate.Id, lastTurnEvent, false);
+        }
 
-        return @event;
+        await _eventRepository.AddAsync(aggregate.Id, lastEvent);
+
+        return lastEvent;
     }
 
     //TODO: add caching?

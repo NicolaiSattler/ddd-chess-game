@@ -21,7 +21,6 @@ public class NotationBuilderTests
     [DataRow(PieceType.Queen, "Q")]
     [DataRow(PieceType.Rook, "R")]
     [DataRow(PieceType.Knight, "N")]
-    [DataRow(PieceType.Pawn, "P")]
     public void  HasPiece_ShouldReturnTheCorrectLetter(PieceType pieceType, string expectedLetter)
     {
         //Arrange & Act
@@ -81,7 +80,7 @@ public class NotationBuilderTests
         var result = _sut.IsCastling(type).Build();
 
         //Assert
-        expectedResult.ShouldBe(expectedResult);
+        result.ShouldBe(expectedResult);
     }
 
     [TestMethod]

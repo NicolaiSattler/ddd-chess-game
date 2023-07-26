@@ -3,6 +3,8 @@ namespace Chess.Domain.ValueObjects;
 public record Square(File File, int Rank)
 {
     public override string ToString() => $"{File}{Rank}";
+
+    public static Square Empty() => new(File.Undefined, 0);
 }
 
 public enum File

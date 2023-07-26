@@ -16,7 +16,7 @@ public class PieceInvalidMoveTests
     public void PawnA1_MoveToB2_AttacksInvalidSquare()
     {
         //Arrange
-        var command = new TakeTurn(Guid.Empty, new(File.D, 1), new(File.C, 2), false);
+        var command = new TakeTurn() { StartPosition = new(File.D, 1), EndPosition = new(File.C, 2) };
         var pieces = new List<Piece>
         {
             new Pawn { Position = new Square(File.D, 1), Color = Color.White }
@@ -37,7 +37,7 @@ public class PieceInvalidMoveTests
     public void PawnA1_MoveToH2_AttacksInvalidSquare()
     {
         //Arrange
-        var command = new TakeTurn(Guid.Empty, new(File.D, 1), new(File.H, 2), false);
+        var command = new TakeTurn() { StartPosition = new(File.D, 1), EndPosition =  new(File.H, 2) };
         var pieces = new List<Piece>
         {
             new Pawn { Position = new(File.D, 1), Color = Color.White }
@@ -58,7 +58,7 @@ public class PieceInvalidMoveTests
     public void BishopA1_MoveToA2_AttacksInvalidSquare()
     {
         //Arrange
-        var command = new TakeTurn(Guid.Empty, new(File.A, 1), new(File.A, 2), false);
+        var command = new TakeTurn() { StartPosition = new(File.A, 1), EndPosition = new(File.A, 2) };
         var pieces = new List<Piece>
         {
             new Bishop { Position = new(File.A, 1), Color = Color.White }
@@ -78,7 +78,7 @@ public class PieceInvalidMoveTests
     public void KingC5_MoveToC6_MoveIsInvalid()
     {
         //Arrange
-        var command = new TakeTurn(Guid.Empty, new(File.C, 5), new(File.C, 6), false);
+        var command = new TakeTurn() { StartPosition = new(File.C, 5), EndPosition = new(File.C, 6) };
         var pieces = new List<Piece>
         {
             new King { Position = new(File.C, 5), Color = Color.White },

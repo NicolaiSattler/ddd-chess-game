@@ -74,7 +74,7 @@ public partial class BoardComponent: ComponentBase
     //TODO: check if move is castling!
     private async Task<TurnResult> ExecuteTurnCommand(PieceEntity activePiece, Square endPosition)
     {
-        var command = new TakeTurn(ActiveMemberId, activePiece.Position, endPosition, false);
+        var command = new TakeTurn() { MemberId = ActiveMemberId, StartPosition = activePiece.Position, EndPosition = endPosition };
 
         return await ApplicationService!.TakeTurnAsync(AggregateId, command);
     }

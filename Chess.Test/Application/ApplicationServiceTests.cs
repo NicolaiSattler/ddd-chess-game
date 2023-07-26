@@ -13,9 +13,6 @@ namespace Chess.Test.Application;
 [TestClass]
 public class ApplicationServiceTests: TestBase
 {
-    private Guid WhiteId { get; }
-    private Guid BlackId { get; }
-    private Guid AggregateId { get; }
     private Mock<ITurnTimer> _mockedTimer;
     private MatchRepository _matchRepository;
     private MatchEventRepository _eventRepository;
@@ -46,8 +43,8 @@ public class ApplicationServiceTests: TestBase
             MemberTwoId = blackId
         };
 
-        var whiteTurn = new TakeTurn(whiteId, new(File.A, 2), new(File.A, 4), false);
-        var blackTurn = new TakeTurn(blackId, new(File.C, 7), new(File.C, 5), false);
+        var whiteTurn = new TakeTurn{ MemberId = whiteId, StartPosition = new(File.A, 2), EndPosition = new(File.A, 4) };
+        var blackTurn = new TakeTurn{ MemberId = blackId, StartPosition = new(File.C, 7), EndPosition = new(File.C, 5) };
 
         //Act
         await _sut.StartMatchAsync(startMatchCommand);
@@ -79,7 +76,7 @@ public class ApplicationServiceTests: TestBase
         var result = await _sut.GetPiecesAsync(aggregateId);
 
         //Assert
-        result.Count().ShouldBe(32);
+        result.Count.ShouldBe(32);
         result.Count(m => m.Color == Color.Black).ShouldBe(16);
         result.Count(m => m.Color == Color.White).ShouldBe(16);
     }
@@ -124,10 +121,10 @@ public class ApplicationServiceTests: TestBase
         await _sut.StartMatchAsync(startMatchCommand);
         var firstAtTurn = await _sut.GetColorAtTurnAsync(aggregateId);
 
-        await _sut.TakeTurnAsync(aggregateId, new(whiteId, new(File.B, 2), new(File.B, 3), false));
+        await _sut.TakeTurnAsync(aggregateId, new() { MemberId = whiteId, StartPosition = new(File.B, 2), EndPosition = new(File.B, 3) });
         var secondAtTurn = await _sut.GetColorAtTurnAsync(aggregateId);
 
-        await _sut.TakeTurnAsync(aggregateId, new(blackId, new(File.B, 7), new(File.B, 5), false));
+        await _sut.TakeTurnAsync(aggregateId, new() { MemberId = blackId, StartPosition = new(File.B, 7), EndPosition = new(File.B, 5) });
         var thirdAtTurn = await _sut.GetColorAtTurnAsync(aggregateId);
 
         //Assert
@@ -152,14 +149,14 @@ public class ApplicationServiceTests: TestBase
         };
 
         //Act
-        await _sut.StartMatchAsync(new(){ AggregateId = aggregateId, MemberOneId = whiteId, MemberTwoId = blackId});
+        await _sut.StartMatchAsync(startMatchCommand);
 
         var firstCount = (await _sut.GetPiecesAsync(aggregateId)).Count;
 
-        await _sut.TakeTurnAsync(aggregateId, new(whiteId, new(File.B, 2), new(File.B, 3), false));
-        await _sut.TakeTurnAsync(aggregateId, new(blackId, new(File.C, 7), new(File.C, 5), false));
-        await _sut.TakeTurnAsync(aggregateId, new(whiteId, new(File.B, 3), new(File.B, 4), false));
-        await _sut.TakeTurnAsync(aggregateId, new(blackId, new(File.C, 5), new(File.B, 4), false));
+        await _sut.TakeTurnAsync(aggregateId, new() { MemberId = whiteId, StartPosition = new(File.B, 2), EndPosition =  new(File.B, 3) });
+        await _sut.TakeTurnAsync(aggregateId, new() { MemberId = blackId, StartPosition = new(File.C, 7), EndPosition =  new(File.C, 5) });
+        await _sut.TakeTurnAsync(aggregateId, new() { MemberId = whiteId, StartPosition = new(File.B, 3), EndPosition =  new(File.B, 4) });
+        await _sut.TakeTurnAsync(aggregateId, new() { MemberId = blackId, StartPosition = new(File.C, 5), EndPosition =  new(File.B, 4) });
 
         var secondCount = (await _sut.GetPiecesAsync(aggregateId)).Count;
 

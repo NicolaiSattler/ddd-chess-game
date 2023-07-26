@@ -1,5 +1,6 @@
 using Ardalis.GuardClauses;
 using Chess.Core;
+using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Events;
@@ -7,15 +8,8 @@ namespace Chess.Domain.Events;
 public class TurnTaken : DomainEvent
 {
     public Guid MemberId { get; init; }
-    public Square StartPosition { get; init; }
-    public Square EndPosition { get; init; }
+    public Square StartPosition { get; init; } = Square.Empty();
+    public Square EndPosition { get; init; } = Square.Empty();
     public DateTime EndTime { get; init; }
-
-    public TurnTaken(Guid memberId, Square startPosition, Square endPosition, DateTime endTime)
-    {
-        MemberId = memberId;
-        StartPosition = Guard.Against.Null(startPosition, nameof(startPosition));
-        EndPosition = Guard.Against.Null(endPosition, nameof(endPosition));
-        EndTime = endTime;
-    }
+    public PieceType PromotionType { get; init; }
 }

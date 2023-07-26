@@ -23,7 +23,7 @@ public class PieceCannotAttackOwnColorTests
             new Pawn() { Color = Color.Black, Position = new(File.C, 2) }
         };
 
-        _command = new(Guid.NewGuid(), new(File.C, 2), new(File.C, 3), false);
+        _command = new() { StartPosition = new(File.C, 2), EndPosition = new(File.C, 3) };
 
         _sut = new PieceCannotAttackOwnColor(_command, _pieces);
 
@@ -38,21 +38,13 @@ public class PieceCannotAttackOwnColorTests
     public void TakeTurn_CheckRule_IsInvalidMove()
     {
         //Arrange
-        _pieces = new();
-        _pieces.Add(new Pawn()
+        _pieces = new()
         {
-            Color = Color.Black,
-            Position = new(File.C, 3)
-        });
+            new Pawn() { Color = Color.Black, Position = new(File.C, 3) },
+            new Pawn() { Color = Color.Black, Position = new(File.C, 2) }
+        };
 
-        _pieces.Add(new Pawn()
-        {
-            Color = Color.Black,
-            Position = new(File.C, 2)
-        });
-
-        _command = new(Guid.NewGuid(), new(File.C, 2), new(File.C, 3), false);
-
+        _command = new() { StartPosition = new(File.C, 2), EndPosition = new(File.C, 3) };
         _sut = new PieceCannotAttackOwnColor(_command, _pieces);
 
         //Act

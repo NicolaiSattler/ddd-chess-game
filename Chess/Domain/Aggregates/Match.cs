@@ -63,37 +63,21 @@ public class Match : AggregateRoot, IMatch
     //TODO: Draw by repitition
     public TurnResult TakeTurn(TakeTurn command)
     {
-        var matchResult = MatchResult.Undefined;
         var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
                                     .SelectMany(r => r.CheckRule())
                                     .ToList();
 
-        Func<Guid?, MatchResult> GetMatchResult = (memberId)
-            => memberId == White.MemberId ? MatchResult.WhiteWins : MatchResult.BlackWins;
 
         if (!violations.Any())
         {
-            var isCheckmate = IsCheckMate(command);
-
-            if (isCheckmate)
+            RaiseEvent(new TurnTaken
             {
-                matchResult = GetMatchResult(command.MemberId);
-                var matchEndedEvent = new MatchEnded(White, Black, matchResult);
-
-                RaiseEvent(matchEndedEvent);
-                return new() { MatchResult = matchResult };
-            }
-
-            var isStalemate = IsStalemate(command);
-
-            if (isStalemate)
-            {
-                RaiseEvent(new MatchEnded(White, Black, MatchResult.Draw));
-                return new() { MatchResult = MatchResult.Stalemate };
-            }
-
-            var turnTakenEvent = new TurnTaken(command.MemberId, command.StartPosition, command.EndPosition, DateTime.UtcNow);
-            RaiseEvent(turnTakenEvent);
+                MemberId = command.MemberId,
+                StartPosition = command.StartPosition,
+                EndPosition =  command.EndPosition,
+                PromotionType = command.PromotionType,
+                EndTime = DateTime.UtcNow
+            });
         }
 
         return new() { Violations = violations };
@@ -101,7 +85,7 @@ public class Match : AggregateRoot, IMatch
 
     public void Forfeit(Forfeit command)
     {
-        Guard.Against.Null<Forfeit>(command, nameof(command));
+        Guard.Against.Null(command, nameof(command));
 
         var matchResult = command.MemberId == White.MemberId
                         ? MatchResult.WhiteForfeit
@@ -160,11 +144,11 @@ public class Match : AggregateRoot, IMatch
         Guard.Against.Null(@event, nameof(@event));
         Guard.Against.Null(Turns, nameof(Turns));
 
-        var movingPiece = Pieces.FirstOrDefault(p => p.Position == @event.StartPosition);
+        var movingPiece = Pieces.Find(p => p.Position == @event.StartPosition);
 
         if (movingPiece == null) return;
 
-        var targetPiece = Pieces.FirstOrDefault(p => p.Position == @event.EndPosition);
+        var targetPiece = Pieces.Find(p => p.Position == @event.EndPosition);
         var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);
         var pieceIsCaptured = Board.PieceIsCaptured(@event, Pieces) || isEnPassant;
         var castling = SpecialMoves.IsCastling(@event.StartPosition, @event.EndPosition, Pieces);
@@ -172,34 +156,45 @@ public class Match : AggregateRoot, IMatch
         if (isEnPassant)
         {
             var pieceId = Turns.Last().Id;
-            targetPiece = Pieces.FirstOrDefault(p => p.Id == pieceId);
+            targetPiece = Pieces.Find(p => p.Id == pieceId);
         }
 
-        if (castling != CastlingType.Undefined)
-        {
-            MoveCastingPieces(movingPiece, @event.EndPosition);
-        }
+        if (castling != CastlingType.Undefined) MoveCastingPieces(movingPiece, @event.EndPosition);
 
-        if (targetPiece != null && pieceIsCaptured)
-        {
-            Pieces.Remove(targetPiece);
-        }
+        if (targetPiece != null && pieceIsCaptured) Pieces.Remove(targetPiece);
 
         movingPiece.Position = @event.EndPosition;
 
-        var promotionType = Promotion(@event, movingPiece);
+        if (@event.PromotionType != PieceType.Undefined) PromotePiece(@event.PromotionType, movingPiece);
+
+        var isCheckMate = IsCheckMate(@event);
+        var isStalemate = Board.IsStalemate(movingPiece.Color, Pieces);
         var isCheck = OpponentIsInCheck(movingPiece.Color);
-        var notation = DetermineNotation(movingPiece, targetPiece, castling, promotionType, isCheck);
+        var notation = DetermineNotation(movingPiece, targetPiece, castling, @event.PromotionType, isCheck, isCheckMate);
 
         EndTurn(@event, movingPiece.Type, notation);
-        StartTurn(@event.EndTime);
+
+        if (isCheckMate)
+        {
+            var matchResult = GetMatchResult(@event.MemberId);
+            RaiseEvent(new MatchEnded(White, Black, matchResult));
+        }
+        else if (isStalemate)
+        {
+            RaiseEvent(new MatchEnded(White, Black, MatchResult.Stalemate));
+        }
+        else
+        {
+            StartTurn(@event.EndTime);
+        }
     }
 
     private static string DetermineNotation(Piece movingPiece,
-                                     Piece? targetPiece,
-                                     CastlingType castling,
-                                     PieceType? promotionType,
-                                     bool isCheck)
+                                            Piece? targetPiece,
+                                            CastlingType castling,
+                                            PieceType promotionType,
+                                            bool isCheck,
+                                            bool isCheckMate)
     {
         var notation = new NotationBuilder();
 
@@ -212,11 +207,14 @@ public class Match : AggregateRoot, IMatch
 
         notation.EndsAtPosition(movingPiece);
 
-        if (promotionType != null)
-            notation.IsPromotion(promotionType.Value);
+        if (promotionType != PieceType.Undefined)
+            notation.IsPromotion(promotionType);
 
         if (isCheck)
             notation.IsCheck();
+
+        if (isCheckMate)
+            notation.IsCheckMate();
 
         return notation.Build();
     }
@@ -227,10 +225,11 @@ public class Match : AggregateRoot, IMatch
         return piece is King king && Board.IsCheck(king, Pieces);
     }
 
+    //TODO: Notify Client that the match has ended
     private void Handle(MatchEnded @event)
     {
-        var whiteId = Guard.Against.Null<Player>(White, nameof(White)).MemberId;
-        var blackId = Guard.Against.Null<Player>(Black, nameof(Black)).MemberId;
+        var whiteId = Guard.Against.Null(White, nameof(White)).MemberId;
+        var blackId = Guard.Against.Null(Black, nameof(Black)).MemberId;
         var result = Elo.Calculate(White.Elo, Black.Elo, @event.Result);
 
         if (result != null)
@@ -240,8 +239,7 @@ public class Match : AggregateRoot, IMatch
         }
     }
 
-    private Player GetOpponent(Guid memberId)
-        => memberId != White.MemberId ? White : Black;
+    private Player GetOpponent(Guid memberId) => memberId != White.MemberId ? White : Black;
 
     private void StartTurn(DateTime startTime)
     {
@@ -259,10 +257,10 @@ public class Match : AggregateRoot, IMatch
     //TODO: Unit Test in aggregate
     private void EndTurn(TurnTaken @event, PieceType pieceType, string notation)
     {
-        @event = Guard.Against.Null<TurnTaken>(@event, nameof(@event));
-        pieceType = Guard.Against.Null<PieceType>(pieceType, nameof(pieceType));
+        @event = Guard.Against.Null(@event, nameof(@event));
+        pieceType = Guard.Against.Null(pieceType, nameof(pieceType));
 
-        var turn = Turns.LastOrDefault() ?? throw new InvalidOperationException("No turns found!");
+        var turn = Turns.Last() ?? throw new InvalidOperationException("No turns found!");
         var player = White.MemberId == @event.MemberId ? White : Black;
 
         turn.StartPosition = @event.StartPosition;
@@ -274,19 +272,12 @@ public class Match : AggregateRoot, IMatch
 
     //TODO: Unit Test in aggregate
     //TODO: User should be given a choice to which kind the piece it will be promoted to.
-    private PieceType? Promotion(TurnTaken @event, Piece movingPiece)
+    private void PromotePiece(PieceType promotionType, Piece movingPiece)
     {
-        if (SpecialMoves.PawnIsPromoted(movingPiece, @event.EndPosition) && movingPiece != null)
-        {
-            var queen = PiecesFactory.CreatePiece(PieceType.Queen, @event.EndPosition, movingPiece.Id, movingPiece.Color);
+        var newPieceType = PiecesFactory.CreatePiece(promotionType, movingPiece.Position, movingPiece.Id, movingPiece.Color);
 
-            Pieces.Remove(movingPiece);
-            Pieces.Add(queen);
-
-            return queen.Type;
-        }
-
-        return null;
+        Pieces.Remove(movingPiece);
+        Pieces.Add(newPieceType);
     }
 
     //TODO: Unit Test in aggregate
@@ -307,10 +298,10 @@ public class Match : AggregateRoot, IMatch
     }
 
     //TODO: Unit Test in aggregate
-    private bool IsCheckMate(TakeTurn turn)
+    private bool IsCheckMate(TurnTaken @event)
     {
-        var player = turn.MemberId == Black.MemberId ? Black : White;
-        var piece = Pieces.FirstOrDefault(p => p.Color != player.Color && p.Type == PieceType.King);
+        var player = @event.MemberId == Black.MemberId ? Black : White;
+        var piece = Pieces.Find(p => p.Color != player.Color && p.Type == PieceType.King);
 
         if (piece is King king)
         {
@@ -320,16 +311,7 @@ public class Match : AggregateRoot, IMatch
         return false;
     }
 
-    //TODO: Unit Test in aggregate
-    private bool IsStalemate(TakeTurn command)
-    {
-        var movingPiece = Pieces.First(p => p.Position == command.StartPosition)
-                ?? throw new InvalidOperationException("Piece not found!");
-
-        return Board.IsStalemate(movingPiece.Color, Pieces);
-    }
-
-    public string CalculateHash(Color color)
+    private  string CalculateHash(Color color)
     {
         const string separator = "";
         using var md5 = MD5.Create();
@@ -344,4 +326,6 @@ public class Match : AggregateRoot, IMatch
 
         return string.Join(separator, hexdecimalCollection);
     }
+
+    private MatchResult GetMatchResult(Guid? memberId) => memberId == White.MemberId ? MatchResult.WhiteWins : MatchResult.BlackWins;
 }

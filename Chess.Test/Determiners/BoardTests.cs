@@ -12,9 +12,8 @@ namespace Chess.Test.Domain.Determiners
         public void PawnC7_MovesToC8_IsPromoted()
         {
             //Arrange
-            var command = new TurnTaken(Guid.NewGuid(), new(File.C, 7), new(File.C, 8), DateTime.UtcNow);
+            var command = new TurnTaken(){ StartPosition = new(File.C, 7), EndPosition = new(File.C, 8), EndTime = DateTime.UtcNow };
             var pawn = new Pawn { Color = Color.White, Position = new(File.C, 7) };
-            var pieces = new List<Piece>() { pawn };
 
             //Act
             var result = SpecialMoves.PawnIsPromoted(pawn, command.EndPosition);
@@ -27,7 +26,7 @@ namespace Chess.Test.Domain.Determiners
         public void PawnC7_MovesToD8_Captures_BishopD8()
         {
             //Arrange
-            var command = new TurnTaken(Guid.NewGuid(), new(File.C, 7), new(File.D, 8), DateTime.UtcNow);
+            var command = new TurnTaken(){ StartPosition = new(File.C, 7), EndPosition = new(File.D, 8), EndTime = DateTime.UtcNow };
             var pieces = new List<Piece>()
             {
                 new Pawn { Color = Color.White, Position = new(File.C, 7) },
@@ -45,7 +44,7 @@ namespace Chess.Test.Domain.Determiners
         public void PawnC7_MovesToD8_DoesNotCapture_BishopD8()
         {
             //Arrange
-            var command = new TurnTaken(Guid.NewGuid(), new(File.C, 7), new(File.D, 8), DateTime.UtcNow);
+            var command = new TurnTaken(){ StartPosition = new(File.C, 7), EndPosition = new(File.D, 8), EndTime = DateTime.UtcNow };
             var pieces = new List<Piece>()
             {
                 new Pawn { Color = Color.White, Position = new(File.C, 7) },
