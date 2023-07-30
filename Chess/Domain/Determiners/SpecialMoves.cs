@@ -11,8 +11,8 @@ public class SpecialMoves
 {
     public static bool IsEnPassant(Piece pawn, IEnumerable<Turn> turns)
     {
-        Guard.Against.Null<Piece>(pawn, nameof(pawn));
-        Guard.Against.Null<IEnumerable<Turn>>(turns, nameof(turns));
+        Guard.Against.Null(pawn, nameof(pawn));
+        Guard.Against.Null(turns, nameof(turns));
 
         if (!turns.Any()) return false;
 
@@ -58,9 +58,9 @@ public class SpecialMoves
 
     public static CastlingType IsCastling(Square startPosition, Square endPosition, IEnumerable<Piece> pieces)
     {
-        Guard.Against.Null<Square>(startPosition, nameof(startPosition));
-        Guard.Against.Null<Square>(endPosition, nameof(endPosition));
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null(startPosition, nameof(startPosition));
+        Guard.Against.Null(endPosition, nameof(endPosition));
+        Guard.Against.Null(pieces, nameof(pieces));
 
         var king = pieces.FirstOrDefault(p => p.Position == startPosition);
 

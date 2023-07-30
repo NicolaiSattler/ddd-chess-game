@@ -9,18 +9,21 @@ namespace Chess.Domain.Determiners;
 
 public class Board
 {
+    private static readonly Func<Square, Square, bool> IsSameFile = (a, b) => a.File == b.File;
+    private static readonly Func<Square, Square, bool> IsSameRank = (a, b) => a.Rank == b.Rank;
+
     public static bool IsCheck(King king, IEnumerable<Piece> pieces)
     {
-        Guard.Against.Null<King>(king, nameof(King));
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null(king, nameof(King));
+        Guard.Against.Null(pieces, nameof(pieces));
 
         return !KingIsUnreachable(king, pieces) && GetPiecesThatReachKing(king, pieces).Any();
     }
 
     public static bool IsCheckMate(King king, IEnumerable<Piece> pieces)
     {
-        Guard.Against.Null<King>(king, nameof(King));
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null(king, nameof(King));
+        Guard.Against.Null(pieces, nameof(pieces));
 
         var isCheck = IsCheck(king, pieces);
 
@@ -35,7 +38,7 @@ public class Board
 
     public static bool IsStalemate(Color color, IEnumerable<Piece> pieces)
     {
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null(pieces, nameof(pieces));
 
         var king = pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King) ?? throw new InvalidOperationException("King cannot be found!");
         var atTurnPieces = pieces.Where(p => p.Color == color) ?? Enumerable.Empty<Piece>();
@@ -63,9 +66,9 @@ public class Board
 
     public static IEnumerable<Piece> GetPiecesThatCanReachPosition(Square position, IEnumerable<Piece> pieces, IEnumerable<Piece> opponentPieces)
     {
-        Guard.Against.Null<Square>(position, nameof(position));
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
-        Guard.Against.Null<IEnumerable<Piece>>(opponentPieces, nameof(opponentPieces));
+        Guard.Against.Null(position, nameof(position));
+        Guard.Against.Null(pieces, nameof(pieces));
+        Guard.Against.Null(opponentPieces, nameof(opponentPieces));
 
         var result = new List<Piece>();
 
@@ -91,8 +94,8 @@ public class Board
 
     public static bool PieceIsCaptured(TurnTaken @event, IEnumerable<Piece> pieces)
     {
-        Guard.Against.Null<TurnTaken>(@event, nameof(@event));
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
+        Guard.Against.Null(@event, nameof(@event));
+        Guard.Against.Null(pieces, nameof(pieces));
 
         var movingPiece = pieces.FirstOrDefault(p => p.Position == @event.StartPosition)
                         ?? throw new InvalidOperationException("Piece does not exists!");
@@ -122,9 +125,9 @@ public class Board
 
     private static IEnumerable<Piece> GetPiecesThatReachKing(King king, IEnumerable<Piece> pieces)
     {
-        Guard.Against.Null<King>(king, nameof(king));
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
-        Guard.Against.InvalidInput<King>(king, nameof(king), k => k.Position != null, "King doesn't have a position.");
+        Guard.Against.Null(king, nameof(king));
+        Guard.Against.Null(pieces, nameof(pieces));
+        Guard.Against.InvalidInput(king, nameof(king), k => k.Position != null, "King doesn't have a position.");
 
         var opponentPieces = pieces.Where(p => p.Color != king.Color);
         return GetPiecesThatCanReachPosition(king.Position, pieces, opponentPieces);
@@ -160,8 +163,8 @@ public class Board
 
     private static bool AttackCanBeBlocked(Piece attackingPiece, Piece defender, IEnumerable<Piece> pieces)
     {
-        Guard.Against.Null<Piece>(attackingPiece, nameof(attackingPiece));
-        Guard.Against.Null<Piece>(defender, nameof(defender));
+        Guard.Against.Null(attackingPiece, nameof(attackingPiece));
+        Guard.Against.Null(defender, nameof(defender));
 
         var attackDirection = GetMoveDirection(attackingPiece.Position, defender.Position);
         var path = attackingPiece.GetAttackRange().Where(p => GetMoveDirection(p, defender.Position) == attackDirection);
@@ -178,7 +181,7 @@ public class Board
         var opponentPieces = pieces.Where(p => p.Color != piece.Color);
 
         return piece.GetAttackRange()
-                    .Where(p => (p.File != piece.Position.File && (opponentPieces.All(q => q.Position == p)))
+                    .Where(p => (p.File != piece.Position.File && opponentPieces.All(q => q.Position == p))
                                 || p.File == piece.Position.File);
     }
 
@@ -201,9 +204,6 @@ public class Board
         return result;
     }
 
-    private static Func<Square, Square, bool> IsSameFile = (a, b) => a.File == b.File;
-
-    private static Func<Square, Square, bool> IsSameRank = (a, b) => a.Rank == b.Rank;
 
     private static bool DirectionIsObstructedForPawn(IEnumerable<Piece> pieces, Piece pawn, Square end)
     {

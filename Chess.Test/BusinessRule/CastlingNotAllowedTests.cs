@@ -137,4 +137,53 @@ public class CastlingNotAllowedTests
         //Assert
         result.ShouldNotBeEmpty();
     }
+
+    [TestMethod]
+    [DataRow(File.F)]
+    [DataRow(File.G)]
+    [DataRow(File.H)]
+    public void  Taketurn_CheckRule_CannotPassThroughCheck_Kingside(File fileOfBlackRook)
+    {
+        //Arrange
+        var command = new TakeTurn { StartPosition = new(File.E, 1), EndPosition =  new(File.G, 1) };
+        var pieces = new List<Piece>()
+        {
+            new King { Color = Color.White, Position = new(File.E, 1)},
+            new Rook { Color = Color.White, Position = new(File.H, 1)},
+            new Rook { Color = Color.Black, Position = new(fileOfBlackRook, 4)},
+        };
+        var turns = new List<Turn>();
+        var sut = new CastlingNotAllowed(command, pieces, turns);
+
+        //Act
+        var result = sut.CheckRule();
+
+        //Assert
+        result.ShouldNotBeEmpty();
+    }
+
+    [TestMethod]
+    [DataRow(File.A)]
+    [DataRow(File.B)]
+    [DataRow(File.C)]
+    [DataRow(File.D)]
+    public void  Taketurn_CheckRule_CannotPassThroughCheck_Queenside(File fileOfBlackRook)
+    {
+        //Arrange
+        var command = new TakeTurn { StartPosition = new(File.E, 1), EndPosition =  new(File.C, 1) };
+        var pieces = new List<Piece>()
+        {
+            new King { Color = Color.White, Position = new(File.E, 1)},
+            new Rook { Color = Color.White, Position = new(File.A, 1)},
+            new Rook { Color = Color.Black, Position = new(fileOfBlackRook, 4)},
+        };
+        var turns = new List<Turn>();
+        var sut = new CastlingNotAllowed(command, pieces, turns);
+
+        //Act
+        var result = sut.CheckRule();
+
+        //Assert
+        result.ShouldNotBeEmpty();
+    }
 }
