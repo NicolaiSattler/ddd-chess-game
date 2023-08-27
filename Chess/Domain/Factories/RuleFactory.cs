@@ -14,9 +14,9 @@ public class RuleFactory
                                                          IEnumerable<Piece> pieces,
                                                          IEnumerable<Turn> turns)
     {
-        Guard.Against.Null<TakeTurn>(command, nameof(command));
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
-        Guard.Against.Null<IEnumerable<Turn>>(turns, nameof(turns));
+        Guard.Against.Null(command, nameof(command));
+        Guard.Against.Null(pieces, nameof(pieces));
+        Guard.Against.Null(turns, nameof(turns));
 
         return new List<BusinessRule>
         {

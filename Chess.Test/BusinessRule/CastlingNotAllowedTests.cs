@@ -18,11 +18,11 @@ public class CastlingNotAllowedTests
     {
         //Arrange
 
-        var command = new TakeTurn { StartPosition = new(File.E, rank), EndPosition = new(file, rank) };
+        var command = new TakeTurn { StartPosition = new(File.D, rank), EndPosition = new(file, rank) };
         var pieces = new List<Piece>()
         {
             new Rook { Color = color, Position = new(File.A, rank)},
-            new King { Color = color, Position = new(File.E, rank)},
+            new King { Color = color, Position = new(File.D, rank)},
             new Rook { Color = color, Position = new(File.H, rank)}
         };
         var turns = new List<Turn>();
@@ -141,7 +141,6 @@ public class CastlingNotAllowedTests
     [TestMethod]
     [DataRow(File.F)]
     [DataRow(File.G)]
-    [DataRow(File.H)]
     public void  Taketurn_CheckRule_CannotPassThroughCheck_Kingside(File fileOfBlackRook)
     {
         //Arrange
@@ -163,8 +162,6 @@ public class CastlingNotAllowedTests
     }
 
     [TestMethod]
-    [DataRow(File.A)]
-    [DataRow(File.B)]
     [DataRow(File.C)]
     [DataRow(File.D)]
     public void  Taketurn_CheckRule_CannotPassThroughCheck_Queenside(File fileOfBlackRook)

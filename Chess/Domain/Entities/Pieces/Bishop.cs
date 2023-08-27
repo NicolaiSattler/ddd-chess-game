@@ -9,7 +9,8 @@ public class Bishop : Piece
     public override PieceType Type { get; init; }
     public override MovementType Movement { get; init; }
 
-    public Bishop() : base(Guid.NewGuid())
+    public Bishop() : this(Guid.NewGuid()) { }
+    public Bishop(Guid id) : base(id)
     {
         Type = PieceType.Bishop;
         Movement = MovementType.Diagonal;

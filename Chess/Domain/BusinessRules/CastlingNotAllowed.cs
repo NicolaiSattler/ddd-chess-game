@@ -26,9 +26,9 @@ public class CastlingNotAllowed : BusinessRule
 
     public CastlingNotAllowed(TakeTurn command, IEnumerable<Piece> pieces, IEnumerable<Turn> turns)
     {
-        _command = Guard.Against.Null<TakeTurn>(command, nameof(command));
-        _pieces = Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
-        _turns = Guard.Against.Null<IEnumerable<Turn>>(turns, nameof(turns));
+        _command = Guard.Against.Null(command, nameof(command));
+        _pieces = Guard.Against.Null(pieces, nameof(pieces));
+        _turns = Guard.Against.Null(turns, nameof(turns));
     }
 
     public override IEnumerable<BusinessRuleViolation> CheckRule()
@@ -47,7 +47,7 @@ public class CastlingNotAllowed : BusinessRule
         if (!isCastling) return Enumerable.Empty<BusinessRuleViolation>();
 
         var rookHasMoved = _turns.Any(p => p.PieceType == PieceType.Rook && p.StartPosition == new Square(file, rank));
-        var kingHasMoved = _turns.Any(p => p.PieceType == PieceType.King);
+        var kingHasMoved = _turns.Any(p => p.PieceType == PieceType.King && p.Player.MemberId == _command.MemberId);
 
         var kingIsInCheck = Board.IsCheck(king, _pieces);
         var moveIsBlocked = Board.DirectionIsObstructed(_pieces, _command.StartPosition, _command.EndPosition);
@@ -65,6 +65,7 @@ public class CastlingNotAllowed : BusinessRule
     {
         var rank = king.Position.Rank;
         var passingSquares = Array.Empty<Square>();
+        var opponentPieces = _pieces.Where(p => p.Color != king.Color);
 
         if (type == CastlingType.Undefined)
         {
@@ -72,13 +73,13 @@ public class CastlingNotAllowed : BusinessRule
         }
         else if (type == CastlingType.KingSide)
         {
-            passingSquares = new Square[] { new(File.F, rank), new(File.G, rank), new(File.H, rank) };
+            passingSquares = new Square[] { new(File.F, rank), new(File.G, rank) };
         }
         else if (type == CastlingType.QueenSide)
         {
-            passingSquares = new Square[] { new(File.A, rank),  new(File.B, rank),  new(File.C, rank), new(File.D, rank),};
+            passingSquares = new Square[] { new(File.C, rank), new(File.D, rank),};
         }
 
-        return passingSquares.Any(s => Board.IsCheck(new() { Position = s }, _pieces));
+        return passingSquares.Any(s => Board.IsCheck(new() { Position = s }, opponentPieces));
     }
 }

@@ -18,7 +18,7 @@ public abstract class Piece : Entity
 
     public abstract IEnumerable<Square> GetAttackRange();
 
-    public override string ToString() => $"{Type.ToString()}{Position.ToString()}";
+    public override string ToString() => $"{Type}{Position}";
 }
 
 public enum MovementType

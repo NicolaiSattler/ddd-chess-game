@@ -1,4 +1,5 @@
 using Chess.Web.Components.Board;
+using Chess.Web.Components.Piece;
 using Microsoft.AspNetCore.Components;
 
 using File = Chess.Domain.ValueObjects.File;
@@ -28,6 +29,20 @@ public partial class FieldComponent
     [Parameter]
     public RenderFragment? ChildContent { get; set;}
 
+    public void AddChild(Domain.Entities.Pieces.Piece piece)
+    {
+        ChildContent = builder =>
+        {
+            builder.OpenElement(0, nameof(PieceComponent));
+            builder.AddAttribute(0, nameof(PieceComponent.PieceId), piece.Id);
+            builder.AddAttribute(1, nameof(PieceComponent.Color), piece.Color);
+            builder.AddAttribute(2, nameof(PieceComponent.Type), piece.Type);
+            builder.CloseElement();
+        };
+    }
+
+    public void RemoveChild() => ChildContent = null;
+
     private string DetermineBackgroundColour()
     {
         var file = (int)this.File;
@@ -37,16 +52,6 @@ public partial class FieldComponent
                     ? LightFieldCssClass : DarkFieldCssClass
                : (file % 2) == 1
                     ? DarkFieldCssClass : LightFieldCssClass;
-    }
-
-    private void HandleDragEnter()
-    {
-        //TODO: Highlight Field
-    }
-
-    private void HandleDragLeave()
-    {
-        //TODO: Reset css
     }
 
     private async Task HandleDropAsync()

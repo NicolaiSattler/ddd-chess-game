@@ -9,7 +9,8 @@ public class Knight : Piece
     public override PieceType Type { get; init; }
     public override MovementType Movement { get; init; }
 
-    public Knight() : base(Guid.NewGuid())
+    public Knight() : this(Guid.NewGuid()) { }
+    public Knight(Guid id) : base(id)
     {
         Type = PieceType.Knight;
         Movement = MovementType.Leap;

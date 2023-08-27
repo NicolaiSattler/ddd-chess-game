@@ -9,7 +9,8 @@ public class Queen : Piece
     public override PieceType Type { get; init; }
     public override MovementType Movement { get; init; }
 
-    public Queen() : base(Guid.NewGuid())
+    public Queen() : this(Guid.NewGuid()) { }
+    public Queen(Guid id) : base(id)
     {
         Type = PieceType.Queen;
         Movement = MovementType.Diagonal | MovementType.FileAndRank;

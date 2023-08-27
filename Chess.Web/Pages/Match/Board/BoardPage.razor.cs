@@ -39,7 +39,8 @@ public partial class BoardPage: ComponentBase
         else
         {
             var turns = await ApplicationService!.GetTurns(AggregateId);
-            Notations = turns.Select(m => new NotationModel(m.Notation, m.StartTime.GetVerbalTimeDisplay())).ToList();
+            Notations = turns.Select(m => new NotationModel(m.Notation, m.StartTime.GetVerbalTimeDisplay()))
+                             .ToList();
 
             ActiveColor = ActiveColor == Color.White ? Color.Black : Color.White;
 

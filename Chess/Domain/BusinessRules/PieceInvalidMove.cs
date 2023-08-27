@@ -6,6 +6,7 @@ using Chess.Domain.Commands;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Determiners;
+using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.BusinessRules;
 
@@ -17,9 +18,9 @@ public class PieceInvalidMove : BusinessRule
 
     public PieceInvalidMove(TakeTurn command, IEnumerable<Piece> pieces, IEnumerable<Turn> turns)
     {
-        _command = Guard.Against.Null<TakeTurn>(command, nameof(command));
-        _pieces = Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
-        _turns = Guard.Against.Null<IEnumerable<Turn>>(turns, nameof(turns));
+        _command = Guard.Against.Null(command, nameof(command));
+        _pieces = Guard.Against.Null(pieces, nameof(pieces));
+        _turns = Guard.Against.Null(turns, nameof(turns));
     }
 
     public override IEnumerable<BusinessRuleViolation> CheckRule()
@@ -36,7 +37,7 @@ public class PieceInvalidMove : BusinessRule
         return Enumerable.Empty<BusinessRuleViolation>();
     }
 
-    private BusinessRuleViolation? ValidateMovement(Piece? piece) => (piece?.Type) switch
+    private BusinessRuleViolation? ValidateMovement(Piece piece) => piece.Type switch
     {
         PieceType.Pawn when !IsValidMove((Pawn)piece)
                         => new("A pawn must attack a filled square."),
@@ -47,13 +48,20 @@ public class PieceInvalidMove : BusinessRule
         _ => null
     };
 
-    private bool PieceMovesToValidSquare(Piece? piece)
+    private bool PieceMovesToValidSquare(Piece piece)
     {
-        var availableMoves = piece?.GetAttackRange();
+        var availableMoves = piece.GetAttackRange().ToList();
+
+        if (piece is King king && KingIsAtStartPosition(king))
+        {
+            availableMoves.Add(new(File.B, king.Position.Rank));
+            availableMoves.Add(new(File.G, king.Position.Rank));
+        }
+
         return availableMoves?.Any(square => square == _command.EndPosition) ?? false;
     }
 
-    private bool IsValidMove(King? king)
+    private bool IsValidMove(King king)
     {
         //Move results in check.
         var opponentPieces = _pieces?.Where(p => p.Color != king?.Color);
@@ -62,9 +70,9 @@ public class PieceInvalidMove : BusinessRule
         return positionIsSafe;
     }
 
-    private bool IsValidMove(Pawn? pawn)
+    private bool IsValidMove(Pawn pawn)
     {
-        Guard.Against.Null<Pawn?>(pawn, nameof(pawn));
+        Guard.Against.Null(pawn, nameof(pawn));
 
         if (!PieceMovesToValidSquare(pawn)) return false;
 
@@ -79,4 +87,10 @@ public class PieceInvalidMove : BusinessRule
 
         return true;
     }
+
+    private static bool KingIsAtStartPosition(King king) =>
+        king.Color == Color.Black
+        ? king.Position == new Square(File.E, 8)
+        : king.Position == new Square(File.E, 1);
+
 }

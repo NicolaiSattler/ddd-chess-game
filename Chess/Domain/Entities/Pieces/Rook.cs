@@ -9,7 +9,9 @@ public class Rook : Piece
     public override PieceType Type { get; init; }
     public override MovementType Movement { get; init; }
 
-    public Rook() : base(Guid.NewGuid())
+
+    public Rook() : this(Guid.NewGuid()) { }
+    public Rook(Guid id) : base(id)
     {
         Type = PieceType.Rook;
         Movement = MovementType.FileAndRank;

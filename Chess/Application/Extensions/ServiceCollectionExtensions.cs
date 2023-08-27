@@ -14,8 +14,6 @@ public static class ServiceCollectionExtensions
                   .ValidateOnStart();
 
         collection.AddScoped<IApplicationService, ApplicationService>();
-        //TODO: How to make turntimer injectable?
-        //collection.AddHostedService<TurnTimer>();
         collection.AddSingleton<TurnTimer>();
         collection.AddSingleton<ITurnTimer>(c => c.GetRequiredService<TurnTimer>());
 

@@ -285,7 +285,7 @@ public class Match : AggregateRoot, IMatch
     {
         if (king == null) return;
 
-        var rank = king.Color == Color.Black ? 8 : 1;
+        var rank = king.Position.Rank;
         var file = endPosition.File > File.E ? File.H : File.A;
         var newFilePosition = file == File.H ? File.F : File.D;
         var rookPosition = new Square(file, rank);

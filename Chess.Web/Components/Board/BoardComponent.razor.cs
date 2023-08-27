@@ -4,6 +4,7 @@ using Chess.Web.Model;
 
 using File = Chess.Domain.ValueObjects.File;
 using PieceEntity = Chess.Domain.Entities.Pieces.Piece;
+using Chess.Domain.Determiners;
 
 namespace Chess.Web.Components.Board;
 
@@ -29,15 +30,21 @@ public partial class BoardComponent: ComponentBase
     public List<FieldComponent> Fields { get; } = new();
     public List<PieceEntity> Pieces { get; private set; } = new();
 
-    public PieceEntity? SelectPiece(int rank, int file) => Pieces?.FirstOrDefault(p => p.Position == new Square((File)file, rank));
+    public PieceEntity? SelectPiece(int rank, int file) => Pieces?.Find(p => p.Position == new Square((File)file, rank));
     public void AddChild(FieldComponent fieldComponent) => Fields.Add(fieldComponent);
     public void HideAvailableMoves() => SetFieldHighlight(Fields, false);
     public void ShowAvailableMoves(Guid pieceId)
     {
         SetFieldHighlight(Fields, false);
 
-        var piece = Pieces.FirstOrDefault(p => p.Id == pieceId);
+        var piece = Pieces.Find(p => p.Id == pieceId);
+
+        //Add castling and en pessant moves.
         var moves = piece?.GetAvailableMoves(Pieces) ?? Enumerable.Empty<Square>();
+
+        if (piece is King kingPiece) moves = moves.Concat(GetCastlingMoves(kingPiece));
+        if (piece is Pawn) moves = moves.Concat(GetEnPassantMoves());
+
         var fields = Fields.Where(f => moves.Any(m => m.File == f.File && m.Rank == f.Rank));
 
         SetFieldHighlight(fields, true);
@@ -71,7 +78,6 @@ public partial class BoardComponent: ComponentBase
         }
     }
 
-    //TODO: check if move is castling!
     private async Task<TurnResult> ExecuteTurnCommand(PieceEntity activePiece, Square endPosition)
     {
         var command = new TakeTurn() { MemberId = ActiveMemberId, StartPosition = activePiece.Position, EndPosition = endPosition };
@@ -83,11 +89,14 @@ public partial class BoardComponent: ComponentBase
     {
         if (turnResult?.Violations?.Any() ?? true) return;
 
-        activePiece.Position = endPosition;
-
+        var castlingType = SpecialMoves.IsCastling(activePiece.Position, endPosition, Pieces);
         var targetPiece = Pieces.FirstOrDefault(p => p.Position == endPosition && p.Color != activePiece.Color);
 
+        activePiece.Position = endPosition;
+
         if (targetPiece != null) Pieces.Remove(targetPiece);
+
+        HandleCastlingMove(activePiece, castlingType);
 
         if (turnResult.MatchResult == MatchResult.Undefined)
         {
@@ -99,8 +108,60 @@ public partial class BoardComponent: ComponentBase
         StateHasChanged();
     }
 
+
     private static void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
     {
         foreach (var item in fields) item.Highlight(highlighted);
+    }
+
+    private IEnumerable<Square> GetCastlingMoves(King king)
+    {
+        var result = new List<Square>();
+        var rank = king.Position.Rank;
+
+        if (!Pieces.Any(p => p.Position == new Square(File.G, rank) || p.Position == new Square(File.F, rank)))
+        {
+            result.Add(new(File.G, rank));
+        }
+
+        if (!Pieces.Any(p => p.Position == new Square(File.B, rank)
+                            || p.Position == new Square(File.C, rank)
+                            || p.Position == new Square(File.B, rank)))
+        {
+            result.Add(new(File.B, rank));
+        }
+
+        return result;
+    }
+
+    //TODO: should be refactored: Aggregate contains similair logic?
+    private void HandleCastlingMove(PieceEntity activePiece, CastlingType castlingType)
+    {
+        if (castlingType == CastlingType.Undefined)
+        {
+            return;
+        }
+
+        var oldFile = castlingType == CastlingType.KingSide ? File.H : File.A;
+        var newFile = castlingType == CastlingType.KingSide ? File.F : File.D;
+        var rook = Pieces.Find(p => p.Type == PieceType.Rook
+                                        && p.Color == activePiece.Color
+                                        && p.Position.File == oldFile);
+
+        if (rook != null)
+        {
+            var newField = Fields.Find(m => m.File == newFile && m.Rank == activePiece.Position.Rank);
+            var oldField = Fields.Find(m => m.File == rook.Position.File && m.Rank == rook.Position.Rank);
+
+            rook.Position = new(newFile, rook.Position.Rank);
+
+            oldField?.RemoveChild();
+            newField?.AddChild(rook);
+        }
+    }
+
+    private IEnumerable<Square> GetEnPassantMoves()
+    {
+        return new List<Square>();
     }
 }

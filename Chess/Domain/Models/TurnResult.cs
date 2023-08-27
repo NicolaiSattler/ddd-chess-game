@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Chess.Core.BusinessRules;
-using Chess.Domain.Determiners;
 using Chess.Domain.Events;
 
 namespace Chess.Domain.Models;
