@@ -18,6 +18,7 @@ Follow these steps:
 - After this, run `dotnet build`. During the build a SQL script will be generated.
 - Run the following command to create the database (from project root).
     ```
+    cd ./Chess.Web
     sqlite3 Chess.db
     .read ../Chess/SQL/ChessDb.sql
     .exit
