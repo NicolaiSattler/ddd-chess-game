@@ -11,15 +11,15 @@ namespace Chess.Domain.Utilities;
 /// </summary>
 public class Navigator
 {
-    private static Func<int?, bool> isValidAxis = (dim) => dim >= 1 && dim <= 8;
+    private static readonly Func<int?, bool> isValidAxis = (dim) => dim >= 1 && dim <= 8;
 
     public static IEnumerable<Square> CalculateMovement(Square position,
                                                         MovementType movement,
                                                         int range = 2,
                                                         Color color = Color.Undefined)
     {
-        Guard.Against.Null<Square>(position, nameof(position));
-        Guard.Against.Null<MovementType>(movement, nameof(movement));
+        Guard.Against.Null(position, nameof(position));
+        Guard.Against.Null(movement, nameof(movement));
 
         var result = new List<Square>();
 

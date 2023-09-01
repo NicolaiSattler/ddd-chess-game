@@ -11,14 +11,17 @@ public class Elo
     /// </summary>
     private const int K = 30;
 
+    private static readonly Func<float, float, float, float> CalculateEloResult = (ranking, probability, matchResult)
+        => ranking + (K * (matchResult - probability));
+
     /// <summary>
     /// Calculate the Elo of the player
     /// </summary>
     public static EloResult Calculate(float? ratingWhite, float? ratingBlack, MatchResult? matchResult)
     {
-        var rA = Guard.Against.Null<float?>(ratingWhite, nameof(ratingWhite))!.Value;
-        var rB = Guard.Against.Null<float?>(ratingBlack, nameof(ratingBlack))!.Value;
-        var result = Guard.Against.Null<MatchResult?>(matchResult, nameof(matchResult))!.Value;
+        var rA = Guard.Against.Null(ratingWhite, nameof(ratingWhite))!.Value;
+        var rB = Guard.Against.Null(ratingBlack, nameof(ratingBlack))!.Value;
+        var result = Guard.Against.Null(matchResult, nameof(matchResult))!.Value;
 
         Guard.Against.Negative(rA, nameof(ratingWhite));
         Guard.Against.Negative(rB, nameof(ratingBlack));
@@ -53,19 +56,15 @@ public class Elo
     /// </summary>
     public static float CalculateProbability(float? ratingA, float? ratingB)
     {
-        var rA = Guard.Against.Null<float?>(ratingA, nameof(ratingA))!.Value;
-        var rB = Guard.Against.Null<float?>(ratingB, nameof(ratingB))!.Value;
+        var rA = Guard.Against.Null(ratingA, nameof(ratingA))!.Value;
+        var rB = Guard.Against.Null(ratingB, nameof(ratingB))!.Value;
 
         Guard.Against.Negative(rA, nameof(ratingA));
         Guard.Against.Negative(rB, nameof(ratingB));
 
         return 1.0f * 1.0f
                 / (1 + 1.0f
-                   * (float)(Math.Pow(10, 1.0f * (rA - rB) / 400)));
+                   * (float)Math.Pow(10, 1.0f * (rA - rB) / 400));
     }
 
-    private static Func<float, float, float, float> CalculateEloResult = (ranking, probability, matchResult) =>
-    {
-        return ranking + (K * (matchResult - probability));
-    };
 }

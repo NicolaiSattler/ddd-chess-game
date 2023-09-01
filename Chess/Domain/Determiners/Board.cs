@@ -40,14 +40,14 @@ public class Board
     {
         Guard.Against.Null(pieces, nameof(pieces));
 
-        var king = pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King) ?? throw new InvalidOperationException("King cannot be found!");
+        var king = pieces.FirstOrDefault(p => p.Color == color && p.Type == PieceType.King)
+                 ?? throw new InvalidOperationException("King cannot be found!");
         var atTurnPieces = pieces.Where(p => p.Color == color) ?? Enumerable.Empty<Piece>();
         var opponentPieces = pieces.Where(p => p.Color != color) ?? Enumerable.Empty<Piece>();
-
         var pieceHasNoValidMoves = true;
         var kingHasNoValidMoves = king.GetAttackRange()
                                       .Where(p => !pieces.Any(q => q.Position == p))
-                                      .All(p => GetPiecesThatCanReachPosition(p, pieces, opponentPieces).Count() > 0);
+                                      .All(p => GetPiecesThatCanReachPosition(p, pieces, opponentPieces).Any());
 
         foreach (var piece in atTurnPieces.Where(p => p.Type != PieceType.King))
         {
@@ -74,13 +74,13 @@ public class Board
 
         foreach (var piece in opponentPieces)
         {
-            Guard.Against.InvalidInput<Piece>(piece, nameof(piece), k => k.Position != null, "Piece doesn't have a position.");
+            Guard.Against.InvalidInput(piece, nameof(piece), k => k.Position != null, "Piece doesn't have a position.");
 
             var availableMoves = piece.GetAttackRange();
 
             if (availableMoves.Any(s => s == position))
             {
-                var pieceIsObstructed = Board.DirectionIsObstructed(pieces, piece.Position, position);
+                var pieceIsObstructed = DirectionIsObstructed(pieces, piece.Position, position);
 
                 if (!pieceIsObstructed || piece.Type == PieceType.Knight)
                 {
@@ -105,9 +105,9 @@ public class Board
 
     public static bool DirectionIsObstructed(IEnumerable<Piece> pieces, Square start, Square end)
     {
-        Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
-        Guard.Against.Null<Square>(start, nameof(start));
-        Guard.Against.Null<Square>(end, nameof(end));
+        Guard.Against.Null(pieces, nameof(pieces));
+        Guard.Against.Null(start, nameof(start));
+        Guard.Against.Null(end, nameof(end));
 
         var piece = pieces.FirstOrDefault(p => p.Position == start);
         var direction = GetMoveDirection(start, end);
@@ -155,10 +155,8 @@ public class Board
 
             return !alliedPieceCanReachAttacker && !AttackCanBeBlocked(opponent, king, allPieces);
         }
-        else
-        {
-            return true;
-        }
+
+        return true;
     }
 
     private static bool AttackCanBeBlocked(Piece attackingPiece, Piece defender, IEnumerable<Piece> pieces)
@@ -204,7 +202,6 @@ public class Board
         return result;
     }
 
-
     private static bool DirectionIsObstructedForPawn(IEnumerable<Piece> pieces, Piece pawn, Square end)
     {
         if (pieces.Any(p => p.Position == end && p.Color == pawn.Color)) return true;
@@ -226,19 +223,29 @@ public class Board
         return false;
     }
 
-    private static bool DirectionIsObstructedForKnight(IEnumerable<Piece> pieces, Piece piece, Square end) => pieces.Any(p => p.Color == piece.Color && p.Position == end);
+    private static bool DirectionIsObstructedForKnight(IEnumerable<Piece> pieces, Piece piece, Square end)
+        => pieces.Any(p => p.Color == piece.Color && p.Position == end);
 
-    private static bool DirectionIsObstructed(IEnumerable<Piece> pieces, DirectionType direction, Square start, Square end) => (direction) switch
+    private static bool DirectionIsObstructed(IEnumerable<Piece> pieces, DirectionType direction, Square start, Square end)
+    => direction switch
     {
-        DirectionType.Left => pieces.Any(p => (int)p.Position.File < (int)start.File && (int)p.Position.File > (int)end.File && IsSameRank(start, p.Position)),
-        DirectionType.Right => pieces.Any(p => (int)p.Position.File > (int)start.File && (int)p.Position.File < (int)end.File && IsSameRank(start, p.Position)),
-        DirectionType.Up => pieces.Any(p => p.Position.Rank > start.Rank && p.Position.Rank < end.Rank && IsSameFile(start, p.Position)),
-        DirectionType.Down => pieces.Any(p => p.Position.Rank < start.Rank && p.Position.Rank > end.Rank && IsSameFile(start, p.Position)),
+        DirectionType.Left => pieces.Any(p => (int)p.Position.File < (int)start.File
+                              && (int)p.Position.File > (int)end.File
+                              && IsSameRank(start, p.Position)),
+        DirectionType.Right => pieces.Any(p => (int)p.Position.File > (int)start.File
+                               && (int)p.Position.File < (int)end.File
+                               && IsSameRank(start, p.Position)),
+        DirectionType.Up => pieces.Any(p => p.Position.Rank > start.Rank
+                            && p.Position.Rank < end.Rank
+                            && IsSameFile(start, p.Position)),
+        DirectionType.Down => pieces.Any(p => p.Position.Rank < start.Rank
+                              && p.Position.Rank > end.Rank
+                              && IsSameFile(start, p.Position)),
         DirectionType.Left | DirectionType.Up => ValidateDiagonalLeftUpObstruction(pieces, start, end),
         DirectionType.Right | DirectionType.Up => ValidateDiagonalRightUpObstruction(pieces, start, end),
         DirectionType.Left | DirectionType.Down => ValidateDiagonalLeftDownObstruction(pieces, start, end),
         DirectionType.Right | DirectionType.Down => ValidateDiagonalRightDownObstruction(pieces, start, end),
-        _ => throw new InvalidOperationException("Oeps")
+        _ => throw new InvalidOperationException("Unknown direction.")
     };
 
     private static bool ValidateDiagonalRightDownObstruction(IEnumerable<Piece> pieces, Square start, Square end)
@@ -309,7 +316,7 @@ public class Board
 
         for (var x = start.Rank + 1; x < end.Rank; x++)
         {
-            var position = new Square((File)y, x);
+            var position = new Square(y, x);
 
             if (pieces.Any(p => p.Position == position))
                 return true;
