@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
 
         serviceCollection.AddScoped<IMatchRepository, MatchRepository>();
         serviceCollection.AddScoped<IMatchEventRepository, MatchEventRepository>();
+        serviceCollection.AddMemoryCache();
 
         return serviceCollection;
     }

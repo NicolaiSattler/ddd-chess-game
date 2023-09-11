@@ -30,6 +30,7 @@ public partial class SetupPage: ComponentBase
 
         if (_form != null && !_form.IsValid) return;
 
+        //If Id's are not parsed correctly, an error occurres.
         var aggregateId = await StartMatchAsync();
 
         NavigationManager?.NavigateTo(string.Format(BoardUri, aggregateId), true);

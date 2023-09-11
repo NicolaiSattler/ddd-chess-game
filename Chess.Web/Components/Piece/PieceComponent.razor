@@ -1,5 +1,5 @@
 <div class="grabbable @HtmlClasses"
      draggable="true"
-     @ondragstart="@(() => HandleDragStarted())"
+     @ondragstart="@(async () => await HandleDragStarted())"
      @ondragend="@(() => HandleDragEnded())">
 </div>

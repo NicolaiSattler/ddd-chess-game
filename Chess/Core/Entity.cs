@@ -6,7 +6,7 @@
     /// <typeparam name="TId">The type of the Id of the entity.</typeparam>
     public abstract class Entity : IEntity
     {
-        public Guid Id { get; }
+        public Guid Id { get; set; }
 
         public Entity(Guid id)
         {

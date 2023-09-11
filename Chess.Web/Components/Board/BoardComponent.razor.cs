@@ -5,6 +5,7 @@ using Chess.Web.Model;
 using File = Chess.Domain.ValueObjects.File;
 using PieceEntity = Chess.Domain.Entities.Pieces.Piece;
 using Chess.Domain.Determiners;
+using Chess.Domain.Entities;
 
 namespace Chess.Web.Components.Board;
 
@@ -33,17 +34,19 @@ public partial class BoardComponent: ComponentBase
     public PieceEntity? SelectPiece(int rank, int file) => Pieces?.Find(p => p.Position == new Square((File)file, rank));
     public void AddChild(FieldComponent fieldComponent) => Fields.Add(fieldComponent);
     public void HideAvailableMoves() => SetFieldHighlight(Fields, false);
-    public void ShowAvailableMoves(Guid pieceId)
+    public async Task ShowAvailableMovesAsync(Guid pieceId)
     {
         SetFieldHighlight(Fields, false);
 
         var piece = Pieces.Find(p => p.Id == pieceId);
-
-        //Add castling and en pessant moves.
         var moves = piece?.GetAvailableMoves(Pieces) ?? Enumerable.Empty<Square>();
 
         if (piece is King kingPiece) moves = moves.Concat(GetCastlingMoves(kingPiece));
-        if (piece is Pawn) moves = moves.Concat(GetEnPassantMoves());
+        else if (piece is Pawn pawn)
+        {
+            var pawnMoves = await GetEnPassantMoves(pawn);
+            moves = moves.Concat(pawnMoves);
+        }
 
         var fields = Fields.Where(f => moves.Any(m => m.File == f.File && m.Rank == f.Rank));
 
@@ -89,14 +92,18 @@ public partial class BoardComponent: ComponentBase
     {
         if (turnResult?.Violations?.Any() ?? true) return;
 
-        var castlingType = SpecialMoves.IsCastling(activePiece.Position, endPosition, Pieces);
         var targetPiece = Pieces.FirstOrDefault(p => p.Position == endPosition && p.Color != activePiece.Color);
 
         activePiece.Position = endPosition;
 
         if (targetPiece != null) Pieces.Remove(targetPiece);
 
-        HandleCastlingMove(activePiece, castlingType);
+        if (turnResult.CastlingType != CastlingType.Undefined)
+        {
+            HandleCastlingMove(activePiece, turnResult.CastlingType);
+        }
+
+        if (turnResult.IsEnPassant) await HandleEnPessantMoveAsync(activePiece);
 
         if (turnResult.MatchResult == MatchResult.Undefined)
         {
@@ -134,13 +141,35 @@ public partial class BoardComponent: ComponentBase
         return result;
     }
 
+    private async Task<IEnumerable<Square>> GetEnPassantMoves(Pawn pawn)
+    {
+        if (ApplicationService == null) return Enumerable.Empty<Square>();
+
+        var turns =  await ApplicationService.GetTurns(AggregateId);
+        var turnCount = turns.Count();
+
+        if (turnCount == 1) return Enumerable.Empty<Square>();
+
+        var opponentTurn = turns?.ElementAt(turnCount - 2);
+        var isPawnMove = opponentTurn?.PieceType == PieceType.Pawn;
+        var rankDiff = opponentTurn?.StartPosition?.Rank - opponentTurn?.EndPosition?.Rank;
+        var isTwoRankMove = rankDiff > 1 || rankDiff < -1;
+        var sameRank = pawn.Position.Rank == opponentTurn?.EndPosition?.Rank;
+
+        if (!isPawnMove || !isTwoRankMove || !sameRank) return Enumerable.Empty<Square>();
+
+        var file = opponentTurn?.StartPosition?.File ?? File.Undefined;
+        var rank = rankDiff > 0
+                   ? pawn.Position.Rank + 1
+                   : pawn.Position.Rank - 1;
+
+        return new Square[] { new(file, rank)};
+    }
+
     //TODO: should be refactored: Aggregate contains similair logic?
     private void HandleCastlingMove(PieceEntity activePiece, CastlingType castlingType)
     {
-        if (castlingType == CastlingType.Undefined)
-        {
-            return;
-        }
+        if (castlingType == CastlingType.Undefined) return;
 
         var oldFile = castlingType == CastlingType.KingSide ? File.H : File.A;
         var newFile = castlingType == CastlingType.KingSide ? File.F : File.D;
@@ -160,8 +189,22 @@ public partial class BoardComponent: ComponentBase
         }
     }
 
-    private IEnumerable<Square> GetEnPassantMoves()
+    private async Task HandleEnPessantMoveAsync(PieceEntity activePiece)
     {
-        return new List<Square>();
+        if (ApplicationService == null) return;
+        if (activePiece is Pawn pawn && pawn == null) return;
+
+        var turns = await ApplicationService.GetTurns(AggregateId) ?? Enumerable.Empty<Turn>();
+        var turnCount = turns.Count();
+        var lastOppenentMove = turns.ElementAt(turnCount - 3);
+        var field = lastOppenentMove?.EndPosition;
+        var pawnField = Fields.Find(m => m.File == field?.File && m.Rank == field?.Rank);
+
+        pawnField?.RemoveChild();
+    }
+
+    private void HandlePromotion()
+    {
+
     }
 }

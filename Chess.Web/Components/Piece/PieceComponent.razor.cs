@@ -30,11 +30,12 @@ public partial class PieceComponent
         _ => throw new IndexOutOfRangeException(Type.ToString())
     };
 
-    private void HandleDragStarted()
+    private async Task HandleDragStarted()
     {
         if (Parent != null && Parent.ActiveColor == Color)
         {
-            Parent.ShowAvailableMoves(PieceId);
+            await Parent.ShowAvailableMovesAsync(PieceId);
+
             Parent.ActivePieceId = PieceId;
         }
     }

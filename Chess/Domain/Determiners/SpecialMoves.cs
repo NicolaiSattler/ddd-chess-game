@@ -9,15 +9,8 @@ namespace Chess.Domain.Determiners;
 
 public class SpecialMoves
 {
-    public static bool IsEnPassant(Piece pawn, IEnumerable<Turn> turns)
+    public static bool IsEnPassant(Piece pawn, Turn lastTurn)
     {
-        Guard.Against.Null(pawn, nameof(pawn));
-        Guard.Against.Null(turns, nameof(turns));
-
-        if (!turns.Any()) return false;
-
-        var lastTurn = turns.LastOrDefault();
-
         if (lastTurn?.EndPosition == null && lastTurn?.Player == null)
         {
             return false;
@@ -43,6 +36,19 @@ public class SpecialMoves
                                   .Any(p => p == passedPosition);
 
         return opponentPawnMovedTwoRanks && isEnPassantMove;
+    }
+    public static bool IsEnPassant(Piece pawn, IEnumerable<Turn> turns)
+    {
+        Guard.Against.Null(pawn, nameof(pawn));
+        Guard.Against.Null(turns, nameof(turns));
+
+        if (!turns.Any()) return false;
+
+        var lastTurn = turns.LastOrDefault(t => !string.IsNullOrEmpty(t.Hash));
+
+        if (lastTurn == null) return false;
+
+        return IsEnPassant(pawn, lastTurn);
     }
 
     public static bool PawnIsPromoted(Piece piece, Square endPosition)

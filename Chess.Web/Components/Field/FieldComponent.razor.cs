@@ -41,7 +41,11 @@ public partial class FieldComponent
         };
     }
 
-    public void RemoveChild() => ChildContent = null;
+    public void RemoveChild()
+    {
+        ChildContent = null;
+        StateHasChanged();
+    }
 
     private string DetermineBackgroundColour()
     {

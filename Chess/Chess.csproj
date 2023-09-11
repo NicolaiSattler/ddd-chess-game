@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <Target Name="Generate SQL Script" AfterTargets="Build" Condition="!Exists('SQL/ChessDb.sql')">
-    <Message Text="Generating Sqlite script..."/>
+    <Message Text="Generating Sqlite script..." />
     <Exec Command="dotnet ef migrations script -c MatchDbContext -o 'SQL/ChessDb.sql' --no-build" />
   </Target>
 

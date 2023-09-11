@@ -67,6 +67,10 @@ public class Match : AggregateRoot, IMatch
                                     .SelectMany(r => r.CheckRule())
                                     .ToList();
 
+        var activePiece = Pieces.Find(p => p.Position == command.StartPosition);
+        var castlingType = SpecialMoves.IsCastling(command.StartPosition, command.EndPosition, Pieces);
+        var isEnPassant = activePiece is Pawn pawn && SpecialMoves.IsEnPassant(pawn, Turns);
+        var isPromotion = activePiece is Pawn && SpecialMoves.PawnIsPromoted(activePiece, command.EndPosition);
 
         if (!violations.Any())
         {
@@ -79,8 +83,15 @@ public class Match : AggregateRoot, IMatch
                 EndTime = DateTime.UtcNow
             });
         }
+        else return new() { Violations = violations };
 
-        return new() { Violations = violations };
+
+        return new()
+        {
+            CastlingType = castlingType,
+            IsEnPassant = isEnPassant,
+            IsPromotion = isPromotion,
+        };
     }
 
     public void Forfeit(Forfeit command)
@@ -155,8 +166,9 @@ public class Match : AggregateRoot, IMatch
 
         if (isEnPassant)
         {
-            var pieceId = Turns.Last().Id;
-            targetPiece = Pieces.Find(p => p.Id == pieceId);
+            var turnCount = Turns.Count;
+            var position = Turns.ElementAt(turnCount - 2).EndPosition;
+            targetPiece = Pieces.Find(p => p.Position == position);
         }
 
         if (castling != CastlingType.Undefined) MoveCastingPieces(movingPiece, @event.EndPosition);
