@@ -76,7 +76,9 @@ public class Board
         {
             Guard.Against.InvalidInput(piece, nameof(piece), k => k.Position != null, "Piece doesn't have a position.");
 
-            var availableMoves = piece.GetAttackRange();
+            var availableMoves = piece is Pawn
+                ? piece.GetAttackRange().Where(p => p.File != piece.Position.File)
+                : piece.GetAttackRange();
 
             if (availableMoves.Any(s => s == position))
             {

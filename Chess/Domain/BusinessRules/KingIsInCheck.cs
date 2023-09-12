@@ -4,7 +4,6 @@ using Chess.Core.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Determiners;
 using Chess.Domain.Entities.Pieces;
-using Chess.Domain.Extensions;
 
 namespace Chess.Domain.BusinessRules;
 

@@ -198,9 +198,14 @@ public partial class BoardComponent: ComponentBase
         var turnCount = turns.Count();
         var lastOppenentMove = turns.ElementAt(turnCount - 3);
         var field = lastOppenentMove?.EndPosition;
-        var pawnField = Fields.Find(m => m.File == field?.File && m.Rank == field?.Rank);
 
+        var targetPiece = Pieces?.Find(p => p.Position == field);
+        if (targetPiece != null) Pieces?.Remove(targetPiece);
+
+        var pawnField = Fields.Find(m => m.File == field?.File && m.Rank == field?.Rank);
         pawnField?.RemoveChild();
+
+        StateHasChanged();
     }
 
     private void HandlePromotion()

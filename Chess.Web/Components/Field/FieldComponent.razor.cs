@@ -43,7 +43,8 @@ public partial class FieldComponent
 
     public void RemoveChild()
     {
-        ChildContent = null;
+        ChildContent = builder => { };
+
         StateHasChanged();
     }
 

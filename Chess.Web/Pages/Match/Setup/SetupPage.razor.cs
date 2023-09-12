@@ -1,6 +1,5 @@
 using Chess.Application.Models;
 using Chess.Web.Model;
-using Chess.Web.Extensions;
 using Microsoft.AspNetCore.Components;
 using Chess.Web.Validation;
 using MudBlazor;
@@ -24,6 +23,12 @@ public partial class SetupPage: ComponentBase
     private SetupModel Setup { get; set; } = new();
     private MudForm? _form;
 
+    protected override void OnInitialized()
+    {
+        Setup.MemberOne = Guid.NewGuid().ToString();
+        Setup.MemberTwo = Guid.NewGuid().ToString();
+    }
+
     private async Task NavigateToBoard()
     {
         await _form!.Validate();
@@ -35,6 +40,7 @@ public partial class SetupPage: ComponentBase
 
         NavigationManager?.NavigateTo(string.Format(BoardUri, aggregateId), true);
     }
+
 
     private void Back() => NavigationManager?.NavigateTo(OverviewUri);
 
