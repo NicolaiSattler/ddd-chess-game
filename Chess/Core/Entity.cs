@@ -1,16 +1,16 @@
-﻿namespace Chess.Core
-{
-    /// <summary>
-    /// Represents an Entity in the domain (DDD).
-    /// </summary>
-    /// <typeparam name="TId">The type of the Id of the entity.</typeparam>
-    public abstract class Entity : IEntity
-    {
-        public Guid Id { get; set; }
+﻿namespace Chess.Core;
 
-        public Entity(Guid id)
-        {
-            Id = id;
-        }
+public interface IEntity
+{
+    Guid Id { get; }
+}
+
+public abstract class Entity : IEntity
+{
+    public Guid Id { get; set; }
+
+    public Entity(Guid id)
+    {
+        Id = id;
     }
 }

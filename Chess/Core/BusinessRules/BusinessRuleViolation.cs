@@ -1,12 +1,11 @@
-﻿namespace Chess.Core.BusinessRules
-{
-    public class BusinessRuleViolation
-    {
-        public string ViolationMessage { get; }
+﻿namespace Chess.Core.BusinessRules;
 
-        public BusinessRuleViolation(string violationMessage)
-        {
-            ViolationMessage = violationMessage;
-        }
+public class BusinessRuleViolation
+{
+    public string ViolationMessage { get; }
+
+    public BusinessRuleViolation(string violationMessage)
+    {
+        ViolationMessage = violationMessage;
     }
 }

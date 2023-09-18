@@ -37,17 +37,14 @@ public class ApplicationService : IApplicationService
     private readonly IMatchRepository _matchRepository;
     private readonly IMatchEventRepository _eventRepository;
     private readonly ITurnTimer _timer;
-    private readonly ILogger<ApplicationService> _logger;
 
     public ApplicationService(IMatchRepository matchRepository,
                               IMatchEventRepository eventRepository,
-                              ITurnTimer turnTimer,
-                              ILogger<ApplicationService> logger)
+                              ITurnTimer turnTimer)
     {
         _matchRepository = matchRepository;
         _eventRepository = eventRepository;
         _timer = turnTimer;
-        _logger = logger;
     }
 
     public async Task StartMatchAsync(StartMatch command)

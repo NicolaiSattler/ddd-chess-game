@@ -1,10 +1,3 @@
-﻿namespace Chess.Core
-{
-    /// <summary>
-    /// Represents domain event (DDD).
-    /// </summary>
-    [Serializable]
-    public abstract class DomainEvent
-    {
-    }
-}
+﻿namespace Chess.Core;
+[Serializable]
+public abstract class DomainEvent { }

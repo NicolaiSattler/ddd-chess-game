@@ -1,6 +1,6 @@
 # Chess Game
 This is a hobby project to try out new technologies and design principles.
-
+![Chess Club](img/chessclub.png)
 Architecture:
 - [Domain Driven Design](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/ddd-oriented-microservice)
 - [EventSourcing](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
