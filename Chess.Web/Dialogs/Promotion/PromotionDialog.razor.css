@@ -1,0 +1,20 @@
+.piece {
+    height: 4rem;
+    width: 4rem;
+}
+
+.white-queen {
+    background: url('./svg/pieces-sprite.svg#white-queen');
+}
+
+.white-bishop {
+    background: url('./svg/pieces-sprite.svg#white-bishop');
+}
+
+.white-rook {
+    background: url('./svg/pieces-sprite.svg#white-rook');
+}
+
+.white-knight {
+    background: url('./svg/pieces-sprite.svg#white-knight');
+}

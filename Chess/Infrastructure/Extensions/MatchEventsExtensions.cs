@@ -11,6 +11,7 @@ public static class MatchEventsExtensions
     {
         nameof(MatchStarted) => JsonSerializer.Deserialize<MatchStarted>(@event.Data),
         nameof(TurnTaken) => JsonSerializer.Deserialize<TurnTaken>(@event.Data),
+        nameof(PawnPromoted) => JsonSerializer.Deserialize<PawnPromoted>(@event.Data),
         nameof(MatchEnded) => JsonSerializer.Deserialize<MatchEnded>(@event.Data),
         _ => throw new InvalidOperationException("Type is unknown."),
     };

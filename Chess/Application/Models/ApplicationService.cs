@@ -8,6 +8,7 @@ using Chess.Domain.Models;
 using Chess.Domain.ValueObjects;
 using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ public interface IApplicationService
     Task ResignAsync(Guid aggregateId, Resign command);
     Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
     Task DrawAsync(Guid aggregateId, Draw command);
+    Task PromotePawnAsync(Guid aggregateId, Square position, PieceType type);
     Task<List<Piece>> GetPiecesAsync(Guid aggregateId);
     Task<Color> GetColorAtTurnAsync(Guid aggregateId);
     Task<IEnumerable<Turn>> GetTurns(Guid aggregateId);
@@ -35,14 +37,17 @@ public class ApplicationService : IApplicationService
     private readonly IMatchRepository _matchRepository;
     private readonly IMatchEventRepository _eventRepository;
     private readonly ITurnTimer _timer;
+    private readonly ILogger<ApplicationService> _logger;
 
     public ApplicationService(IMatchRepository matchRepository,
                               IMatchEventRepository eventRepository,
-                              ITurnTimer turnTimer)
+                              ITurnTimer turnTimer,
+                              ILogger<ApplicationService> logger)
     {
         _matchRepository = matchRepository;
         _eventRepository = eventRepository;
         _timer = turnTimer;
+        _logger = logger;
     }
 
     public async Task StartMatchAsync(StartMatch command)
@@ -142,6 +147,15 @@ public class ApplicationService : IApplicationService
         var match = await GetAggregateById(aggregateId);
 
         return match.Turns.ToList();
+    }
+
+    public async Task PromotePawnAsync(Guid aggregateId, Square position, PieceType type)
+    {
+        var match = await GetAggregateById(aggregateId);
+        var command = new Promotion() { PawnPosition = position, PromotionType = type };
+        match.PromotePiece(command);
+
+        await SaveEventAsync(match);
     }
 
     private async Task<DomainEvent?> SaveEventAsync(IMatch aggregate)

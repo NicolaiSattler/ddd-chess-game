@@ -1,0 +1,13 @@
+<MudDialog>
+    <DialogContent>
+        @PromotionDialogQustion
+    </DialogContent>
+    <DialogActions>
+        <MudSpacer />
+        <button type="button" @onclick="(() => Submit(PieceType.Rook))" class="mud-icon-button mud-ripple mud-ripple-icon white-rook piece"></button>
+        <button type="button" @onclick="(() => Submit(PieceType.Knight))" class="mud-icon-button mud-ripple mud-ripple-icon white-knight piece"></button>
+        <button type="button" @onclick="(() => Submit(PieceType.Bishop))" class="mud-icon-button mud-ripple mud-ripple-icon white-bishop piece"></button>
+        <button type="button" @onclick="(() => Submit(PieceType.Queen))" class="mud-icon-button mud-ripple mud-ripple-icon white-queen piece"></button>
+        <MudSpacer />
+    </DialogActions>
+</MudDialog>

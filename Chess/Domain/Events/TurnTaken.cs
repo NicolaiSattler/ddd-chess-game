@@ -1,4 +1,3 @@
-using Ardalis.GuardClauses;
 using Chess.Core;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.ValueObjects;
@@ -11,5 +10,4 @@ public class TurnTaken : DomainEvent
     public Square StartPosition { get; init; } = Square.Empty();
     public Square EndPosition { get; init; } = Square.Empty();
     public DateTime EndTime { get; init; }
-    public PieceType PromotionType { get; init; }
 }

@@ -1,6 +1,7 @@
 using System.Text;
 using Chess.Domain.Determiners;
 using Chess.Domain.Entities.Pieces;
+using Chess.Domain.Extensions;
 
 namespace Chess.Domain.Utilities;
 
@@ -23,7 +24,7 @@ public class NotationBuilder
     {
         if (pieceType == PieceType.Pawn) return this;
 
-        var pieceNotation = GetPieceNotation(pieceType);
+        var pieceNotation = pieceType.GetPieceNotation();
         _builder.Append(pieceNotation);
 
         return this;
@@ -71,9 +72,7 @@ public class NotationBuilder
 
     public NotationBuilder IsPromotion(PieceType promotionType)
     {
-        var pieceNotation = GetPieceNotation(promotionType);
-
-        _builder.Append($"={pieceNotation}");
+        _builder.Append($"={promotionType.GetPieceNotation()}");
 
         return this;
     }
@@ -86,14 +85,4 @@ public class NotationBuilder
     }
 
     public string Build() => _builder.ToString();
-
-    private static char GetPieceNotation(PieceType pieceType) => pieceType switch
-    {
-        PieceType.King => 'K',
-        PieceType.Queen => 'Q',
-        PieceType.Rook => 'R',
-        PieceType.Bishop => 'B',
-        PieceType.Knight => 'N',
-        _ => throw new IndexOutOfRangeException("Unknown PieceType")
-    };
 }

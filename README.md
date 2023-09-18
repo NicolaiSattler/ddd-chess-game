@@ -34,12 +34,9 @@ Follow these steps:
 
 - UI events
   - End the game
-  - Pawn promotion
-
-- Castling
-  - Pass through check
 
 ## Technical Dept
 - Implement [FluentResult](https://github.com/altmann/FluentResults) instead of throwing Exceptions.
+- fix testcoverage.
 
 Alot more idea's will be added soon..

@@ -6,6 +6,8 @@ using File = Chess.Domain.ValueObjects.File;
 using PieceEntity = Chess.Domain.Entities.Pieces.Piece;
 using Chess.Domain.Determiners;
 using Chess.Domain.Entities;
+using MudBlazor;
+using Chess.Web.Dialogs.Promotion;
 
 namespace Chess.Web.Components.Board;
 
@@ -17,7 +19,10 @@ public partial class BoardComponent: ComponentBase
     private ILogger<BoardComponent>? Logger { get; set;}
     [Inject]
     private IApplicationService? ApplicationService { get; set; }
-    private Guid ActiveMemberId => ActiveColor == Color.White ? White.MemberId : Black.MemberId;
+    [Inject]
+    private IDialogService? DialogService { get; set; }
+
+    private Guid ActiveMemberId => ActiveColor == Domain.ValueObjects.Color.White ? White.MemberId : Black.MemberId;
 
     [Parameter, EditorRequired]
     public Guid AggregateId { get; set; }
@@ -26,7 +31,7 @@ public partial class BoardComponent: ComponentBase
 
     public Player White { get; private set; } = new();
     public Player Black { get; private set; } = new();
-    public Color ActiveColor { get; private set; }
+    public Domain.ValueObjects.Color ActiveColor { get; private set; }
     public Guid ActivePieceId { get; set; }
     public List<FieldComponent> Fields { get; } = new();
     public List<PieceEntity> Pieces { get; private set; } = new();
@@ -103,11 +108,21 @@ public partial class BoardComponent: ComponentBase
             HandleCastlingMove(activePiece, turnResult.CastlingType);
         }
 
-        if (turnResult.IsEnPassant) await HandleEnPessantMoveAsync(activePiece);
+        if (turnResult.IsEnPassant)
+        {
+            await HandleEnPessantMoveAsync(activePiece);
+        }
+
+        if (turnResult.IsPromotion)
+        {
+            await HandlePromotionAsync(activePiece, endPosition);
+        }
 
         if (turnResult.MatchResult == MatchResult.Undefined)
         {
-            ActiveColor = ActiveColor == Color.White ? Color.Black : Color.White;
+            ActiveColor = ActiveColor == Domain.ValueObjects.Color.White
+                        ? Domain.ValueObjects.Color.Black
+                        : Domain.ValueObjects.Color.White;
 
             await OnTurnEnded.InvokeAsync(new() { ActiveMemberId = ActiveMemberId, Result = turnResult });
         }
@@ -198,8 +213,8 @@ public partial class BoardComponent: ComponentBase
         var turnCount = turns.Count();
         var lastOppenentMove = turns.ElementAt(turnCount - 3);
         var field = lastOppenentMove?.EndPosition;
-
         var targetPiece = Pieces?.Find(p => p.Position == field);
+
         if (targetPiece != null) Pieces?.Remove(targetPiece);
 
         var pawnField = Fields.Find(m => m.File == field?.File && m.Rank == field?.Rank);
@@ -208,8 +223,31 @@ public partial class BoardComponent: ComponentBase
         StateHasChanged();
     }
 
-    private void HandlePromotion()
+    private async Task HandlePromotionAsync(PieceEntity activePiece, Square endPosition)
     {
+        if (DialogService == null || ApplicationService == null) return;
 
+        var pawn = Pieces?.Find(p => p.Id == activePiece.Id);
+
+        if (pawn == null) return;
+
+        var options = new DialogOptions { CloseOnEscapeKey = false, DisableBackdropClick = true };
+        var dialog = await DialogService.ShowAsync<PromotionDialog>("Pawn Promotion", options);
+        var result = await dialog.Result;
+        var pieceType = result.Data is not null ? (PieceType)result.Data: PieceType.Undefined;
+
+        if (pieceType == PieceType.Undefined) return;
+
+        await ApplicationService.PromotePawnAsync(AggregateId, pawn.Position, pieceType);
+
+        Pieces = await ApplicationService.GetPiecesAsync(AggregateId);
+
+        var field = Fields.Find(f => f.Equals(endPosition));
+        var piece = Pieces?.Find(p => p.Position == pawn.Position);
+
+        if (piece == null) return;
+
+        field?.RemoveChild();
+        field?.AddChild(piece);
     }
 }

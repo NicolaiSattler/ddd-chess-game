@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoFixture;
 using Chess.Domain.Events;
 using Chess.Infrastructure.Repository;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -15,6 +16,7 @@ public class MatchEventRepositoryTests: TestBase
     private MatchEventRepository _sut;
     private Fixture _fixture;
     private Guid _aggregateId = Guid.NewGuid();
+    private Mock<IMemoryCache> _mockedCache;
 
     public MatchEventRepositoryTests(): base()
     {
@@ -28,7 +30,8 @@ public class MatchEventRepositoryTests: TestBase
     [TestInitialize]
     public void Initialize()
     {
-        _sut = new(Mock.Of<ILogger<MatchEventRepository>>(), DbContext);
+        _mockedCache = new();
+        _sut = new(Mock.Of<ILogger<MatchEventRepository>>(), _mockedCache.Object, DbContext);
         _fixture = new();
     }
 

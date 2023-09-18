@@ -2,6 +2,7 @@ using Chess.Application.Models;
 using Chess.Domain.Commands;
 using Chess.Infrastructure.Repository;
 using Chess.Test.Infrastructure;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
@@ -23,7 +24,7 @@ public class ApplicationServiceTests: TestBase
     {
         _mockedTimer = new();
         _matchRepository = new(Mock.Of<ILogger<MatchRepository>>(), DbContext);
-        _eventRepository = new(Mock.Of<ILogger<MatchEventRepository>>(), DbContext);
+        _eventRepository = new(Mock.Of<ILogger<MatchEventRepository>>(), Mock.Of<IMemoryCache>(), DbContext);
 
         _sut = new(_matchRepository, _eventRepository, _mockedTimer.Object);
     }

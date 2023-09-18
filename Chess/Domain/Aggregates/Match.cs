@@ -6,6 +6,7 @@ using Chess.Domain.Determiners;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
+using Chess.Domain.Extensions;
 using Chess.Domain.Factories;
 using Chess.Domain.ValueObjects;
 using Chess.Domain.Models;
@@ -29,11 +30,11 @@ public class Match : AggregateRoot, IMatch
     public Match(Guid id) : base(id) { }
     public Match(Guid id, IEnumerable<DomainEvent?>? events) : base(id, events) { }
 
-
     protected override void When(DomainEvent? domainEvent)
     {
         if (domainEvent is MatchStarted matchStarted) Handle(matchStarted);
         if (domainEvent is TurnTaken turnTaken) Handle(turnTaken);
+        if (domainEvent is PawnPromoted pawnPromoted) Handle(pawnPromoted);
         if (domainEvent is MatchEnded matchEnded) Handle(matchEnded);
     }
 
@@ -79,7 +80,6 @@ public class Match : AggregateRoot, IMatch
                 MemberId = command.MemberId,
                 StartPosition = command.StartPosition,
                 EndPosition =  command.EndPosition,
-                PromotionType = command.PromotionType,
                 EndTime = DateTime.UtcNow
             });
         }
@@ -94,6 +94,17 @@ public class Match : AggregateRoot, IMatch
         };
     }
 
+    //TODO: Unit test...
+    public void PromotePiece(Promotion command)
+    {
+        RaiseEvent(new PawnPromoted()
+        {
+            PawnPosition = command.PawnPosition,
+            PromotionType = command.PromotionType
+        });
+    }
+
+    //TODO: Unit test...
     public void Forfeit(Forfeit command)
     {
         Guard.Against.Null(command, nameof(command));
@@ -107,7 +118,7 @@ public class Match : AggregateRoot, IMatch
         RaiseEvent(@event);
     }
 
-    //TODO: Unitt test aggregate
+    //TODO: Unit test aggregate
     public void Resign(Resign command)
     {
         Guard.Against.InvalidInput(command.MemberId,
@@ -143,8 +154,8 @@ public class Match : AggregateRoot, IMatch
         Turns = new();
 
         Pieces = new();
-        Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.White));
-        Pieces.AddRange(PiecesFactory.CreatePiecesForColor(Color.Black));
+        Pieces.AddRange(PieceFactory.CreatePiecesForColor(Color.White));
+        Pieces.AddRange(PieceFactory.CreatePiecesForColor(Color.Black));
 
         StartTurn(@event.StartTime);
     }
@@ -177,12 +188,10 @@ public class Match : AggregateRoot, IMatch
 
         movingPiece.Position = @event.EndPosition;
 
-        if (@event.PromotionType != PieceType.Undefined) PromotePiece(@event.PromotionType, movingPiece);
-
         var isCheckMate = IsCheckMate(@event);
         var isStalemate = Board.IsStalemate(movingPiece.Color, Pieces);
         var isCheck = OpponentIsInCheck(movingPiece.Color);
-        var notation = DetermineNotation(movingPiece, targetPiece, castling, @event.PromotionType, isCheck, isCheckMate);
+        var notation = DetermineNotation(movingPiece, targetPiece, castling, isCheck, isCheckMate);
 
         EndTurn(@event, movingPiece.Type, notation);
 
@@ -201,10 +210,37 @@ public class Match : AggregateRoot, IMatch
         }
     }
 
+    private void Handle(PawnPromoted @event)
+    {
+        Guard.Against.Null(@event, nameof(@event));
+
+        var pawn = Pieces.Find(p => p.Position == @event.PawnPosition && p.Type == PieceType.Pawn);
+        var newPieceType = PieceFactory.CreatePiece(@event.PromotionType, pawn!.Position, pawn!.Id, pawn!.Color);
+
+        Pieces.Remove(pawn);
+        Pieces.Add(newPieceType);
+
+        var lastTurn = Turns.ElementAt(Turns.Count - 2);
+        lastTurn.Notation += $"={@event.PromotionType.GetPieceNotation()}";
+    }
+
+    //TODO: Notify Client that the match has ended
+    private void Handle(MatchEnded @event)
+    {
+        var whiteId = Guard.Against.Null(White, nameof(White)).MemberId;
+        var blackId = Guard.Against.Null(Black, nameof(Black)).MemberId;
+        var result = Elo.Calculate(White.Elo, Black.Elo, @event.Result);
+
+        if (result != null)
+        {
+            White = new() { MemberId = whiteId, Color = Color.White, Elo = result.WhiteElo };
+            Black = new() { MemberId = blackId, Color = Color.Black, Elo = result.BlackElo };
+        }
+    }
+
     private static string DetermineNotation(Piece movingPiece,
                                             Piece? targetPiece,
                                             CastlingType castling,
-                                            PieceType promotionType,
                                             bool isCheck,
                                             bool isCheckMate)
     {
@@ -218,9 +254,6 @@ public class Match : AggregateRoot, IMatch
             notation.HasCapturedPiece(movingPiece);
 
         notation.EndsAtPosition(movingPiece);
-
-        if (promotionType != PieceType.Undefined)
-            notation.IsPromotion(promotionType);
 
         if (isCheck)
             notation.IsCheck();
@@ -237,19 +270,6 @@ public class Match : AggregateRoot, IMatch
         return piece is King king && Board.IsCheck(king, Pieces);
     }
 
-    //TODO: Notify Client that the match has ended
-    private void Handle(MatchEnded @event)
-    {
-        var whiteId = Guard.Against.Null(White, nameof(White)).MemberId;
-        var blackId = Guard.Against.Null(Black, nameof(Black)).MemberId;
-        var result = Elo.Calculate(White.Elo, Black.Elo, @event.Result);
-
-        if (result != null)
-        {
-            White = new() { MemberId = whiteId, Color = Color.White, Elo = result.WhiteElo };
-            Black = new() { MemberId = blackId, Color = Color.Black, Elo = result.BlackElo };
-        }
-    }
 
     private Player GetOpponent(Guid memberId) => memberId != White.MemberId ? White : Black;
 
@@ -282,15 +302,6 @@ public class Match : AggregateRoot, IMatch
         turn.Notation = notation;
     }
 
-    //TODO: Unit Test in aggregate
-    //TODO: User should be given a choice to which kind the piece it will be promoted to.
-    private void PromotePiece(PieceType promotionType, Piece movingPiece)
-    {
-        var newPieceType = PiecesFactory.CreatePiece(promotionType, movingPiece.Position, movingPiece.Id, movingPiece.Color);
-
-        Pieces.Remove(movingPiece);
-        Pieces.Add(newPieceType);
-    }
 
     //TODO: Unit Test in aggregate
     private void MoveCastingPieces(Piece king, Square endPosition)

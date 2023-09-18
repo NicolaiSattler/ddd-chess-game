@@ -78,11 +78,6 @@ public partial class FieldComponent
         base.OnInitialized();
     }
 
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-    }
-
     public void Highlight(bool enabled)
     {
         if (enabled && string.IsNullOrEmpty(DropClasses))
@@ -96,4 +91,15 @@ public partial class FieldComponent
             StateHasChanged();
         }
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is Square square)
+        {
+            return square.File == File && square.Rank == Rank;
+        }
+
+        return base.Equals(obj);
+    }
+
 }

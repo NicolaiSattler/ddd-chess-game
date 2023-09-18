@@ -4,7 +4,7 @@ using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Factories;
 
-public class PiecesFactory
+public class PieceFactory
 {
     private static Dictionary<int, PieceType> GetStartPositions() => new()
     {
