@@ -19,7 +19,7 @@ public interface IMatch : IAggregateRoot
 
     void Start(StartMatch command);
     void Draw(Draw command);
-    void Resign(Resign command);
+    void Surrender(Surrender command);
     void Forfeit(Forfeit command);
     TurnResult TakeTurn(TakeTurn command);
 }

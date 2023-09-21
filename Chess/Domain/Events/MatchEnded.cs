@@ -11,8 +11,8 @@ public enum MatchResult
     BlackWins = 2,
     Draw = 3,
     Stalemate = 4,
-    WhiteForfeit = 5,
-    BlackForfeit = 6
+    WhiteSurrenders = 5,
+    BlackSurrenders = 6
 }
 
 public class MatchEnded : DomainEvent
@@ -23,8 +23,8 @@ public class MatchEnded : DomainEvent
 
     public MatchEnded(Player? white, Player? black, MatchResult result)
     {
-        White = Guard.Against.Null<Player?>(white, nameof(white))!;
-        Black = Guard.Against.Null<Player?>(black, nameof(black))!;
+        White = Guard.Against.Null(white, nameof(white))!;
+        Black = Guard.Against.Null(black, nameof(black))!;
         Result = result;
     }
 }

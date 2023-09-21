@@ -22,20 +22,27 @@
 
         <MudButtonGroup Variant="Variant.Filled" Class="d-flex align-center justify-center mud-width-full mt-2 overflow-auto">
             <MudIconButton Icon="@Icons.Material.Filled.Flag"
+                           @onclick="OpenForfeitDialogAsync"
                            Color="MudBlazor.Color.Warning"
                            Title="Forfeit" area-label="Forfeit"></MudIconButton>
+
             <MudIconButton Icon="@Icons.Material.Filled.Handshake"
                            Color="MudBlazor.Color.Tertiary"
+                           Disabled="true"
                            Title="Draw" area-label="Draw"></MudIconButton>
+
             <MudIconButton Icon="@Icons.Material.Filled.Flip"
+                           Disabled="true"
                            Color="MudBlazor.Color.Primary"
                            Title="Flip board" area-label="Flip board"></MudIconButton>
 
             <MudIconButton Icon="@Icons.Material.Filled.NavigateBefore"
+                           Disabled="true"
                            Color="MudBlazor.Color.Secondary"
                            Title="Previous move" area-label="Previous move"></MudIconButton>
 
             <MudIconButton Icon="@Icons.Material.Filled.NavigateNext"
+                           Disabled="true"
                            Color="MudBlazor.Color.Secondary"
                            Title="Next move" area-label="Next move"></MudIconButton>
         </MudButtonGroup>

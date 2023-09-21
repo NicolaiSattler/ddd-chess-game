@@ -1,5 +1,5 @@
 using Chess.Application.Models;
-using Chess.Web.Dialogs.Promotion;
+using Chess.Web.Dialogs.Surrender;
 using Chess.Web.Model;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -8,6 +8,10 @@ namespace Chess.Web.Pages.Match.Board;
 
 public partial class BoardPage: ComponentBase
 {
+    private const string BlackAtTurn = "Black is at turn";
+    private const string WhiteAtTurn = "White is at turn";
+    private const string SurrenderDialogTitle = "Surrender";
+
     [Inject]
     private IApplicationService? ApplicationService { get; set; }
     [Inject]
@@ -63,19 +67,27 @@ public partial class BoardPage: ComponentBase
 
     private void SetPlayerAtTurnStatus()
     {
-        var content = ActiveColor == Domain.ValueObjects.Color.Black ? "Black is at turn" : "White is at turn";
+        var content = ActiveColor == Domain.ValueObjects.Color.Black ? BlackAtTurn : WhiteAtTurn;
         Status = new(content, StatusType.Information);
     }
 
-    private async Task OpenDialogAsync()
+    private async Task OpenForfeitDialogAsync()
     {
-        var options = new DialogOptions { CloseOnEscapeKey = false, DisableBackdropClick = true };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
 
         if (DialogService == null) return;
 
-        var dialog = await DialogService.ShowAsync<PromotionDialog>("Select piece promotion", options);
+        var dialog = await DialogService.ShowAsync<SurrenderDialog>(SurrenderDialogTitle, options);
         var result = await dialog.Result;
 
-        Console.Write(result.Data);
+        if (result.Data != null && (bool)result.Data && ApplicationService != null)
+        {
+            var memberId = await ApplicationService.GetPlayerAtTurnAsync(AggregateId);
+            var command = new Surrender { MemberId = memberId };
+
+            await ApplicationService.SurrenderAsync(AggregateId, command);
+
+            //TODO: Set match result to the opposite of the player who surrendered.
+        }
     }
 }

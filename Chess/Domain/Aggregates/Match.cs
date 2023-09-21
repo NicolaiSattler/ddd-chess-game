@@ -110,8 +110,8 @@ public class Match : AggregateRoot, IMatch
         Guard.Against.Null(command, nameof(command));
 
         var matchResult = command.MemberId == White.MemberId
-                        ? MatchResult.WhiteForfeit
-                        : MatchResult.BlackForfeit;
+                        ? MatchResult.WhiteSurrenders
+                        : MatchResult.BlackSurrenders;
 
         var @event = new MatchEnded(White, Black, matchResult);
 
@@ -119,15 +119,15 @@ public class Match : AggregateRoot, IMatch
     }
 
     //TODO: Unit test aggregate
-    public void Resign(Resign command)
+    public void Surrender(Surrender command)
     {
         Guard.Against.InvalidInput(command.MemberId,
                                    nameof(command.MemberId),
                                    (memberId) => memberId != Guid.Empty);
 
         var matchResult = command.MemberId == White.MemberId
-                        ? MatchResult.WhiteWins
-                        : MatchResult.BlackWins;
+                        ? MatchResult.WhiteSurrenders
+                        : MatchResult.BlackSurrenders;
 
         var @event = new MatchEnded(White, Black, matchResult);
 
@@ -236,6 +236,8 @@ public class Match : AggregateRoot, IMatch
             White = new() { MemberId = whiteId, Color = Color.White, Elo = result.WhiteElo };
             Black = new() { MemberId = blackId, Color = Color.Black, Elo = result.BlackElo };
         }
+
+        //TODO: Save match event..
     }
 
     private static string DetermineNotation(Piece movingPiece,

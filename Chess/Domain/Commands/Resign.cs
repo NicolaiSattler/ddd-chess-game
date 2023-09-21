@@ -1,6 +1,6 @@
 namespace Chess.Domain.Commands;
 
-public record Resign
+public record Surrender
 {
     public Guid MemberId { get; init; }
 }

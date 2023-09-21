@@ -31,12 +31,12 @@ public class Elo
 
         return result switch
         {
-            MatchResult.WhiteWins or MatchResult.BlackForfeit => new()
+            MatchResult.WhiteWins or MatchResult.BlackSurrenders => new()
             {
                 WhiteElo = CalculateEloResult(rA, probabilityWhite, 1),
                 BlackElo = CalculateEloResult(rB, probabilityBlack, 0)
             },
-            MatchResult.BlackWins or MatchResult.WhiteForfeit => new()
+            MatchResult.BlackWins or MatchResult.WhiteSurrenders => new()
             {
                 WhiteElo = CalculateEloResult(rA, probabilityWhite, 0),
                 BlackElo = CalculateEloResult(rB, probabilityBlack, 1)

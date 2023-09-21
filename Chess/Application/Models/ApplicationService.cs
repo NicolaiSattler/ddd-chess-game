@@ -21,11 +21,12 @@ public interface IApplicationService
 {
     Task StartMatchAsync(StartMatch command);
     Task<TurnResult> TakeTurnAsync(Guid aggregateId, TakeTurn command);
-    Task ResignAsync(Guid aggregateId, Resign command);
+    Task SurrenderAsync(Guid aggregateId, Surrender command);
     Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
     Task DrawAsync(Guid aggregateId, Draw command);
     Task PromotePawnAsync(Guid aggregateId, Square position, PieceType type);
     Task<List<Piece>> GetPiecesAsync(Guid aggregateId);
+    Task<Guid> GetPlayerAtTurnAsync(Guid aggregateId);
     Task<Color> GetColorAtTurnAsync(Guid aggregateId);
     Task<IEnumerable<Turn>> GetTurns(Guid aggregateId);
     Task<IEnumerable<MatchEntity>> GetMatchesAsync();
@@ -53,6 +54,13 @@ public class ApplicationService : IApplicationService
         match.Start(command);
 
         await SaveEventAsync(match);
+    }
+
+    public async Task<Guid> GetPlayerAtTurnAsync(Guid aggregateId)
+    {
+        var match = await GetAggregateById(aggregateId);
+
+        return match.Turns.Last().Player.MemberId;
     }
 
     public async Task<Color> GetColorAtTurnAsync(Guid aggregateId)
@@ -129,12 +137,12 @@ public class ApplicationService : IApplicationService
     }
 
     //TODO: Unit Test
-    public async Task ResignAsync(Guid aggregateId, Resign command)
+    public async Task SurrenderAsync(Guid aggregateId, Surrender command)
     {
         _timer.Stop();
 
         var match = await GetAggregateById(aggregateId);
-        match.Resign(command);
+        match.Surrender(command);
 
         await SaveEventAsync(match);
     }

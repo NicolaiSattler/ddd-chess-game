@@ -36,7 +36,7 @@ public class EloTests
 
     [TestMethod]
     [DataRow(MatchResult.BlackWins)]
-    [DataRow(MatchResult.WhiteForfeit)]
+    [DataRow(MatchResult.WhiteSurrenders)]
     public void Calculate_BlackWins(MatchResult matchResult)
     {
         //Arrange
@@ -53,7 +53,7 @@ public class EloTests
 
     [TestMethod]
     [DataRow(MatchResult.WhiteWins)]
-    [DataRow(MatchResult.BlackForfeit)]
+    [DataRow(MatchResult.BlackSurrenders)]
     public void Calculate_WhiteWins(MatchResult matchResult)
     {
         //Arrange
