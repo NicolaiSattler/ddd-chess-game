@@ -1,3 +1,4 @@
+using Chess.Application.Events;
 using Chess.Core;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
@@ -8,53 +9,31 @@ using Chess.Domain.Models;
 using Chess.Domain.ValueObjects;
 using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 using MatchEntity = Chess.Infrastructure.Entity.Match;
 
-namespace Chess.Application.Models;
-
-public interface IApplicationService
-{
-    Task StartMatchAsync(StartMatch command);
-    Task<TurnResult> TakeTurnAsync(Guid aggregateId, TakeTurn command);
-    Task SurrenderAsync(Guid aggregateId, Surrender command);
-    Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
-    Task DrawAsync(Guid aggregateId, Draw command);
-    Task PromotePawnAsync(Guid aggregateId, Square position, PieceType type);
-    Task<List<Piece>> GetPiecesAsync(Guid aggregateId);
-    Task<Guid> GetPlayerAtTurnAsync(Guid aggregateId);
-    Task<Color> GetColorAtTurnAsync(Guid aggregateId);
-    Task<IEnumerable<Turn>> GetTurns(Guid aggregateId);
-    Task<IEnumerable<MatchEntity>> GetMatchesAsync();
-    Task<Player> GetPlayerAsync(Guid aggregateId, Color color);
-}
+namespace Chess.Application.Services;
 
 public class ApplicationService : IApplicationService
 {
     private readonly IMatchRepository _matchRepository;
     private readonly IMatchEventRepository _eventRepository;
-    private readonly ITurnTimer _timer;
+    private readonly ITimerService _timer;
 
     public ApplicationService(IMatchRepository matchRepository,
                               IMatchEventRepository eventRepository,
-                              ITurnTimer turnTimer)
+                              ITimerService turnTimer)
     {
         _matchRepository = matchRepository;
         _eventRepository = eventRepository;
+
         _timer = turnTimer;
+        _timer.TurnExpired += TimerExpiredEventHandler;
     }
 
-    public async Task StartMatchAsync(StartMatch command)
-    {
-        var match = new Match(command.AggregateId);
-        match.Start(command);
-
-        await SaveEventAsync(match);
-    }
 
     public async Task<Guid> GetPlayerAtTurnAsync(Guid aggregateId)
     {
@@ -82,6 +61,24 @@ public class ApplicationService : IApplicationService
         return color == Color.White ? match.White : match.Black;
     }
 
+    //TODO: Unit Test
+    public async Task<IEnumerable<MatchEntity>> GetMatchesAsync() => await _matchRepository.GetAsync();
+
+    public async Task<IEnumerable<Turn>> GetTurns(Guid aggregateId)
+    {
+        var match = await GetAggregateById(aggregateId);
+
+        return match.Turns;
+    }
+
+    public async Task StartMatchAsync(StartMatch command)
+    {
+        var match = new Match(command.AggregateId);
+        match.Start(command);
+
+        await SaveEventAsync(match);
+    }
+
     //TODO: Make sure the timer is not disposed when the instance of ApplicationService is disposing.
     //TODO: Piece promotion?
     public async Task<TurnResult> TakeTurnAsync(Guid aggregateId, TakeTurn command)
@@ -98,8 +95,9 @@ public class ApplicationService : IApplicationService
             if (@event is TurnTaken)
             {
                 var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
+                var turnTimeInSeconds = (int)match.Options.MaxTurnTime.TotalSeconds;
 
-                _timer.Start(aggregateId, playerAtTurn!.MemberId);
+                _timer.Start(aggregateId, playerAtTurn!.MemberId, turnTimeInSeconds);
             }
             else if (@event is MatchEnded)
             {
@@ -117,12 +115,6 @@ public class ApplicationService : IApplicationService
         await Task.CompletedTask;
         throw new NotImplementedException();
         //TODO: Raise event in UI.
-    }
-
-    //TODO: Unit Test
-    public async Task<IEnumerable<MatchEntity>> GetMatchesAsync()
-    {
-        return await _matchRepository.GetAsync();
     }
 
     //TODO: Unit Test
@@ -147,11 +139,12 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
-    public async Task<IEnumerable<Turn>> GetTurns(Guid aggregateId)
+    public async Task ForfeitAsync(Guid aggregateId, Forfeit command)
     {
         var match = await GetAggregateById(aggregateId);
+        match.Forfeit(command);
 
-        return match.Turns.ToList();
+        await SaveEventAsync(match);
     }
 
     public async Task PromotePawnAsync(Guid aggregateId, Square position, PieceType type)
@@ -163,20 +156,25 @@ public class ApplicationService : IApplicationService
         await SaveEventAsync(match);
     }
 
+    private async void TimerExpiredEventHandler(object sender, TurnExpiredEventArgs args)
+    {
+        var command = new Forfeit { MemberId = args.MemberId };
+
+        await ForfeitAsync(args.AggregateId, command);
+    }
+
     private async Task<DomainEvent?> SaveEventAsync(IMatch aggregate)
     {
         var lastEvent = aggregate.Events.Last();
 
         if (lastEvent is MatchStarted matchStartedEvent)
         {
-            await _matchRepository.AddAsync(matchStartedEvent, false);
+            await _matchRepository.AddAsync(matchStartedEvent);
         }
-        else if (lastEvent is MatchEnded)
+        else if (lastEvent is MatchEnded matchEndedEvent)
         {
-            var lastTurnIndex = aggregate.Events.Count() - 2;
-            var lastTurnEvent = aggregate.Events.ElementAt(lastTurnIndex);
-
-            await _eventRepository.AddAsync(aggregate.Id, lastTurnEvent, false);
+            await _eventRepository.AddAsync(aggregate.Id, matchEndedEvent);
+            return lastEvent;
         }
 
         await _eventRepository.AddAsync(aggregate.Id, lastEvent);
@@ -184,7 +182,6 @@ public class ApplicationService : IApplicationService
         return lastEvent;
     }
 
-    //TODO: add caching?
     private async Task<Match> GetAggregateById(Guid aggregateId)
     {
         var result = await _eventRepository.GetAsync(aggregateId);

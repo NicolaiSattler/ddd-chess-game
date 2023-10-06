@@ -1,4 +1,4 @@
-using Chess.Application.Models;
+using Chess.Application.Services;
 using Microsoft.AspNetCore.Components;
 
 using MatchEntity = Chess.Infrastructure.Entity.Match;

@@ -1,4 +1,4 @@
-using Chess.Application.Models;
+using Chess.Application.Services;
 using Chess.Web.Model;
 using Microsoft.AspNetCore.Components;
 using Chess.Web.Validation;

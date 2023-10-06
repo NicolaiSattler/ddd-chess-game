@@ -42,20 +42,14 @@ public class Match : AggregateRoot, IMatch
     {
         Guard.Against.InvalidInput(command,
                                    nameof(command),
-                                   (cmd) => cmd.MemberOneId != cmd.MemberTwoId,
+                                   (cmd) => cmd.MemberOne.MemberId != cmd.MemberTwo.MemberId,
                                    Constants.InvalidStartMatchError);
 
         var colorPicker = new Random(1);
         var memberOneIsWhite = colorPicker.Next() == 0;
-        var whiteId = memberOneIsWhite ? command.MemberOneId : command.MemberTwoId;
-        var blackId = !memberOneIsWhite ? command.MemberOneId : command.MemberTwoId;
-        var @event = new MatchStarted()
-        {
-            AggregateId = command.AggregateId,
-            WhiteMemberId = whiteId,
-            BlackMemberId = blackId,
-            StartTime = DateTime.UtcNow
-        };
+        var white = memberOneIsWhite ? command.MemberOne : command.MemberTwo;
+        var black = !memberOneIsWhite ? command.MemberOne : command.MemberTwo;
+        var @event = MatchStarted.CreateFrom(command, white, black);
 
         RaiseEvent(@event);
     }
@@ -75,13 +69,9 @@ public class Match : AggregateRoot, IMatch
 
         if (!violations.Any())
         {
-            RaiseEvent(new TurnTaken
-            {
-                MemberId = command.MemberId,
-                StartPosition = command.StartPosition,
-                EndPosition =  command.EndPosition,
-                EndTime = DateTime.UtcNow
-            });
+            var @event = TurnTaken.CreateFrom(command);
+
+            RaiseEvent(@event);
         }
         else return new() { Violations = violations };
 
@@ -97,11 +87,9 @@ public class Match : AggregateRoot, IMatch
     //TODO: Unit test...
     public void PromotePiece(Promotion command)
     {
-        RaiseEvent(new PawnPromoted()
-        {
-            PawnPosition = command.PawnPosition,
-            PromotionType = command.PromotionType
-        });
+        var @event = PawnPromoted.CreateFrom(command);
+
+        RaiseEvent(@event);
     }
 
     //TODO: Unit test...
@@ -110,8 +98,8 @@ public class Match : AggregateRoot, IMatch
         Guard.Against.Null(command, nameof(command));
 
         var matchResult = command.MemberId == White.MemberId
-                        ? MatchResult.WhiteSurrenders
-                        : MatchResult.BlackSurrenders;
+                        ? MatchResult.BlackWins
+                        : MatchResult.WhiteWins;
 
         var @event = new MatchEnded(White, Black, matchResult);
 
@@ -149,8 +137,8 @@ public class Match : AggregateRoot, IMatch
     private void Handle(MatchStarted @event)
     {
         Options = @event.Options;
-        White = new() { Color = Color.White, MemberId = @event.WhiteMemberId, Elo = @event.EloOfWhite };
-        Black = new() { Color = Color.Black, MemberId = @event.BlackMemberId, Elo = @event.EloOfBlack };
+        White = new() { Color = Color.White, MemberId = @event.WhiteMemberId, Elo = @event.WhiteElo };
+        Black = new() { Color = Color.Black, MemberId = @event.BlackMemberId, Elo = @event.BlackElo };
         Turns = new();
 
         Pieces = new();
@@ -240,11 +228,7 @@ public class Match : AggregateRoot, IMatch
         //TODO: Save match event..
     }
 
-    private static string DetermineNotation(Piece movingPiece,
-                                            Piece? targetPiece,
-                                            CastlingType castling,
-                                            bool isCheck,
-                                            bool isCheckMate)
+    private static string DetermineNotation(Piece movingPiece, Piece? targetPiece, CastlingType castling, bool isCheck, bool isCheckMate)
     {
         var notation = new NotationBuilder();
 
@@ -271,7 +255,6 @@ public class Match : AggregateRoot, IMatch
         var piece =  Pieces.FirstOrDefault(p => p.Color != currentPlayerColor && p.Type == PieceType.King);
         return piece is King king && Board.IsCheck(king, Pieces);
     }
-
 
     private Player GetOpponent(Guid memberId) => memberId != White.MemberId ? White : Black;
 
@@ -339,14 +322,13 @@ public class Match : AggregateRoot, IMatch
     private  string CalculateHash(Color color)
     {
         const string separator = "";
-        using var md5 = MD5.Create();
 
         var pieceNotations = Pieces.Where(p => p.Color == color)
                                    .Select(p => p.ToString());
+
         var aggregate = string.Join(separator, pieceNotations);
         var inputBytes = Encoding.UTF8.GetBytes(aggregate);
-
-        var hexdecimalCollection = md5.ComputeHash(inputBytes)
+        var hexdecimalCollection = MD5.HashData(inputBytes)
                                       .Select(m => m.ToString("x2"));
 
         return string.Join(separator, hexdecimalCollection);

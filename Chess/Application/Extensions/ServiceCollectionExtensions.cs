@@ -1,4 +1,4 @@
-using Chess.Application.Models;
+using Chess.Application.Services;
 using Chess.Domain.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +14,9 @@ public static class ServiceCollectionExtensions
                   .ValidateOnStart();
 
         collection.AddScoped<IApplicationService, ApplicationService>();
-        collection.AddSingleton<TurnTimer>();
-        collection.AddSingleton<ITurnTimer>(c => c.GetRequiredService<TurnTimer>());
+        collection.AddSingleton<TimerService>();
+        collection.AddSingleton<ITimerService>(c => c.GetRequiredService<TimerService>());
+        collection.AddScoped<ITurnTimerInfoService, TurnTimerInfoService>();
 
         return collection;
     }

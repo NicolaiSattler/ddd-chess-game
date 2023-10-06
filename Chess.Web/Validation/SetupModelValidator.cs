@@ -9,8 +9,8 @@ public class SetupModelValidator: AbstractValidator<SetupModel>
     {
         RuleFor(m => m.MemberOne).NotEmpty();
         RuleFor(m => m.MemberTwo).NotEmpty();
-        RuleFor(m => m.MaxTurnTime).GreaterThan(0);
-        RuleFor(m => m.MaxTurnTime).LessThan(60);
+        RuleFor(m => m.MaxTurnTimeInMinutes).GreaterThan(0);
+        RuleFor(m => m.MaxTurnTimeInMinutes).LessThan(60);
     }
 
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>

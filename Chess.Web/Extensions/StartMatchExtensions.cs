@@ -16,13 +16,13 @@ public static class Extensions
         var aggregateId = Guid.NewGuid();
         return new()
         {
-            MemberOneId = memberOne,
-            MemberTwoId = memberTwo,
+            MemberOne = new() { MemberId = memberOne, Elo = model.MemberOneElo },
+            MemberTwo = new() { MemberId = memberTwo, Elo = model.MemberTwoElo },
             AggregateId = aggregateId,
             Options = new()
             {
                 DrawByRepition = model.DrawByRepition,
-                MaxTurnTime = new TimeSpan(0, model.MaxTurnTime, 0)
+                MaxTurnTime = new TimeSpan(0, model.MaxTurnTimeInMinutes, 0)
             }
         };
     }

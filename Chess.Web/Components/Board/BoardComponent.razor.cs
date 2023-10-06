@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using Chess.Application.Models;
+using Chess.Application.Services;
 using Chess.Web.Model;
 
 using File = Chess.Domain.ValueObjects.File;
@@ -83,6 +83,8 @@ public partial class BoardComponent: ComponentBase
         {
             Pieces = await ApplicationService.GetPiecesAsync(AggregateId);
             ActiveColor = await ApplicationService.GetColorAtTurnAsync(AggregateId);
+            Black = await ApplicationService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.Black);
+            White = await ApplicationService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.White);
         }
     }
 
@@ -118,14 +120,11 @@ public partial class BoardComponent: ComponentBase
             await HandlePromotionAsync(activePiece, endPosition);
         }
 
-        if (turnResult.MatchResult == MatchResult.Undefined)
-        {
-            ActiveColor = ActiveColor == Domain.ValueObjects.Color.White
-                        ? Domain.ValueObjects.Color.Black
-                        : Domain.ValueObjects.Color.White;
+        ActiveColor = ActiveColor == Domain.ValueObjects.Color.White
+                    ? Domain.ValueObjects.Color.Black
+                    : Domain.ValueObjects.Color.White;
 
-            await OnTurnEnded.InvokeAsync(new() { ActiveMemberId = ActiveMemberId, Result = turnResult });
-        }
+        await OnTurnEnded.InvokeAsync(new() { ActiveMemberId = ActiveMemberId, Result = turnResult });
 
         StateHasChanged();
     }
