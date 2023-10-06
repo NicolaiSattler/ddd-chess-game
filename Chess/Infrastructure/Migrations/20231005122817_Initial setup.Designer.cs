@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Chess.Infrastructure.Migrations
+namespace Chess.Migrations.Infrastructure
 {
     [DbContext(typeof(MatchDbContext))]
-    [Migration("20230514125044_Initial setup")]
+    [Migration("20231005122817_Initial setup")]
     partial class Initialsetup
     {
         /// <inheritdoc />
@@ -52,11 +52,11 @@ namespace Chess.Infrastructure.Migrations
                     b.Property<Guid>("AggregateId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Data")
-                        .IsRequired()
+                    b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("FK_MatchEvent_AggregateId")
+                    b.Property<string>("Data")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")
@@ -68,7 +68,7 @@ namespace Chess.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FK_MatchEvent_AggregateId");
+                    b.HasIndex("AggregateId");
 
                     b.ToTable("Events");
                 });
@@ -77,8 +77,10 @@ namespace Chess.Infrastructure.Migrations
                 {
                     b.HasOne("Chess.Infrastructure.Entity.Match", "Match")
                         .WithMany("Events")
-                        .HasForeignKey("FK_MatchEvent_AggregateId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("AggregateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_MatchEvent_AggregateId");
 
                     b.Navigation("Match");
                 });

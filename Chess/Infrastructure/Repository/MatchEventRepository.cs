@@ -74,7 +74,8 @@ public class MatchEventRepository : IMatchEventRepository
                 AggregateId = aggregateId,
                 Version = latestVersion++,
                 Type = @event.GetType().Name,
-                Data = JsonSerializer.Serialize(@event, @event.GetType())
+                Data = JsonSerializer.Serialize(@event, @event.GetType()),
+                CreatedAtUtc = DateTime.UtcNow
             };
 
             _dbContext.Events!.Add(matchEvent);

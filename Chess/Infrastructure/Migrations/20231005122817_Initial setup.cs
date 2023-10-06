@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Chess.Infrastructure.Migrations
+namespace Chess.Migrations.Infrastructure
 {
     /// <inheritdoc />
     public partial class Initialsetup : Migration
@@ -35,23 +35,23 @@ namespace Chess.Infrastructure.Migrations
                     Version = table.Column<int>(type: "INTEGER", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Data = table.Column<string>(type: "TEXT", nullable: false),
-                    FK_MatchEvent_AggregateId = table.Column<Guid>(type: "TEXT", nullable: true)
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Events", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Events_Matches_FK_MatchEvent_AggregateId",
-                        column: x => x.FK_MatchEvent_AggregateId,
+                        name: "FK_MatchEvent_AggregateId",
+                        column: x => x.AggregateId,
                         principalTable: "Matches",
                         principalColumn: "AggregateId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Events_FK_MatchEvent_AggregateId",
+                name: "IX_Events_AggregateId",
                 table: "Events",
-                column: "FK_MatchEvent_AggregateId");
+                column: "AggregateId");
         }
 
         /// <inheritdoc />

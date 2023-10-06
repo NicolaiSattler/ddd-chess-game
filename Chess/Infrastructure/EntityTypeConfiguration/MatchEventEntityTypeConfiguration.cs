@@ -21,7 +21,8 @@ public class MatchEventEntityTypeConfiguration : IEntityTypeConfiguration<MatchE
 
        builder.HasOne(m => m.Match)
               .WithMany(m => m.Events)
-              .HasForeignKey("FK_MatchEvent_AggregateId")
+              .HasForeignKey(m => m.AggregateId)
+              .HasConstraintName("FK_MatchEvent_AggregateId")
               .OnDelete(DeleteBehavior.Cascade);
     }
 }

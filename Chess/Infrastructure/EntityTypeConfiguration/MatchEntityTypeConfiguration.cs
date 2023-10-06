@@ -18,6 +18,9 @@ public class MatchEntityTypeConfiguration : IEntityTypeConfiguration<Match>
 
        builder.Property(m => m.StartTime)
               .IsRequired();
+
+       builder.HasMany(m => m.Events)
+              .WithOne(m => m.Match);
     }
 }
 

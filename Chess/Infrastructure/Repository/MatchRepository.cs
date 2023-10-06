@@ -10,7 +10,7 @@ namespace Chess.Infrastructure.Repository;
 
 public interface IMatchRepository
 {
-    Task<Match> GetAsync(Guid aggregateId);
+    Task<Match> GetAsync(Guid aggregateId, bool includeEvents = false);
     Task<IEnumerable<Match>> GetAsync();
     Task<Match?> AddAsync(MatchStarted @event, bool saveChanges = true);
 }
@@ -31,10 +31,17 @@ public class MatchRepository : IMatchRepository
     /// </summary>
     public async Task<IEnumerable<Match>> GetAsync() => await _context.Matches.ToListAsync();
 
-    public async Task<Match> GetAsync(Guid aggregateId)
+    public async Task<Match> GetAsync(Guid aggregateId, bool includeEvents = false)
     {
         try
         {
+            if (includeEvents)
+            {
+                return await _context.Matches
+                                     .Include(m => m.Events)
+                                     .FirstAsync(m => m.AggregateId == aggregateId)
+                    ?? throw new ApplicationException($"No match was found for the id {aggregateId}");
+            }
             return await _context.Matches.SingleOrDefaultAsync(m => m.AggregateId == aggregateId)
                 ?? throw new ApplicationException($"No match was found for the id {aggregateId}");
         }
