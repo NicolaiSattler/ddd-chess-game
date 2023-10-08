@@ -14,8 +14,8 @@ public partial class FieldComponent
 
     private string? BgClasses { get; set; }
     private string? DropClasses { get; set; }
-    private bool ShowRank => this.File == File.A;
-    private bool ShowFile => this.Rank == 8;
+    private bool ShowRank => File == File.A;
+    private bool ShowFile => Rank == 8;
 
     [CascadingParameter]
     private BoardComponent? Parent { get; set; }
@@ -102,4 +102,5 @@ public partial class FieldComponent
         return base.Equals(obj);
     }
 
+    public override int GetHashCode() => HashCode.Combine(Rank, File);
 }
