@@ -8,7 +8,7 @@ namespace Chess.Web.Pages.Match.Overview;
 public partial class OverviewPage: ComponentBase
 {
     [Inject]
-    private IApplicationService? ApplicationService { get; set; }
+    private IMatchDataService? MatchDataService { get; set; }
 
     [Inject]
     private NavigationManager? Navigator { get; set; }
@@ -22,11 +22,7 @@ public partial class OverviewPage: ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (ApplicationService != null)
-        {
-            var result = await ApplicationService.GetMatchesAsync();
-
-            Matches = result.ToList();
-        }
+        var result = await MatchDataService!.GetMatchesAsync();
+        Matches = result.ToList();
     }
 }

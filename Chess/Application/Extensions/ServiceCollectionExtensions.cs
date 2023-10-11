@@ -13,10 +13,13 @@ public static class ServiceCollectionExtensions
                   .Bind(configuration.GetSection(MatchOptions.SectionName))
                   .ValidateOnStart();
 
-        collection.AddScoped<IApplicationService, ApplicationService>();
+        collection.AddScoped<IMatchDataService, MatchDataService>();
+        collection.AddScoped<IMatchInfoService, MatchInfoService>();
+        collection.AddScoped<IPlayerActionService, PlayerActionService>();
+        collection.AddScoped<ITurnTimerInfoService, TurnTimerInfoService>();
+
         collection.AddSingleton<TimerService>();
         collection.AddSingleton<ITimerService>(c => c.GetRequiredService<TimerService>());
-        collection.AddScoped<ITurnTimerInfoService, TurnTimerInfoService>();
 
         return collection;
     }

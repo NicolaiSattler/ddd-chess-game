@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Chess.Application.Services;
+using Chess.Domain.Determiners;
+using Chess.Domain.Entities;
+using Chess.Web.Dialogs.Promotion;
 using Chess.Web.Model;
+using MudBlazor;
 
 using File = Chess.Domain.ValueObjects.File;
 using PieceEntity = Chess.Domain.Entities.Pieces.Piece;
-using Chess.Domain.Determiners;
-using Chess.Domain.Entities;
-using MudBlazor;
-using Chess.Web.Dialogs.Promotion;
 
 namespace Chess.Web.Components.Board;
 
@@ -18,7 +18,11 @@ public partial class BoardComponent: ComponentBase
     [Inject]
     private ILogger<BoardComponent>? Logger { get; set;}
     [Inject]
-    private IApplicationService? ApplicationService { get; set; }
+    private IMatchDataService? MatchDataService { get; set; }
+    [Inject]
+    private IMatchInfoService? MatchInfoService { get; set; }
+    [Inject]
+    private IPlayerActionService? ActionService { get; set; }
     [Inject]
     private IDialogService? DialogService { get; set; }
 
@@ -37,8 +41,11 @@ public partial class BoardComponent: ComponentBase
     public List<PieceEntity> Pieces { get; private set; } = new();
 
     public PieceEntity? SelectPiece(int rank, int file) => Pieces?.Find(p => p.Position == new Square((File)file, rank));
+
     public void AddChild(FieldComponent fieldComponent) => Fields.Add(fieldComponent);
+
     public void HideAvailableMoves() => SetFieldHighlight(Fields, false);
+
     public async Task ShowAvailableMovesAsync(Guid pieceId)
     {
         SetFieldHighlight(Fields, false);
@@ -57,6 +64,7 @@ public partial class BoardComponent: ComponentBase
 
         SetFieldHighlight(fields, true);
     }
+
     public async Task UpdateBoardAsync(int rank, File file)
     {
         try
@@ -79,12 +87,12 @@ public partial class BoardComponent: ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        if (ApplicationService != null)
+        if (MatchDataService != null  && MatchInfoService != null)
         {
-            Pieces = await ApplicationService.GetPiecesAsync(AggregateId);
-            ActiveColor = await ApplicationService.GetColorAtTurnAsync(AggregateId);
-            Black = await ApplicationService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.Black);
-            White = await ApplicationService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.White);
+            Pieces = await MatchDataService.GetPiecesAsync(AggregateId);
+            ActiveColor = await MatchInfoService.GetColorAtTurnAsync(AggregateId);
+            Black = await MatchInfoService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.Black);
+            White = await MatchInfoService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.White);
         }
     }
 
@@ -92,7 +100,7 @@ public partial class BoardComponent: ComponentBase
     {
         var command = new TakeTurn() { MemberId = ActiveMemberId, StartPosition = activePiece.Position, EndPosition = endPosition };
 
-        return await ApplicationService!.TakeTurnAsync(AggregateId, command);
+        return await ActionService!.TakeTurnAsync(AggregateId, command);
     }
 
     private async Task HandleTurnResultAsync(TurnResult turnResult, PieceEntity activePiece, Square endPosition)
@@ -157,9 +165,9 @@ public partial class BoardComponent: ComponentBase
 
     private async Task<IEnumerable<Square>> GetEnPassantMoves(Pawn pawn)
     {
-        if (ApplicationService == null) return Enumerable.Empty<Square>();
+        if (MatchDataService == null) return Enumerable.Empty<Square>();
 
-        var turns =  await ApplicationService.GetTurns(AggregateId);
+        var turns =  await MatchDataService.GetTurns(AggregateId);
         var turnCount = turns.Count();
 
         if (turnCount == 1) return Enumerable.Empty<Square>();
@@ -205,10 +213,10 @@ public partial class BoardComponent: ComponentBase
 
     private async Task HandleEnPessantMoveAsync(PieceEntity activePiece)
     {
-        if (ApplicationService == null) return;
+        if (MatchDataService == null) return;
         if (activePiece is Pawn pawn && pawn == null) return;
 
-        var turns = await ApplicationService.GetTurns(AggregateId) ?? Enumerable.Empty<Turn>();
+        var turns = await MatchDataService.GetTurns(AggregateId) ?? Enumerable.Empty<Turn>();
         var turnCount = turns.Count();
         var lastOppenentMove = turns.ElementAt(turnCount - 3);
         var field = lastOppenentMove?.EndPosition;
@@ -224,7 +232,9 @@ public partial class BoardComponent: ComponentBase
 
     private async Task HandlePromotionAsync(PieceEntity activePiece, Square endPosition)
     {
-        if (DialogService == null || ApplicationService == null) return;
+        if (DialogService == null
+            || MatchDataService == null
+            || ActionService == null) return;
 
         var pawn = Pieces?.Find(p => p.Id == activePiece.Id);
 
@@ -237,9 +247,9 @@ public partial class BoardComponent: ComponentBase
 
         if (pieceType == PieceType.Undefined) return;
 
-        await ApplicationService.PromotePawnAsync(AggregateId, pawn.Position, pieceType);
+        await ActionService.PromotePawnAsync(AggregateId, pawn.Position, pieceType);
 
-        Pieces = await ApplicationService.GetPiecesAsync(AggregateId);
+        Pieces = await MatchDataService.GetPiecesAsync(AggregateId);
 
         var field = Fields.Find(f => f.Equals(endPosition));
         var piece = Pieces?.Find(p => p.Position == pawn.Position);

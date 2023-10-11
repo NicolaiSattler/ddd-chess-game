@@ -16,7 +16,11 @@ public partial class BoardPage: ComponentBase, IDisposable
     private const string TimerExceededDialogTitle = "Turn time exceeded";
 
     [Inject]
-    private IApplicationService? ApplicationService { get; set; }
+    private IPlayerActionService? ActionService { get; set; }
+    [Inject]
+    private IMatchInfoService? MatchInfoService { get; set; }
+    [Inject]
+    private IMatchDataService? MatchDataService { get; set; }
     [Inject]
     private ITurnTimerInfoService? TimerInfoService { get; set; }
     [Inject]
@@ -32,23 +36,20 @@ public partial class BoardPage: ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        if (ApplicationService != null)
-        {
-            ActiveColor =  await ApplicationService.GetColorAtTurnAsync(AggregateId);
+        ActiveColor = await MatchInfoService!.GetColorAtTurnAsync(AggregateId);
 
-            var turns = await ApplicationService.GetTurns(AggregateId);
-            //TODO: check, match ended etc..
-            SetMatchState(turns);
-        }
+        var turns = await MatchDataService!.GetTurns(AggregateId);
+        //TODO: check, match ended etc..
+        SetMatchState(turns);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender && ApplicationService != null && TimerInfoService != null && TimerService != null)
+        if(firstRender)
         {
-            var turns = await ApplicationService.GetTurns(AggregateId);
+            var turns = await MatchDataService!.GetTurns(AggregateId);
             var lastTurn = turns.Last();
-            var remainingTimeInSeconds = await TimerInfoService.GetRemainingTimeAsync(AggregateId);
+            var remainingTimeInSeconds = await TimerInfoService!.GetRemainingTimeAsync(AggregateId);
             var turnExpired = remainingTimeInSeconds < 0;
 
             if (turnExpired)
@@ -57,7 +58,7 @@ public partial class BoardPage: ComponentBase, IDisposable
             }
             else
             {
-                TimerService.Start(AggregateId, lastTurn.Player.MemberId, remainingTimeInSeconds);
+                TimerService!.Start(AggregateId, lastTurn.Player.MemberId, remainingTimeInSeconds);
                 TimerService.TurnExpired += TurnExpiredEventHandler;
             }
         }
@@ -77,7 +78,7 @@ public partial class BoardPage: ComponentBase, IDisposable
 
         ActiveColor = ActiveColor == Color.White ? Color.Black : Color.White;
 
-        var turns = await ApplicationService!.GetTurns(AggregateId);
+        var turns = await MatchDataService!.GetTurns(AggregateId);
         SetMatchState(turns);
         StateHasChanged();
     }
@@ -102,12 +103,12 @@ public partial class BoardPage: ComponentBase, IDisposable
         var dialog = await DialogService.ShowAsync<SurrenderDialog>(SurrenderDialogTitle, options);
         var result = await dialog.Result;
 
-        if (result.Data != null && (bool)result.Data && ApplicationService != null)
+        if (result.Data != null && (bool)result.Data)
         {
-            var memberId = await ApplicationService.GetPlayerAtTurnAsync(AggregateId);
+            var memberId = await MatchInfoService!.GetPlayerAtTurnAsync(AggregateId);
             var command = new Surrender { MemberId = memberId };
 
-            await ApplicationService.SurrenderAsync(AggregateId, command);
+            await ActionService!.SurrenderAsync(AggregateId, command);
         }
     }
 
@@ -122,6 +123,6 @@ public partial class BoardPage: ComponentBase, IDisposable
         var result = await dialog.Result;
         var command = new Forfeit { MemberId = memberId};
 
-        await ApplicationService!.ForfeitAsync(AggregateId, command);
+        await ActionService!.ForfeitAsync(AggregateId, command);
     }
 }

@@ -12,7 +12,7 @@ public partial class SetupPage: ComponentBase
     private const string OverviewUri = "match/overview";
 
     [Inject]
-    private IApplicationService? ApplicationService { get; set; }
+    private IPlayerActionService? ActionService { get; set; }
     [Inject]
     private ILogger<SetupPage>? Logger { get; set; }
     [Inject]
@@ -48,11 +48,11 @@ public partial class SetupPage: ComponentBase
     {
         try
         {
-            if (ApplicationService == null) return Guid.Empty;
+            if (ActionService == null) return Guid.Empty;
 
             var command = Setup.CreateCommand();
 
-            await ApplicationService.StartMatchAsync(command);
+            await ActionService.StartMatchAsync(command);
 
             return command.AggregateId;
         }
