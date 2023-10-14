@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Chess.Domain.Configuration;
 using Chess.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -19,8 +21,14 @@ public class MatchEntityTypeConfiguration : IEntityTypeConfiguration<Match>
        builder.Property(m => m.StartTime)
               .IsRequired();
 
+       builder.Property(m => m.Options)
+              .IsRequired()
+              .HasConversion(m => JsonSerializer.Serialize(m, JsonSerializerOptions.Default),
+                             m => JsonSerializer.Deserialize<MatchOptions>(m, JsonSerializerOptions.Default));
+
        builder.HasMany(m => m.Events)
               .WithOne(m => m.Match);
+
     }
 }
 

@@ -14,14 +14,14 @@
             </ToolBarContent>
             <Columns>
                 <PropertyColumn Property="x => Matches.IndexOf(x) + 1" />
-                <PropertyColumn Property="x => x.WhitePlayerId" Title="White" />
-                <PropertyColumn Property="x => x.BlackPlayerId" Title="Black" />
-                <PropertyColumn Property="x => x.StartTime" Title="Start Time" />
+                <PropertyColumn Property="x => x!.WhitePlayerId" Title="White" />
+                <PropertyColumn Property="x => x!.BlackPlayerId" Title="Black" />
+                <PropertyColumn Property="x => x!.StartTime" Title="Start Time" />
                 <TemplateColumn CellClass="d-flex justify-end">
                     <CellTemplate>
                         <MudStack Row>
                             <MudButton Size="@Size.Small" Variant="@Variant.Text" Color="@Color.Primary"
-                                OnClick="@(() => this.OnViewClick(context.Item))">View</MudButton>
+                                OnClick="@(() => this.OnViewClick(context!.Item))">View</MudButton>
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>

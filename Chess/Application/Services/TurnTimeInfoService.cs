@@ -35,11 +35,10 @@ public class TurnTimerInfoService : ITurnTimerInfoService
         if (!result.Events!.Any()) return 0;
 
         var lastEvent = result.Events!.Last();
-        var matchOptions = JsonSerializer.Deserialize<MatchOptions>(result?.Options ?? string.Empty);
 
-        if (matchOptions?.MaxTurnTime == TimeSpan.MinValue) return 0;
+        if (result.Options?.MaxTurnTime == TimeSpan.MinValue) return 0;
 
-        var deadline = lastEvent.CreatedAtUtc.AddSeconds(matchOptions!.MaxTurnTime.TotalSeconds);
+        var deadline = lastEvent.CreatedAtUtc.AddSeconds(result.Options!.MaxTurnTime.TotalSeconds);
         var timeDifference = deadline - DateTime.UtcNow;
 
         return (int)timeDifference.TotalSeconds;

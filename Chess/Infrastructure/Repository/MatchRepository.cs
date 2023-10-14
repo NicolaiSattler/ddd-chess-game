@@ -63,7 +63,7 @@ public class MatchRepository : IMatchRepository
                 BlackPlayerId = @event.BlackMemberId,
                 WhitePlayerId = @event.WhiteMemberId,
                 StartTime = @event.StartTime,
-                Options = JsonSerializer.Serialize(@event.Options)
+                Options = @event.Options
             };
 
             _context.Matches!.Add(match);
