@@ -19,9 +19,9 @@ public class Elo
     /// </summary>
     public static EloResult Calculate(float? ratingWhite, float? ratingBlack, MatchResult? matchResult)
     {
-        var rA = Guard.Against.Null(ratingWhite, nameof(ratingWhite))!.Value;
-        var rB = Guard.Against.Null(ratingBlack, nameof(ratingBlack))!.Value;
-        var result = Guard.Against.Null(matchResult, nameof(matchResult))!.Value;
+        var rA = Guard.Against.Null(ratingWhite, nameof(ratingWhite));
+        var rB = Guard.Against.Null(ratingBlack, nameof(ratingBlack));
+        var result = Guard.Against.Null(matchResult, nameof(matchResult));
 
         Guard.Against.Negative(rA, nameof(ratingWhite));
         Guard.Against.Negative(rB, nameof(ratingBlack));
@@ -56,8 +56,8 @@ public class Elo
     /// </summary>
     public static float CalculateProbability(float? ratingA, float? ratingB)
     {
-        var rA = Guard.Against.Null(ratingA, nameof(ratingA))!.Value;
-        var rB = Guard.Against.Null(ratingB, nameof(ratingB))!.Value;
+        var rA = Guard.Against.Null(ratingA, nameof(ratingA));
+        var rB = Guard.Against.Null(ratingB, nameof(ratingB));
 
         Guard.Against.Negative(rA, nameof(ratingA));
         Guard.Against.Negative(rB, nameof(ratingB));

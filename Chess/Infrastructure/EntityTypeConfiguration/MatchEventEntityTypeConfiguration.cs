@@ -12,10 +12,13 @@ public class MatchEventEntityTypeConfiguration : IEntityTypeConfiguration<MatchE
 
        builder.Property(m => m.AggregateId)
               .IsRequired();
+
        builder.Property(m => m.Data)
               .IsRequired();
+
        builder.Property(m => m.Type)
               .IsRequired();
+
        builder.Property(m => m.Version)
               .IsRequired();
 
