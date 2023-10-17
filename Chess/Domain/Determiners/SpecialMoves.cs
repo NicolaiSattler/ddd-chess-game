@@ -44,7 +44,8 @@ public class SpecialMoves
 
         if (!turns.Any()) return false;
 
-        var lastTurn = turns.LastOrDefault(t => !string.IsNullOrEmpty(t.Hash));
+        var lastTurn = turns.OrderBy(m => m.StartTime)
+                            .LastOrDefault(t => t.EndPosition != null);
 
         if (lastTurn == null) return false;
 

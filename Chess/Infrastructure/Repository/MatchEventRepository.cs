@@ -44,7 +44,8 @@ public class MatchEventRepository : IMatchEventRepository
                                                  .OrderBy(m => m.Version)
                                                  .ToListAsync();
 
-            _cache.Set(aggregateId, result, options);
+            if (result.Any())
+                _cache.Set(aggregateId, result, options);
 
             return result;
         }
