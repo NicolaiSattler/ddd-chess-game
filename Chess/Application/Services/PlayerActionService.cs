@@ -110,9 +110,9 @@ public class PlayerActionService : IPlayerActionService
             if (@event is TurnTaken)
             {
                 var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
-                var turnTimeInSeconds = (int)match.Options.MaxTurnTime.TotalSeconds;
+                var turnTimeInMilliSeconds = match.Options.MaxTurnTime.TotalMilliseconds;
 
-                _timerService.Start(aggregateId, playerAtTurn!.MemberId, turnTimeInSeconds);
+                _timerService.Start(aggregateId, playerAtTurn!.MemberId, turnTimeInMilliSeconds);
             }
             else if (@event is MatchEnded)
             {

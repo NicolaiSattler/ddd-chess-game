@@ -9,9 +9,9 @@ using Microsoft.Extensions.Options;
 
 namespace Chess.Application.Services;
 
-public interface ITimerService: IHostedService, IDisposable
+public interface ITimerService: IHostedService, IAsyncDisposable
 {
-    void Start(Guid aggregateId, Guid memberId, int remainingTimeInSeconds);
+    void Start(Guid aggregateId, Guid memberId, double remainingTimeInMilliSeconds);
     void Stop();
 
     event TurnExpiredEventHandler TurnExpired;
@@ -23,18 +23,15 @@ public class TimerService : ITimerService
 
     private readonly ILogger<TimerService> _logger;
     private readonly IOptions<MatchOptions> _options;
-    private bool _disposing;
 
     public event TurnExpiredEventHandler? TurnExpired;
 
-    private System.Timers.Timer Timer { get; set; } = new();
+    private System.Timers.Timer? Timer { get; set; } = new();
     private Guid AggregateId { get; set; }
     private Guid MemberId { get; set; }
-    private int RemainingTimeInSeconds { get; set; }
     private bool HasMaxTurnTime => _options.Value.MaxTurnTime != TimeSpan.MinValue;
 
-    public TimerService(ILogger<TimerService> logger,
-                     IOptions<MatchOptions> options)
+    public TimerService(ILogger<TimerService> logger, IOptions<MatchOptions> options)
     {
         _logger = logger;
         _options = options;
@@ -42,11 +39,8 @@ public class TimerService : ITimerService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        const int milliseconds = 1000;
-
-        Timer = new(RemainingTimeInSeconds) { Interval = RemainingTimeInSeconds * milliseconds };
+        Timer = new() { AutoReset = false };
         Timer.Elapsed += TimerExceeded;
-        Timer.AutoReset = false;
 
         return Task.CompletedTask;
     }
@@ -58,32 +52,27 @@ public class TimerService : ITimerService
         return Task.CompletedTask;
     }
 
-    public void Dispose() => Dispose(true);
-
-    public void Start(Guid aggregateId, Guid memberId, int remainingTimeInSeconds)
+    public void Start(Guid aggregateId, Guid memberId, double remainingTimeInMilliSeconds)
     {
         AggregateId = aggregateId;
         MemberId = memberId;
-        RemainingTimeInSeconds = remainingTimeInSeconds;
 
-        if (!HasMaxTurnTime) return;
+        if (!HasMaxTurnTime || Timer == null) return;
 
+        Timer.Interval = remainingTimeInMilliSeconds;
         Timer.Start();
     }
 
-    public void Stop() => Timer.Stop();
+    public void Stop() => Timer?.Stop();
 
-    protected virtual void Dispose(bool disposing)
+    public async ValueTask DisposeAsync()
     {
-        if (!_disposing)
+        if (Timer is IAsyncDisposable timer)
         {
-            if (disposing)
-            {
-                Timer?.Dispose();
-            }
-
-            _disposing = true;
+            await timer.DisposeAsync();
         }
+
+        Timer = null;
     }
 
     private void TimerExceeded(object? source, ElapsedEventArgs? args)
@@ -92,6 +81,7 @@ public class TimerService : ITimerService
 
         TurnExpired?.Invoke(this, new()
         {
+            AggregateId = AggregateId,
             MemberId = MemberId,
             ExceededTime = _options.Value.MaxTurnTime
         });
