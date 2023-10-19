@@ -30,14 +30,11 @@ public class TurnTimerInfoService : ITurnTimerInfoService
     public async Task<int> GetRemainingTimeAsync(Guid aggregateId)
     {
         var result = await _matchRepository.GetAsync(aggregateId, true)
-                   ?? throw new ApplicationException($"No match was found for the id {aggregateId}");
+                   ?? throw new ApplicationException($"No match was found with id {aggregateId}");
 
-        if (!result.Events!.Any()) return 0;
+        if (!result.Events!.Any() || result.Options?.MaxTurnTime == TimeSpan.MinValue) return 0;
 
         var lastEvent = result.Events!.Last();
-
-        if (result.Options?.MaxTurnTime == TimeSpan.MinValue) return 0;
-
         var deadline = lastEvent.CreatedAtUtc.AddSeconds(result.Options!.MaxTurnTime.TotalSeconds);
         var timeDifference = deadline - DateTime.UtcNow;
 
