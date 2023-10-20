@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
-using Chess.Infrastructure.Extensions;
 using Chess.Infrastructure.Repository;
 
 using MatchEntity = Chess.Infrastructure.Entity.Match;

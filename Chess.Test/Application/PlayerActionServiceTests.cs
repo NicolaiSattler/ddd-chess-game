@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Chess.Application.Services;
+using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
 using Chess.Domain.Events;
 using Chess.Infrastructure.Repository;
@@ -49,6 +50,23 @@ public class PlayerActionServiceTests
 
         await _mockedEventRepository.Received(1)
                                     .AddAsync(aggregateId, Arg.Is<MatchStarted>(m => m.AggregateId == aggregateId), true);
+    }
+
+    [TestMethod]
+    public async Task Draw_ShouldRaise_MatchEndedEvent_WithDraw()
+    {
+        //Arrange
+        var aggregateId = Guid.NewGuid();
+
+        _mockedDataService.GetAggregateAsync(aggregateId)
+                          .Returns(new Match(aggregateId));
+
+        //Act
+        await _sut.DrawAsync(aggregateId);
+
+        //Assert
+        await _mockedEventRepository.Received(1)
+                                    .AddAsync(aggregateId, Arg.Is<MatchEnded>(m => m.Result == MatchResult.Draw), true);
     }
 
 }

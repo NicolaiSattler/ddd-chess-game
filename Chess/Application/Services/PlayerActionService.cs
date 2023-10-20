@@ -17,7 +17,7 @@ public interface IPlayerActionService
     Task StartMatchAsync(StartMatch command);
     Task SurrenderAsync(Guid aggregateId, Surrender command);
     Task PurposeDrawAsync(Guid aggregateId, ProposeDraw command);
-    Task DrawAsync(Guid aggregateId, Draw command);
+    Task DrawAsync(Guid aggregateId);
     Task ForfeitAsync(Guid aggregateId, Forfeit command);
     Task PromotePawnAsync(Guid aggregateId, Square position, PieceType type);
 }
@@ -49,13 +49,13 @@ public class PlayerActionService : IPlayerActionService
         await SaveEventAsync(match);
     }
 
-    public async Task DrawAsync(Guid aggregateId, Draw command)
+    public async Task DrawAsync(Guid aggregateId)
     {
         _timerService.Stop();
 
         var match = await _dataService.GetAggregateAsync(aggregateId);
 
-        match.Draw(command);
+        match.Draw();
 
         await SaveEventAsync(match);
     }

@@ -124,14 +124,11 @@ public class Match : AggregateRoot, IMatch
 
 
     //TODO: Unit test aggregate
-    public void Draw(Draw command)
+    public void Draw()
     {
-        if (command.Accepted)
-        {
-            var @event = new MatchEnded(White, Black, MatchResult.Draw);
+        var @event = new MatchEnded(White, Black, MatchResult.Draw);
 
-            RaiseEvent(@event);
-        }
+        RaiseEvent(@event);
     }
 
     private void Handle(MatchStarted @event)
