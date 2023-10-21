@@ -12,7 +12,10 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddMudServices();
+builder.Services.AddHttpClient();
+
 builder.Services.AddValidatorsFromAssemblyContaining<SetupModelValidator>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
