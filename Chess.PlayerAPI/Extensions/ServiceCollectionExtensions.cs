@@ -22,4 +22,17 @@ public static class ServiceCollectionExtensions
 
         return collection;
     }
+
+    public static IServiceCollection ConfigureAuthorization(this IServiceCollection collection)
+    {
+        collection.AddAuthorization(options =>
+        {
+            options.AddPolicy("ApiScope", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+                policy.RequireClaim("scope", "PlayerApi");
+            });
+        });
+        return collection;
+    }
 }

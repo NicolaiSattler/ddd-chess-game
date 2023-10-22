@@ -9,6 +9,7 @@ public partial class Index: ComponentBase
     private IHttpClientFactory? HttpClientFactory { get; set;}
 
     public string? AccessToken { get; set; }
+    public string? PlayerApiResponse { get; set;}
 
     protected override async Task OnInitializedAsync()
     {
@@ -38,6 +39,11 @@ public partial class Index: ComponentBase
             }
 
             AccessToken = response.AccessToken ?? string.Empty;
+
+            httpClient = HttpClientFactory.CreateClient();
+            httpClient.SetBearerToken(AccessToken);
+            var playerApiResponse = await httpClient.GetAsync("http://localhost:5220");
+            PlayerApiResponse = await playerApiResponse.Content.ReadAsStringAsync();
         }
     }
 }
