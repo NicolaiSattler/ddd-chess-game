@@ -40,7 +40,8 @@ public class MatchEventRepository : IMatchEventRepository
             if (cache.Any()) return cache;
 
             var options = GetCacheOptions();
-            var result = await _dbContext.Events!.Where(m => m.AggregateId == aggregateId)
+            var result = await _dbContext.Events!.AsNoTracking()
+                                                 .Where(m => m.AggregateId == aggregateId)
                                                  .OrderBy(m => m.Version)
                                                  .ToListAsync();
 

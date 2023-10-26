@@ -29,7 +29,9 @@ public class MatchRepository : IMatchRepository
     /// <summary>
     /// Retrieve all active matches
     /// </summary>
-    public async Task<IEnumerable<Match>> GetAsync() => await _context.Matches.ToListAsync();
+    public async Task<IEnumerable<Match>> GetAsync() => await _context.Matches
+                                                                      .AsNoTracking()
+                                                                      .ToListAsync();
 
     public async Task<Match> GetAsync(Guid aggregateId, bool includeEvents = false)
     {
@@ -38,6 +40,7 @@ public class MatchRepository : IMatchRepository
             if (includeEvents)
             {
                 return await _context.Matches
+                                     .AsNoTracking()
                                      .Include(m => m.Events)
                                      .FirstAsync(m => m.AggregateId == aggregateId)
                     ?? throw new ApplicationException($"No match was found for the id {aggregateId}");
