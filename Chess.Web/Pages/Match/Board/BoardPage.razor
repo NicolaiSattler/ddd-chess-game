@@ -27,8 +27,8 @@
                            Title="Forfeit" area-label="Forfeit"></MudIconButton>
 
             <MudIconButton Icon="@Icons.Material.Filled.Handshake"
+                           Disabled="!HubIsConnected"
                            Color="MudBlazor.Color.Tertiary"
-                           Disabled="true"
                            Title="Draw" area-label="Draw"></MudIconButton>
 
             <MudIconButton Icon="@Icons.Material.Filled.Flip"

@@ -1,33 +1,20 @@
-using Chess.Infrastructure.Extensions;
 using Chess.Application.Extensions;
-using MudBlazor.Services;
-using Chess.Web.Validation;
-using FluentValidation;
+using Chess.Infrastructure.Extensions;
+using Chess.Web.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
-
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(builder.Configuration);
-builder.Services.AddMudServices();
-builder.Services.AddValidatorsFromAssemblyContaining<SetupModelValidator>();
+builder.Services.AddWebApp();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
+app.ConfigureMiddleware();
 
 app.MapBlazorHub();
+app.MapHub<MatchHub>(MatchHub.HubUrl);
+
 app.MapFallbackToPage("/_Host");
 
 app.Run();

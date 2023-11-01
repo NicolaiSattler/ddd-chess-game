@@ -3,17 +3,21 @@ using Chess.Application.Services;
 using Chess.Domain.Entities;
 using Chess.Web.Dialogs.Surrender;
 using Chess.Web.Dialogs.TimerExceeded;
+using Chess.Web.Hubs;
 using Chess.Web.Model;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Chess.Web.Pages.Match.Board;
 
-public partial class BoardPage: ComponentBase, IDisposable
+public partial class BoardPage: ComponentBase, IAsyncDisposable
 {
     private const string BlackAtTurn = "Black is at turn";
     private const string WhiteAtTurn = "White is at turn";
     private const string SurrenderDialogTitle = "Surrender";
     private const string TimerExceededDialogTitle = "Turn time exceeded";
+
+    private HubConnection? _hubConnection;
 
     [Inject]
     private IPlayerActionService? ActionService { get; set; }
@@ -27,15 +31,20 @@ public partial class BoardPage: ComponentBase, IDisposable
     private ITimerService? TimerService { get; set;}
     [Inject]
     private MudBlazor.IDialogService? DialogService { get; set; }
+    [Inject]
+    private NavigationManager? Navigator { get; set; }
 
     [Parameter]
     public Guid AggregateId { get; set; }
     public StatusModel Status { get; set; } = StatusModel.Empty();
     public List<NotationModel> Notations { get; set; } = new();
     public Color ActiveColor { get; private set; }
+    public bool HubIsConnected => _hubConnection?.State == HubConnectionState.Connected;
 
     protected override async Task OnInitializedAsync()
     {
+        await InitializeHub();
+
         ActiveColor = await MatchInfoService!.GetColorAtTurnAsync(AggregateId);
 
         var turns = await MatchDataService!.GetTurns(AggregateId);
@@ -45,7 +54,7 @@ public partial class BoardPage: ComponentBase, IDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
         {
             var turns = await MatchDataService!.GetTurns(AggregateId);
             var lastTurn = turns.Last();
@@ -64,11 +73,16 @@ public partial class BoardPage: ComponentBase, IDisposable
         }
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        if (TimerService != null)
+        if (TimerService is not null)
         {
             TimerService!.TurnExpired -= TurnExpiredEventHandler;
+        }
+
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.DisposeAsync();
         }
     }
 
@@ -81,6 +95,21 @@ public partial class BoardPage: ComponentBase, IDisposable
         var turns = await MatchDataService!.GetTurns(AggregateId);
         SetMatchState(turns);
         StateHasChanged();
+    }
+    private async Task InitializeHub()
+    {
+        var url = Navigator!.ToAbsoluteUri(MatchHub.HubUrl);
+
+        _hubConnection = new HubConnectionBuilder()
+                            .WithUrl(url)
+                            .Build();
+
+        _hubConnection.On<string, string>("DrawPurposed", (memberId, aggregateId) => {
+            //TODO: Show draw dialog.
+            InvokeAsync(StateHasChanged);
+        });
+
+        await _hubConnection.StartAsync();
     }
 
     //TODO: set state of game, e.g. check, checkmate, draw, etc.
@@ -116,6 +145,7 @@ public partial class BoardPage: ComponentBase, IDisposable
     {
         await HandleTurnTimeExpired(args.MemberId);
     }
+
     private async Task HandleTurnTimeExpired(Guid memberId)
     {
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = false };
