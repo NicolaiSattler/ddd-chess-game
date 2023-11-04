@@ -12,7 +12,7 @@ namespace Chess.Infrastructure.Repository;
 
 public interface IMatchEventRepository
 {
-    Task<IEnumerable<MatchEvent>> GetAsync(Guid aggregateId);
+    Task<List<MatchEvent>> GetAsync(Guid aggregateId);
     Task<MatchEvent> AddAsync(Guid aggregateId, DomainEvent @event, bool saveChanges = true);
 }
 
@@ -31,7 +31,7 @@ public class MatchEventRepository : IMatchEventRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<MatchEvent>> GetAsync(Guid aggregateId)
+    public async Task<List<MatchEvent>> GetAsync(Guid aggregateId)
     {
         try
         {
@@ -110,7 +110,7 @@ public class MatchEventRepository : IMatchEventRepository
         }
     }
 
-    private IEnumerable<MatchEvent> GetFromCache(Guid aggregateId)
+    private List<MatchEvent> GetFromCache(Guid aggregateId)
     {
         _cache.TryGetValue(aggregateId, out List<MatchEvent>? eventCollection);
         eventCollection ??= new List<MatchEvent>();

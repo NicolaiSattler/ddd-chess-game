@@ -38,21 +38,25 @@ public abstract class AggregateRoot : Entity, IAggregateRoot
         _events = new List<DomainEvent>();
     }
 
-    public AggregateRoot(Guid id, IEnumerable<DomainEvent?>? events) : this(id)
+    public AggregateRoot(Guid id, List<DomainEvent?> events) : this(id)
     {
-        IsReplaying = true;
-
-        if (events != null)
+        try
         {
-            foreach (var evt in events)
+            IsReplaying = true;
+
+            _events = events;
+
+            foreach (var evt in _events)
             {
                 When(evt);
                 OriginalVersion++;
                 Version++;
             }
         }
-
-        IsReplaying = false;
+        finally
+        {
+            IsReplaying = false;
+        }
     }
 
     protected void RaiseEvent(DomainEvent domainEvent)

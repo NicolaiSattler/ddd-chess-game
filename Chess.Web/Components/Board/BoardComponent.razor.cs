@@ -15,16 +15,11 @@ public partial class BoardComponent: ComponentBase
 {
     private const string TakeTurnErroMessage = "An error occurred while updating the board for piece {ActivePieceId} for member {ActiveMemberId}";
 
-    [Inject]
-    private ILogger<BoardComponent>? Logger { get; set;}
-    [Inject]
-    private IMatchDataService? MatchDataService { get; set; }
-    [Inject]
-    private IMatchInfoService? MatchInfoService { get; set; }
-    [Inject]
-    private IPlayerActionService? ActionService { get; set; }
-    [Inject]
-    private IDialogService? DialogService { get; set; }
+    [Inject] private ILogger<BoardComponent>? Logger { get; set;}
+    [Inject] private IMatchDataService? MatchDataService { get; set; }
+    [Inject] private IMatchInfoService? MatchInfoService { get; set; }
+    [Inject] private IPlayerActionService? ActionService { get; set; }
+    [Inject] private IDialogService? DialogService { get; set; }
 
     private Guid ActiveMemberId => ActiveColor == Domain.ValueObjects.Color.White ? White.MemberId : Black.MemberId;
 
@@ -36,6 +31,7 @@ public partial class BoardComponent: ComponentBase
     public Player White { get; private set; } = new();
     public Player Black { get; private set; } = new();
     public Domain.ValueObjects.Color ActiveColor { get; private set; }
+    public bool IsFinished { get; private set; }
     public Guid ActivePieceId { get; set; }
     public List<FieldComponent> Fields { get; } = new();
     public List<PieceEntity> Pieces { get; private set; } = new();
@@ -93,6 +89,7 @@ public partial class BoardComponent: ComponentBase
             ActiveColor = await MatchInfoService.GetColorAtTurnAsync(AggregateId);
             Black = await MatchInfoService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.Black);
             White = await MatchInfoService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.White);
+            IsFinished = (await MatchInfoService.GetMatchResult(AggregateId)) != MatchResult.Undefined;
         }
     }
 
@@ -136,7 +133,6 @@ public partial class BoardComponent: ComponentBase
 
         StateHasChanged();
     }
-
 
     private static void SetFieldHighlight(IEnumerable<FieldComponent> fields, bool highlighted)
     {

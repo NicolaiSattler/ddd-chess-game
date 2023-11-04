@@ -40,7 +40,7 @@ public class MatchDataService : IMatchDataService
             throw new ApplicationException($"No match events found for {aggregateId}");
         }
 
-        var matchEvents = result.Select(e => e.Event);
+        var matchEvents = result.Select(e => e.Event).ToList();
         return new(aggregateId, matchEvents);
     }
 

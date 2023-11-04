@@ -9,15 +9,21 @@ public class SetupModelValidator: AbstractValidator<SetupModel>
     {
         RuleFor(m => m.MemberOne).NotEmpty();
         RuleFor(m => m.MemberTwo).NotEmpty();
-        RuleFor(m => m.MaxTurnTimeInMinutes).GreaterThan(0);
-        RuleFor(m => m.MaxTurnTimeInMinutes).LessThan(60);
+
+        When(m => m.UseTurnTimer, () =>
+        {
+            RuleFor(m => m.MaxTurnTimeInMinutes).GreaterThan(0);
+            RuleFor(m => m.MaxTurnTimeInMinutes).LessThan(60);
+        });
     }
 
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
     {
-        var result = await ValidateAsync(ValidationContext<SetupModel>.CreateWithOptions((SetupModel)model, x => x.IncludeProperties(propertyName)));
+        var result = await ValidateAsync(ValidationContext<SetupModel>
+                           .CreateWithOptions((SetupModel)model, x => x.IncludeProperties(propertyName)));
         if (result.IsValid)
             return Array.Empty<string>();
+
         return result.Errors.Select(e => e.ErrorMessage);
     };
 }

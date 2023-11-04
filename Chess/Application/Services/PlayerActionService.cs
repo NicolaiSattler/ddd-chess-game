@@ -101,6 +101,7 @@ public class PlayerActionService : IPlayerActionService
         _timerService.Stop();
 
         var match = await _dataService.GetAggregateAsync(aggregateId);
+        var options = match.Options;
         var result = match.TakeTurn(command);
 
         if (!result.Violations?.Any() ?? false)
@@ -112,7 +113,8 @@ public class PlayerActionService : IPlayerActionService
                 var playerAtTurn = command.MemberId == match.White.MemberId ? match.White : match.Black;
                 var turnTimeInMilliSeconds = match.Options.MaxTurnTime.TotalMilliseconds;
 
-                _timerService.Start(aggregateId, playerAtTurn!.MemberId, turnTimeInMilliSeconds);
+                if (options.UseTurnTimer)
+                    _timerService.Start(aggregateId, playerAtTurn!.MemberId, turnTimeInMilliSeconds);
             }
             else if (@event is MatchEnded)
             {

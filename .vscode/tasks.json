@@ -24,7 +24,6 @@
                 "clear": false,
                 "close": true
             },
-            "dependsOn":["build playerapi", "build identity"]
         },
         {
             "label": "build web",
@@ -48,52 +47,6 @@
                 "clear": false,
                 "close": true
             },
-        },
-        {
-            "label": "build playerapi",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/Chess.PlayerApi/Chess.PlayerApi.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile",
-            "isBackground": false,
-            "promptOnClose": false,
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false,
-                "close": true
-            }
-        },
-        {
-            "label": "build identity",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "build",
-                "${workspaceFolder}/Chess.IdentityServer/Chess.IdentityServer.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile",
-            "isBackground": false,
-            "promptOnClose": false,
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false,
-                "close": true
-            }
         },
         {
             "label": "publish",
@@ -124,8 +77,6 @@
                 "close": true
             },
             "dependsOn": [
-                "watch identity",
-                "watch playerapi",
                 "watch web"
             ]
         },
@@ -151,53 +102,6 @@
                 "clear": false,
                 "close": true
             }
-        },
-        {
-            "label": "watch identity",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "--project",
-                "${workspaceFolder}/Chess.IdentityServer/Chess.IdentityServer.csproj"
-            ],
-            "problemMatcher": "$msCompile",
-            "isBackground": false,
-            "promptOnClose": false,
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false,
-                "close": true
-            },
-        },
-        {
-            "label": "watch playerapi",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "--project",
-                "${workspaceFolder}/Chess.PlayerApi/Chess.PlayerApi.csproj"
-            ],
-            "problemMatcher": "$msCompile",
-            "isBackground": false,
-            "promptOnClose": false,
-            "presentation": {
-                "echo": true,
-                "reveal": "silent",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false,
-                "close": true
-            },
-
         }
     ]
 }

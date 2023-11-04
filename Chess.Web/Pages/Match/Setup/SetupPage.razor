@@ -4,6 +4,11 @@
 <MudContainer MaxWidth="MaxWidth.Small" Class="mt-6">
   <MudCard>
     <MudForm Model="@Setup" @ref="@_form" Validation="@Validator.ValidateValue" ValidationDelay="0">
+      <MudCardHeader>
+        <CardHeaderContent>
+          <MudText Typo="Typo.h5">Configure your match</MudText>
+        </CardHeaderContent>
+      </MudCardHeader>
       <MudCardContent>
 		    <MudTextField @bind-Value="Setup.MemberOne"
 		    					  For="@(() => Setup.MemberOne)"
@@ -17,13 +22,20 @@
 		    					  Immediate="true"
 		    					  Label="Member Two" />
 
-        <MudNumericField @bind-Value="Setup.MaxTurnTimeInMinutes"
-                      For="@(() => Setup.MaxTurnTimeInMinutes)"
-                      Label="Max Turntime"
-                      Variant="Variant.Text"
-                      Immediate="true"
-                      Min="0"
-                      Max="60"/>
+        @if(Setup.UseTurnTimer)
+        {
+          <MudNumericField @bind-Value="Setup.MaxTurnTimeInMinutes"
+                        For="@(() => Setup.MaxTurnTimeInMinutes)"
+                        Label="Max Turntime"
+                        Variant="Variant.Text"
+                        Immediate="true"
+                        Min="0"
+                        Max="60"/>
+        }
+
+        <MudCheckBox @bind-Checked="Setup.UseTurnTimer"
+                     For="@(() => Setup.UseTurnTimer)"
+                     Label="Use Turn Timer" />
 
         <MudCheckBox @bind-Checked="Setup.DrawByRepition"
                      For="@(() => Setup.DrawByRepition)"

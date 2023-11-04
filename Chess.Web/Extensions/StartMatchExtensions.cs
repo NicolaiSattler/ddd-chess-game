@@ -22,6 +22,7 @@ public static class Extensions
             Options = new()
             {
                 DrawByRepition = model.DrawByRepition,
+                UseTurnTimer = model.UseTurnTimer,
                 MaxTurnTime = new TimeSpan(0, model.MaxTurnTimeInMinutes, 0)
             }
         };

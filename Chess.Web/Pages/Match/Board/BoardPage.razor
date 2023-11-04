@@ -27,6 +27,7 @@
                            Title="Forfeit" area-label="Forfeit"></MudIconButton>
 
             <MudIconButton Icon="@Icons.Material.Filled.Handshake"
+                           @onclick="async() => await OpenDrawDialogAsync(true)"
                            Disabled="!HubIsConnected"
                            Color="MudBlazor.Color.Tertiary"
                            Title="Draw" area-label="Draw"></MudIconButton>

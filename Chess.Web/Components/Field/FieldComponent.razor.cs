@@ -61,7 +61,7 @@ public partial class FieldComponent
 
     private async Task HandleDropAsync()
     {
-        if (Parent != null)
+        if (Parent != null && !Parent.IsFinished)
         {
             await Parent.UpdateBoardAsync(Rank, File);
 

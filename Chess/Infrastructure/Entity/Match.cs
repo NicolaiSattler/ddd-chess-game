@@ -9,7 +9,7 @@ public record Match
     public Guid BlackPlayerId { get; init; }
     public Guid WhitePlayerId { get; init; }
     public DateTime StartTime { get; init; }
-    public MatchOptions? Options { get; init; }
+    public MatchOptions Options { get; init; } = new();
 
     public List<MatchEvent>? Events { get; set; }
 }

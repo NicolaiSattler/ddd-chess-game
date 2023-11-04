@@ -28,7 +28,7 @@ public class Match : AggregateRoot, IMatch
 
     public Match(): base(Guid.Empty) {}
     public Match(Guid id) : base(id) { }
-    public Match(Guid id, IEnumerable<DomainEvent?>? events) : base(id, events) { }
+    public Match(Guid id, List<DomainEvent?> events) : base(id, events) { }
 
     protected override void When(DomainEvent? domainEvent)
     {

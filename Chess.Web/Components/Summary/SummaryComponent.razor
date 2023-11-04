@@ -1,24 +1,26 @@
-<!-- Made issue at MudBlazor #7257 for line issue-->
-<MudTimeline @ref="Timeline" TimelineOrientation="TimelineOrientation.Horizontal">
-    @if (Notations != null)
+@if (Notations != null && Notations.Any(n => !string.IsNullOrEmpty(n.Notation)))
+{
+    <MudTimeline @ref="Timeline" TimelineOrientation="TimelineOrientation.Horizontal">
+    @foreach (var item in Notations)
     {
-        @foreach(var item in Notations)
+        if (!string.IsNullOrEmpty(item.Notation))
         {
-            if (!string.IsNullOrEmpty(item.Notation))
-            {
-                var color = Notations?.IndexOf(item) % 2 == 0
-                ? Color.Dark
-                : Color.Default;
+            var color = Notations?.IndexOf(item) % 2 == 0
+            ? Color.Dark
+            : Color.Default;
 
-                <MudTimelineItem Color="color" Style="text-align:center;">
-                    <MudText Typo="Typo.body1">@item.Notation</MudText>
-                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@item.Time</MudText>
-                </MudTimelineItem>
-            }
+            <MudTimelineItem Color="color" Style="text-align:center;">
+                <MudText Typo="Typo.body1">@item.Notation</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">@item.Time</MudText>
+            </MudTimelineItem>
         }
     }
-</MudTimeline>
-
+    </MudTimeline>
+}
+else
+{
+    <MudText Typo="Typo.body1" Align="Align.Center">No moves have been made</MudText>
+}
 @code {
 
     public MudTimeline? Timeline { get; set; }
