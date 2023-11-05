@@ -5,7 +5,7 @@ using MudBlazor;
 
 namespace Chess.Web.Dialogs.TimerExceeded;
 
-public partial class TimerExceededDialog
+public partial class TimerExceededDialog: ComponentBase
 {
     public const string TimerExceededMessage = "Turn time of {0} has expired.";
 

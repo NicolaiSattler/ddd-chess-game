@@ -89,7 +89,7 @@ public class MatchDataServiceTests
         var aggregateId = Guid.NewGuid();
         var matchStarted = _fixture.Create<MatchStarted>();
         _mockedMatchEventRepository.GetAsync(aggregateId)
-                                   .Returns(Enumerable.Empty<MatchEvent>());
+                                   .Returns(new List<MatchEvent>());
 
         //Act & Assert
         await _sut.Invoking(m => m.GetAggregateAsync(aggregateId))

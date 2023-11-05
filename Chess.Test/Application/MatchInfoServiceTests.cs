@@ -4,6 +4,8 @@ using Chess.Application.Services;
 using Chess.Domain.Aggregates;
 using Chess.Domain.Commands;
 using Chess.Domain.Events;
+using Chess.Infrastructure.Repository;
+using MatchEntity = Chess.Infrastructure.Entity.Match;
 
 namespace Chess.Test.Application;
 
@@ -11,6 +13,7 @@ namespace Chess.Test.Application;
 public class MatchInfoServiceTests
 {
     private IMatchDataService _mockedMatchDataService;
+    private IMatchRepository _mockedMatchRepository;
     private MatchInfoService _sut;
     private Fixture _fixture;
 
@@ -19,7 +22,8 @@ public class MatchInfoServiceTests
     {
         _fixture = new();
         _mockedMatchDataService = Substitute.For<IMatchDataService>();
-        _sut = new(_mockedMatchDataService);
+        _mockedMatchRepository = Substitute.For<IMatchRepository>();
+        _sut = new(_mockedMatchDataService, _mockedMatchRepository);
     }
 
     [TestMethod]
@@ -122,5 +126,32 @@ public class MatchInfoServiceTests
 
         //Assert
         result.Should().Be(MatchResult.BlackWins);
+    }
+
+    [TestMethod]
+    public async Task Name()
+    {
+        //Arrange
+        var aggregateId = Guid.NewGuid();
+        var match = new MatchEntity
+        {
+            AggregateId = aggregateId,
+            Options = new()
+            {
+                UseTurnTimer = true,
+                DrawByRepition = true
+            }
+        };
+
+        _mockedMatchRepository.GetAsync(aggregateId)
+                              .Returns(match);
+
+        //Act
+        var result = await _sut.GetMatchOptionsAsync(aggregateId);
+
+        //Assert
+        result.ShouldNotBeNull();
+        result.UseTurnTimer.ShouldBeTrue();
+        result.DrawByRepition.ShouldBeTrue();
     }
 }
