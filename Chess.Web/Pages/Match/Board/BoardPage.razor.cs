@@ -7,6 +7,7 @@ using Chess.Web.Dialogs.TimerExceeded;
 using Chess.Web.Hubs;
 using Chess.Web.Model;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Chess.Web.Pages.Match.Board;
@@ -22,6 +23,7 @@ public partial class BoardPage: ComponentBase, IAsyncDisposable
     [Inject] private ITimerService? TimerService { get; set;}
     [Inject] private MudBlazor.IDialogService? DialogService { get; set; }
     [Inject] private NavigationManager? Navigator { get; set; }
+    [Inject] private IHubContext<MatchHub>? HubContext { get; set; }
 
     [Parameter] public Guid AggregateId { get; set; }
     public StatusModel Status { get; set; } = StatusModel.Empty();
@@ -85,7 +87,7 @@ public partial class BoardPage: ComponentBase, IAsyncDisposable
         _hubConnection = new HubConnectionBuilder().WithUrl(url)
                                                    .Build();
 
-        _hubConnection.On<string, string>("DrawPurposed", (memberId, aggregateId) => {
+        _hubConnection.On<string>("DrawPurposed", (memberId) => {
             InvokeAsync(async() => await OpenDrawDialogAsync(false));
         });
 
@@ -180,17 +182,26 @@ public partial class BoardPage: ComponentBase, IAsyncDisposable
         if (DialogService == null) return;
 
         var options = new MudBlazor.DialogOptions { CloseOnEscapeKey = true };
-        var parameters = new MudBlazor.DialogParameters<DrawDialog>();
-        parameters.Add(m => m.ContentText, proposing
-                                           ? DrawDialog.ConfirmDrawDialogQuestion
-                                           : DrawDialog.DrawDialogQuestion);
+        var parameters = new MudBlazor.DialogParameters<DrawDialog>
+        {
+            {
+                m => m.ContentText,
+                proposing ? DrawDialog.ConfirmDrawDialogQuestion
+                          : DrawDialog.DrawDialogQuestion
+            }
+        };
 
         var dialog = await DialogService.ShowAsync<DrawDialog>(Constants.DrawDialogTitle, parameters, options);
         var result = await dialog.Result;
 
-        if (!proposing && result?.Data is bool accepted)
+        if (result?.Data is bool accepted)
         {
-            await ActionService!.DrawAsync(AggregateId);
+            if (proposing)
+            {
+                var memberId = await MatchInfoService!.GetPlayerAtTurnAsync(AggregateId);
+                await _hubConnection!.SendAsync("PurposeDraw", memberId, AggregateId);
+            }
+            else await ActionService!.DrawAsync(AggregateId);
         }
     }
 }
