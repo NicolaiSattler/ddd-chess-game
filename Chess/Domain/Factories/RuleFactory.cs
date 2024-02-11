@@ -21,10 +21,10 @@ public class RuleFactory
         return new List<BusinessRule>
         {
             new PieceInvalidMove(command, pieces, turns),
-            new KingIsInCheck(command, pieces),
             new PieceCannotAttackOwnColor(command, pieces),
             new PieceIsBlocked(command, pieces),
-            new CastlingNotAllowed(command, pieces, turns)
+            new CastlingNotAllowed(command, pieces, turns),
+            new KingIsInCheck(command, pieces),
         };
     }
 }

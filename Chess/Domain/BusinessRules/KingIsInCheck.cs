@@ -7,7 +7,6 @@ using Chess.Domain.Entities.Pieces;
 
 namespace Chess.Domain.BusinessRules;
 
-//TODO: Unit test.
 public class KingIsInCheck : BusinessRule
 {
     private readonly TakeTurn _command;
@@ -21,32 +20,25 @@ public class KingIsInCheck : BusinessRule
 
     public override IEnumerable<BusinessRuleViolation> CheckRule()
     {
-        var piece = _pieces.First(p => p?.Position == _command.StartPosition);
+        //Copy collection to test the move
+        var pieces = _pieces.ToList();
+        var piece = pieces.First(p => p?.Position == _command.StartPosition);
+        var king = pieces.First(p => p?.Type == PieceType.King && p.Color == piece?.Color);
 
-        try
+        if (piece == null || king == null) return Enumerable.Empty<BusinessRuleViolation>();
+
+        piece.Position = _command.EndPosition;
+
+        var kingIsInCheck = Board.IsCheck((King)king, pieces);
+
+        if (kingIsInCheck)
         {
-            var king = _pieces.First(p => p?.Type == PieceType.King && p.Color == piece?.Color);
-
-            if (piece == null || king == null) return Enumerable.Empty<BusinessRuleViolation>();
-
-            piece.Position = _command.EndPosition;
-
-            var kingIsInCheck = Board.IsCheck((King)king, _pieces);
-
-            if (kingIsInCheck)
+            return new List<BusinessRuleViolation>()
             {
-                return new List<BusinessRuleViolation>()
-                {
-                    new("King is in check, move is not allowed!")
-                };
-            }
-
-            return Enumerable.Empty<BusinessRuleViolation>();
-
+                new("King is in check, move is not allowed!")
+            };
         }
-        finally
-        {
-            piece!.Position = _command.StartPosition;
-        }
+
+        return Enumerable.Empty<BusinessRuleViolation>();
     }
 }

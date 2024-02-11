@@ -125,7 +125,7 @@ public class Board
         };
     }
 
-    private static IEnumerable<Piece> GetPiecesThatReachKing(King king, IEnumerable<Piece> pieces)
+    public static IEnumerable<Piece> GetPiecesThatReachKing(King king, IEnumerable<Piece> pieces)
     {
         Guard.Against.Null(king, nameof(king));
         Guard.Against.Null(pieces, nameof(pieces));
