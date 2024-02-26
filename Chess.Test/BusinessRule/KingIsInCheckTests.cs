@@ -32,7 +32,7 @@ public class KingIsInCheckTests
             new King { Position = new(File.E, 8), Color = Color.Black },
             new Pawn { Position = new(File.D, 2), Color = Color.Black }
         };
-        //TODO: check if the move removes check state.
+
         _sut = new KingIsInCheck(command, pieces);
 
         //Act
