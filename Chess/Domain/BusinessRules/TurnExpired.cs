@@ -3,6 +3,7 @@ using System.Linq;
 using Ardalis.GuardClauses;
 using Chess.Core.BusinessRules;
 using Chess.Domain.Entities;
+using FluentResults;
 
 namespace Chess.Domain.BusinessRules;
 
@@ -22,15 +23,16 @@ public class TurnExpired : BusinessRule
         _maxTurnLength = maxTurnLength;
     }
 
-    public override IEnumerable<BusinessRuleViolation> CheckRule()
+    public override Result CheckRule()
     {
-        var duration = DateTime.UtcNow.Subtract(_currentTurn.StartTime);
-
-        if (duration > _maxTurnLength)
-        {
-            return new List<BusinessRuleViolation> { new(Constants.TurnIsExpiredError) };
-        }
-
-        return Enumerable.Empty<BusinessRuleViolation>();
+        return Result.Ok();
+        // var duration = DateTime.UtcNow.Subtract(_currentTurn.StartTime);
+        //
+        // if (duration > _maxTurnLength)
+        // {
+        //     return new List<BusinessRuleViolation> { new(Constants.TurnIsExpiredError) };
+        // }
+        //
+        // return Enumerable.Empty<BusinessRuleViolation>();
     }
 }

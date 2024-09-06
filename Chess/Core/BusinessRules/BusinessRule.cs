@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using FluentResults;
 
 namespace Chess.Core.BusinessRules;
 
 public abstract class BusinessRule
 {
-    public abstract IEnumerable<BusinessRuleViolation> CheckRule();
+    public abstract Result  CheckRule();
 }

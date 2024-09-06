@@ -7,6 +7,7 @@ using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Determiners;
 using Chess.Domain.ValueObjects;
+using FluentResults;
 
 namespace Chess.Domain.BusinessRules;
 
@@ -18,8 +19,6 @@ namespace Chess.Domain.BusinessRules;
 /// </summary>
 public class CastlingNotAllowed : BusinessRule
 {
-    private const string CastlingNotAllowedError = "The Castling move is not allowed, either the King or Rook has been moved,"
-                                              + " the King is in check or a piece is standing between the King and Rook.";
     private readonly TakeTurn _command;
     private readonly IEnumerable<Turn> _turns;
     private readonly IEnumerable<Piece> _pieces;
@@ -31,34 +30,60 @@ public class CastlingNotAllowed : BusinessRule
         _turns = Guard.Against.Null(turns, nameof(turns));
     }
 
-    public override IEnumerable<BusinessRuleViolation> CheckRule()
+    public override Result CheckRule()
     {
-        var movingPiece = _pieces.FirstOrDefault(p => p.Position == _command.StartPosition)
-                          ?? throw new InvalidOperationException("Moving piece cannot be found!");
-        var king = (_pieces.FirstOrDefault(p => p.Type == PieceType.King && p.Color == movingPiece.Color) as King)
-                   ?? throw new InvalidOperationException("King cannot be found!");
+        return ValidateMovingPiece()
+            .Bind((movingPiece) => ValidateKing(movingPiece))
+            .Bind((result) =>
+            {
+               var rank = result.Item1.Color == Color.Black ? 8 : 1;
+               var file = _command.StartPosition.File < _command.EndPosition.File ? File.A : File.H;
 
+               var castlingType = SpecialMoves.IsCastling(_command.StartPosition, _command.EndPosition, _pieces);
+               var isCastling = castlingType != CastlingType.Undefined;
+
+               if (isCastling)
+               {
+                    var rookHasMoved = _turns.Any(p => p.PieceType == PieceType.Rook && p.StartPosition == new Square(file, rank));
+                    var kingHasMoved = _turns.Any(p => p.PieceType == PieceType.King && p.Player.MemberId == _command.MemberId);
+                    var kingIsInCheck = Board.IsCheck(result.Item2, _pieces);
+                    var moveIsBlocked = Board.DirectionIsObstructed(_pieces, _command.StartPosition, _command.EndPosition);
+                    var moveThroughCheck = MoveThroughCheck(result.Item2, castlingType);
+
+                    if (rookHasMoved || kingHasMoved || moveIsBlocked || kingIsInCheck || moveThroughCheck)
+                    {
+                        return new CastlingNotAllowedError();
+                    }
+                }
+
+                return Result.Ok();
+            });
+    }
+
+    private Result<Piece> ValidateMovingPiece()
+    {
+        var movingPiece = _pieces.FirstOrDefault(p => p.Position == _command.StartPosition);
+
+        return movingPiece == null
+            ? new MovingPieceNotFoundError()
+            : Result.Ok(movingPiece);
+    }
+
+    private Result<(Piece, King)> ValidateKing(Piece movingPiece)
+    {
+        var king = _pieces.FirstOrDefault(p => p.Type == PieceType.King && p.Color == movingPiece.Color) as King;
+
+        return king == null
+            ? new KingNotFoundError()
+            : (movingPiece, king);
+    }
+
+    private bool ActionIsCastlingMove(Piece movingPiece)
+    {
         var rank = movingPiece.Color == Color.Black ? 8 : 1;
         var file = _command.StartPosition.File < _command.EndPosition.File ? File.A : File.H;
-
         var castlingType = SpecialMoves.IsCastling(_command.StartPosition, _command.EndPosition, _pieces);
-        var isCastling = castlingType != CastlingType.Undefined;
-
-        if (!isCastling) return Enumerable.Empty<BusinessRuleViolation>();
-
-        var rookHasMoved = _turns.Any(p => p.PieceType == PieceType.Rook && p.StartPosition == new Square(file, rank));
-        var kingHasMoved = _turns.Any(p => p.PieceType == PieceType.King && p.Player.MemberId == _command.MemberId);
-
-        var kingIsInCheck = Board.IsCheck(king, _pieces);
-        var moveIsBlocked = Board.DirectionIsObstructed(_pieces, _command.StartPosition, _command.EndPosition);
-        var moveThroughCheck = MoveThroughCheck(king, castlingType);
-
-        if (rookHasMoved || kingHasMoved || moveIsBlocked || kingIsInCheck || moveThroughCheck)
-        {
-            return new List<BusinessRuleViolation> { new(CastlingNotAllowedError) };
-        }
-
-        return Enumerable.Empty<BusinessRuleViolation>();
+        return castlingType != CastlingType.Undefined;
     }
 
     private bool MoveThroughCheck(King king, CastlingType type)
@@ -83,3 +108,19 @@ public class CastlingNotAllowed : BusinessRule
         return passingSquares.Any(s => Board.IsCheck(new() { Position = s }, opponentPieces));
     }
 }
+
+public class KingNotFoundError : Error
+{
+    private const string Error = "King cannot be found!";
+
+    public KingNotFoundError() : base(Error) { }
+}
+
+public class CastlingNotAllowedError: Error
+{
+    private const string Error = "The Castling move is not allowed, either the King or Rook has been moved,"
+                               + " the King is in check or a piece is standing between the King and Rook.";
+
+    public CastlingNotAllowedError() : base(Error) { }
+}
+

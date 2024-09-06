@@ -7,11 +7,16 @@ using Chess.Domain.Entities;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Determiners;
 using Chess.Domain.ValueObjects;
+using FluentResults;
 
 namespace Chess.Domain.BusinessRules;
 
 public class PieceInvalidMove : BusinessRule
 {
+    private const string InvalidPawnAttackError = "A pawn must attack a filled square.";
+    private const string KingMoveError = "King cannot set itself check.";
+    private const string IlligalMoveError = "Piece must move to designated squares.";
+
     private readonly TakeTurn _command;
     private readonly IEnumerable<Piece> _pieces;
     private readonly IEnumerable<Turn> _turns;
@@ -23,29 +28,33 @@ public class PieceInvalidMove : BusinessRule
         _turns = Guard.Against.Null(turns, nameof(turns));
     }
 
-    public override IEnumerable<BusinessRuleViolation> CheckRule()
+    public override Result CheckRule()
     {
-        var movingPiece = _pieces?.FirstOrDefault(p => p.Position == _command.StartPosition)
-                            ?? throw new InvalidOperationException($"No piece was found on position {_command.StartPosition}");
-        var result = ValidateMovement(movingPiece);
-
-        if (result != null)
-        {
-            return new List<BusinessRuleViolation> { result };
-        }
-
-        return Enumerable.Empty<BusinessRuleViolation>();
+        return ValidateMovingPiece()
+            .Bind(movingPiece => ValidateMovement(movingPiece));
     }
 
-    private BusinessRuleViolation? ValidateMovement(Piece piece) => piece.Type switch
+    private Result<Piece> ValidateMovingPiece()
+    {
+        var movingPiece = _pieces?.FirstOrDefault(p => p.Position == _command.StartPosition);
+
+        if (movingPiece == null)
+        {
+            return new MovingPieceNotFoundError();
+        }
+
+        return movingPiece;
+    }
+
+    private Result ValidateMovement(Piece piece) => piece.Type switch
     {
         PieceType.Pawn when !IsValidMove((Pawn)piece)
-                        => new("A pawn must attack a filled square."),
+                        => new InvalidMoveError(InvalidPawnAttackError),
         PieceType.King when !IsValidMove((King)piece)
-                        => new("King cannot set itself check."),
+                        => new InvalidMoveError(KingMoveError),
         _ when !PieceMovesToValidSquare(piece)
-                       => new("Piece must move to designated squares."),
-        _ => null
+                       => new InvalidMoveError(IlligalMoveError),
+        _ => Result.Ok()
     };
 
     private bool PieceMovesToValidSquare(Piece piece)
@@ -92,5 +101,9 @@ public class PieceInvalidMove : BusinessRule
         king.Color == Color.Black
         ? king.Position == new Square(File.E, 8)
         : king.Position == new Square(File.E, 1);
+}
 
+public class InvalidMoveError: Error 
+{ 
+    public InvalidMoveError(string error) : base(error) { }
 }

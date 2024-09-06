@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
@@ -32,7 +31,7 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -63,7 +62,7 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.IsFailed.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -94,7 +93,7 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.IsFailed.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -114,7 +113,7 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.IsFailed.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -135,7 +134,7 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<CastlingNotAllowedError>();
     }
 
     [TestMethod]
@@ -158,7 +157,7 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<CastlingNotAllowedError>();
     }
 
     [TestMethod]
@@ -181,6 +180,6 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<CastlingNotAllowedError>();
     }
 }
