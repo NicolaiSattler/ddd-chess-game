@@ -102,8 +102,3 @@ public class PieceInvalidMove : BusinessRule
         ? king.Position == new Square(File.E, 8)
         : king.Position == new Square(File.E, 1);
 }
-
-public class InvalidMoveError: Error 
-{ 
-    public InvalidMoveError(string error) : base(error) { }
-}

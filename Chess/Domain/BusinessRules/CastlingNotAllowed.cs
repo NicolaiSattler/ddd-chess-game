@@ -107,20 +107,5 @@ public class CastlingNotAllowed : BusinessRule
 
         return passingSquares.Any(s => Board.IsCheck(new() { Position = s }, opponentPieces));
     }
+
 }
-
-public class KingNotFoundError : Error
-{
-    private const string Error = "King cannot be found!";
-
-    public KingNotFoundError() : base(Error) { }
-}
-
-public class CastlingNotAllowedError: Error
-{
-    private const string Error = "The Castling move is not allowed, either the King or Rook has been moved,"
-                               + " the King is in check or a piece is standing between the King and Rook.";
-
-    public CastlingNotAllowedError() : base(Error) { }
-}
-

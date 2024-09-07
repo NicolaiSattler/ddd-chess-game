@@ -5,12 +5,14 @@ using Chess.Core.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Determiners;
+using FluentResults;
 
 namespace Chess.Domain.BusinessRules;
 
 public class PieceIsBlocked : BusinessRule
 {
-    private const string PieceIsBlockedViolation = "Piece is blocked!";
+    private const string StartPositionIsNull = "Start postion cannot be null";
+    private const string EndPositionIsNull = "End postion cannot be null";
 
     private readonly TakeTurn _command;
     private readonly IEnumerable<Piece> _pieces;
@@ -20,21 +22,33 @@ public class PieceIsBlocked : BusinessRule
         _command = Guard.Against.Null<TakeTurn>(command, nameof(command));
         _pieces = Guard.Against.Null<IEnumerable<Piece>>(pieces, nameof(pieces));
 
-        Guard.Against.InvalidInput<TakeTurn>(command, nameof(command), c => c.StartPosition != null, "Start postion cannot be null");
-        Guard.Against.InvalidInput<TakeTurn>(command, nameof(command), c => c.EndPosition != null, "End postion cannot be null");
+        Guard.Against.InvalidInput<TakeTurn>(command, nameof(command), c => c.StartPosition != null, StartPositionIsNull);
+        Guard.Against.InvalidInput<TakeTurn>(command, nameof(command), c => c.EndPosition != null, EndPositionIsNull);
     }
 
-    public override IEnumerable<BusinessRuleViolation> CheckRule()
+    public override Result CheckRule()
     {
-        var movingPiece = _pieces.FirstOrDefault(p => p.Position == _command.StartPosition)
-            ?? throw new InvalidOperationException($"No piece was found at {_command.StartPosition}");
+        return ValidateMovingPiece().Bind((movingPiece) => {
 
-        var pieceIsBlocked = EndPositionIsBlocked(movingPiece)
+            var pieceIsBlocked = EndPositionIsBlocked(movingPiece)
             || (Board.DirectionIsObstructed(_pieces, _command.StartPosition, _command.EndPosition));
 
-        return pieceIsBlocked
-            ? new List<BusinessRuleViolation>() { new(PieceIsBlockedViolation) }
-            : Enumerable.Empty<BusinessRuleViolation>();
+            if (pieceIsBlocked) return new PieceIsBlockedError();
+
+            return Result.Ok();
+        });
+    }
+
+    private Result<Piece> ValidateMovingPiece()
+    {
+        var movingPiece = _pieces.FirstOrDefault(p => p.Position == _command.StartPosition);
+
+        if (movingPiece == null)
+        {
+            return new MovingPieceNotFoundError();
+        }
+
+        return Result.Ok(movingPiece);
     }
 
     private bool EndPositionIsBlocked(Piece movingPiece) =>

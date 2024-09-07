@@ -21,19 +21,28 @@ public class PieceCannotAttackOwnColor : BusinessRule
 
     public override Result CheckRule()
     {
-        return Result.Ok();
-        // var result = new List<BusinessRuleViolation>();
-        // var movingPiece = _pieces.FirstOrDefault(p => p.Position == _command.StartPosition)
-        //     ?? throw new InvalidOperationException($"No piece was found at {_command.StartPosition}");
-        //
-        // var availableMoves = movingPiece.GetAttackRange();
-        // var isValidSquare = availableMoves.Any(m => m == _command.EndPosition);
-        // var targetPiece = _pieces.FirstOrDefault(p => p.Position == _command.EndPosition);
-        //
-        // if (targetPiece?.Color == movingPiece.Color)
-        // {
-        //     return new List<BusinessRuleViolation> { new("Cannot target piece of same color.") };
-        // }
-        // else return Enumerable.Empty<BusinessRuleViolation>();
+        return ValidateMovingPiece()
+                    .Bind(movingPiece =>
+                    {
+                        var availableMoves = movingPiece.GetAttackRange();
+                        var isValidSquare = availableMoves.Any(m => m == _command.EndPosition);
+                        var targetPiece = _pieces.FirstOrDefault(p => p.Position == _command.EndPosition);
+
+                        if (targetPiece?.Color == movingPiece.Color) return new PieceCannotAttackOwnColorError();
+                        
+                        return Result.Ok();
+                    });
+    }
+
+    private Result<Piece> ValidateMovingPiece()
+    {
+        var movingPiece = _pieces.FirstOrDefault(p => p.Position == _command.StartPosition);
+
+        if (movingPiece == null)
+        {
+            return new MovingPieceNotFoundError();
+        }
+
+        return Result.Ok(movingPiece);
     }
 }
