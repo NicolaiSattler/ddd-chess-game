@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
+using FluentResults;
 
 namespace Chess.Test.BusinessRule;
 
@@ -27,7 +28,9 @@ public class PieceIsBlockedTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .HasError<PieceIsBlockedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -47,7 +50,9 @@ public class PieceIsBlockedTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .HasError<PieceIsBlockedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -67,7 +72,9 @@ public class PieceIsBlockedTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .HasError<PieceIsBlockedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -87,7 +94,9 @@ public class PieceIsBlockedTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .HasError<PieceIsBlockedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -107,7 +116,9 @@ public class PieceIsBlockedTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .HasError<PieceIsBlockedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -128,6 +139,8 @@ public class PieceIsBlockedTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .HasError<PieceIsBlockedError>()
+              .ShouldBeTrue();
     }
 }

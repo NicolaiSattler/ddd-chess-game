@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities;
+using FluentResults;
 
 namespace Chess.Test.BusinessRule;
 
@@ -29,8 +28,9 @@ public class PieceInvalidMoveTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
-        result.FirstOrDefault().ViolationMessage.ShouldBe("A pawn must attack a filled square.");
+        result.ShouldBeOfType<Result>()
+              .HasError<InvalidMoveError>(m => m.Message == "A pawn must attack a filled square.")
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -50,8 +50,9 @@ public class PieceInvalidMoveTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
-        result.FirstOrDefault().ViolationMessage.ShouldBe("A pawn must attack a filled square.");
+        result.ShouldBeOfType<Result>()
+              .HasError<InvalidMoveError>(m => m.Message == "A pawn must attack a filled square.")
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -70,8 +71,9 @@ public class PieceInvalidMoveTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeEmpty();
-        result.FirstOrDefault().ViolationMessage.ShouldBe("Piece must move to designated squares.");
+        result.ShouldBeOfType<Result>()
+              .HasError<InvalidMoveError>(m => m.Message == "Piece must move to designated squares.")
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -91,7 +93,8 @@ public class PieceInvalidMoveTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldNotBeNull();
-        result.FirstOrDefault().ViolationMessage.ShouldBe("King cannot set itself check.");
+        result.ShouldBeOfType<Result>()
+              .HasError<InvalidMoveError>(m => m.Message == "King cannot set itself check.")
+              .ShouldBeTrue();
     }
 }

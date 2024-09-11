@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
+using FluentResults;
 
 namespace Chess.Test.BusinessRule;
 
@@ -39,6 +39,8 @@ public class KingIsInCheckTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .IsSuccess
+              .ShouldBeTrue();
     }
 }

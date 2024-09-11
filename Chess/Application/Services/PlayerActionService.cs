@@ -104,7 +104,7 @@ public class PlayerActionService : IPlayerActionService
         var options = match.Options;
         var result = match.TakeTurn(command);
 
-        if (!result.Violations?.Any() ?? false)
+        if (string.IsNullOrEmpty(result.Violation))
         {
             var @event = await SaveEventAsync(match);
 

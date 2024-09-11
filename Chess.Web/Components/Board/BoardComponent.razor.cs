@@ -102,7 +102,7 @@ public partial class BoardComponent: ComponentBase
 
     private async Task HandleTurnResultAsync(TurnResult turnResult, PieceEntity activePiece, Square endPosition)
     {
-        if (turnResult?.Violations?.Any() ?? true) return;
+        if (!string.IsNullOrEmpty(turnResult.Violation)) return;
 
         var targetPiece = Pieces.FirstOrDefault(p => p.Position == endPosition && p.Color != activePiece.Color);
 

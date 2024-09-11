@@ -8,9 +8,9 @@ using FluentResults;
 
 namespace Chess.Domain.Factories;
 
-public class TurnRules
+public class RuleFactory
 {
-    public static Result Validate(TakeTurn command,
+    public static Result GetTurnRules(TakeTurn command,
                                       IEnumerable<Piece> pieces,
                                       IEnumerable<Turn> turns)
     {

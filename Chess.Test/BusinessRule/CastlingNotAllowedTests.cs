@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Entities;
+using FluentResults;
 
 namespace Chess.Test.BusinessRule;
 
@@ -31,7 +32,8 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.ShouldBeOfType<Result>()
+              .IsSuccess.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -62,7 +64,9 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.IsFailed.ShouldBeTrue();
+        result.ShouldBeOfType<Result>()
+              .HasError<CastlingNotAllowedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -93,7 +97,9 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.IsFailed.ShouldBeTrue();
+        result.ShouldBeOfType<Result>()
+              .HasError<CastlingNotAllowedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -113,7 +119,9 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.IsFailed.ShouldBeTrue();
+        result.ShouldBeOfType<Result>()
+              .HasError<CastlingNotAllowedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -134,7 +142,9 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldBeOfType<CastlingNotAllowedError>();
+        result.ShouldBeOfType<Result>()
+              .HasError<CastlingNotAllowedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -157,7 +167,9 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldBeOfType<CastlingNotAllowedError>();
+        result.ShouldBeOfType<Result>()
+              .HasError<CastlingNotAllowedError>()
+              .ShouldBeTrue();
     }
 
     [TestMethod]
@@ -180,6 +192,8 @@ public class CastlingNotAllowedTests
         var result = sut.CheckRule();
 
         //Assert
-        result.ShouldBeOfType<CastlingNotAllowedError>();
+        result.ShouldBeOfType<Result>()
+              .HasError<CastlingNotAllowedError>()
+              .ShouldBeTrue();
     }
 }

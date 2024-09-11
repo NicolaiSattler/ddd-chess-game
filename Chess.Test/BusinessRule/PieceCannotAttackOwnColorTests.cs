@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
+using FluentResults;
 
 namespace Chess.Test.BusinessRule;
 
@@ -30,7 +30,8 @@ public class PieceCannotAttackOwnColorTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.ShouldBeEmpty();
+        result.ShouldBeOfType<Result>()
+              .IsSuccess.ShouldBeTrue();
     }
 
     [TestMethod]
@@ -50,6 +51,8 @@ public class PieceCannotAttackOwnColorTests
         var result = _sut.CheckRule();
 
         //Assert
-        result.Count().ShouldBe(1);
+        result.ShouldBeOfType<Result>()
+              .HasError<PieceCannotAttackOwnColorError>()
+              .ShouldBeTrue();
     }
 }

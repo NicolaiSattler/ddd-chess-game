@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using FluentResults;
 
 namespace Chess.Domain.Aggregates;
 
@@ -58,23 +59,24 @@ public class Match : AggregateRoot, IMatch
     //TODO: Draw by repitition
     public TurnResult TakeTurn(TakeTurn command)
     {
-        var violations = RuleFactory.GetTurnRules(command, Pieces, Turns)
-                                    .SelectMany(r => r.CheckRule())
-                                    .ToList();
+        var validationResult = TurnRules.Validate(command, Pieces, Turns);
 
-        var activePiece = Pieces.Find(p => p.Position == command.StartPosition);
-        var castlingType = SpecialMoves.IsCastling(command.StartPosition, command.EndPosition, Pieces);
-        var isEnPassant = activePiece is Pawn pawn && SpecialMoves.IsEnPassant(pawn, Turns);
-        var isPromotion = activePiece is Pawn && SpecialMoves.PawnIsPromoted(activePiece, command.EndPosition);
-
-        if (!violations.Any())
+        if (validationResult.IsSuccess)
         {
             var @event = TurnTaken.CreateFrom(command);
 
             RaiseEvent(@event);
         }
-        else return new() { Violations = violations };
+        else 
+        {
+            var violation = validationResult!.Errors!.FirstOrDefault()!.Message;
+            return new() { Violation =  violation };
+        }
 
+        var activePiece = Pieces.Find(p => p.Position == command.StartPosition);
+        var castlingType = SpecialMoves.IsCastling(command.StartPosition, command.EndPosition, Pieces);
+        var isEnPassant = activePiece is Pawn pawn && SpecialMoves.IsEnPassant(pawn, Turns);
+        var isPromotion = activePiece is Pawn && SpecialMoves.PawnIsPromoted(activePiece, command.EndPosition);
 
         return new()
         {
