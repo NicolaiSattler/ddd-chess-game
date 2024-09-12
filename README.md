@@ -36,7 +36,6 @@ Follow these steps:
   - End the game
 
 ## Technical Dept
-- Implement [FluentResult](https://github.com/altmann/FluentResults) instead of throwing Exceptions.
 - fix testcoverage.
 
 Alot more idea's will be added soon..
