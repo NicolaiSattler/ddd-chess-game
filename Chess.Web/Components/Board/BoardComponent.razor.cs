@@ -5,6 +5,7 @@ using Chess.Domain.Entities;
 using Chess.Web.Dialogs.Promotion;
 using Chess.Web.Model;
 using MudBlazor;
+using Ardalis.GuardClauses;
 
 using File = Chess.Domain.ValueObjects.File;
 using PieceEntity = Chess.Domain.Entities.Pieces.Piece;
@@ -65,6 +66,8 @@ public partial class BoardComponent: ComponentBase
     {
         try
         {
+            if (ActivePieceId == Guid.Empty) return;
+
             var activePiece = Pieces.First(p => p.Id == ActivePieceId);
             var endPosition = new Square(file, rank);
             var turnResult = await ExecuteTurnCommand(activePiece, endPosition);
@@ -108,7 +111,14 @@ public partial class BoardComponent: ComponentBase
 
         activePiece.Position = endPosition;
 
-        if (targetPiece != null) Pieces.Remove(targetPiece);
+        if (targetPiece != null)
+        {
+            var field = Fields.Find(m => m.Equals(endPosition));
+            field?.RemoveChild();
+            field?.AddChild(activePiece);
+
+            Pieces.Remove(targetPiece);
+        }
 
         if (turnResult.CastlingType != CastlingType.Undefined)
         {
