@@ -9,7 +9,8 @@ public abstract class Piece : Entity
     public Color Color { get; init; }
     public Square Position { get; set; } = new(File.Undefined, 0);
     public abstract PieceType Type { get; init; }
-    public abstract MovementType Movement { get; init; }
+    public abstract MovementType GetMovement();
+    public abstract void SetMovement(MovementType value);
 
     public Piece(Guid id) : base(id)
     {

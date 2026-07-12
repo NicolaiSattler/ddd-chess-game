@@ -7,13 +7,24 @@ namespace Chess.Domain.Entities.Pieces;
 public class King : Piece
 {
     public override PieceType Type { get; init; }
-    public override MovementType Movement { get; init; }
+
+    private readonly MovementType movement;
+
+    public override MovementType GetMovement()
+    {
+        return movement;
+    }
+
+    public override void SetMovement(MovementType value)
+    {
+        this.movement = value;
+    }
 
     public King() : base(Guid.NewGuid())
     {
         Type = PieceType.King;
-        Movement = MovementType.Diagonal | MovementType.FileAndRank;
+        SetMovement(MovementType.Diagonal | MovementType.FileAndRank);
     }
 
-    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement);
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, GetMovement());
 }

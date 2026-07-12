@@ -7,13 +7,24 @@ namespace Chess.Domain.Entities.Pieces;
 public class Pawn : Piece
 {
     public override PieceType Type { get; init; }
-    public override MovementType Movement { get; init; }
+
+    private readonly MovementType movement;
+
+    public override MovementType GetMovement()
+    {
+        return movement;
+    }
+
+    public override void SetMovement(MovementType value)
+    {
+        this.movement = value;
+    }
 
     public Pawn() : base(Guid.NewGuid())
     {
         Type = PieceType.Pawn;
-        Movement = MovementType.Pawn;
+        SetMovement(MovementType.Pawn);
     }
 
-    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement, color: Color);
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, GetMovement(), color: Color);
 }

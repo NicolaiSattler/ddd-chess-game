@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Chess.Core;
 
@@ -38,7 +39,7 @@ public abstract class AggregateRoot : Entity, IAggregateRoot
         _events = new List<DomainEvent>();
     }
 
-    public AggregateRoot(Guid id, List<DomainEvent?> events) : this(id)
+    public AggregateRoot(Guid id, List<DomainEvent> events) : this(id)
     {
         try
         {

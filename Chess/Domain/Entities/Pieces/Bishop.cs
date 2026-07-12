@@ -7,16 +7,25 @@ namespace Chess.Domain.Entities.Pieces;
 public class Bishop : Piece
 {
     public override PieceType Type { get; init; }
-    public override MovementType Movement { get; init; }
+
+    private readonly MovementType movement;
+
+    public override MovementType GetMovement()
+    {
+        return movement;
+    }
+
+    public override void SetMovement(MovementType value)
+    {
+        this.movement = value;
+    }
 
     public Bishop() : this(Guid.NewGuid()) { }
     public Bishop(Guid id) : base(id)
     {
         Type = PieceType.Bishop;
-        Movement = MovementType.Diagonal;
+        SetMovement(MovementType.Diagonal);
     }
 
-
-    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement, 8);
-
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, GetMovement(), 8);
 }

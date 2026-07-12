@@ -7,15 +7,25 @@ namespace Chess.Domain.Entities.Pieces;
 public class Rook : Piece
 {
     public override PieceType Type { get; init; }
-    public override MovementType Movement { get; init; }
 
+    private readonly MovementType movement;
+
+    public override MovementType GetMovement()
+    {
+        return movement;
+    }
+
+    public override void SetMovement(MovementType value)
+    {
+        this.movement = value;
+    }
 
     public Rook() : this(Guid.NewGuid()) { }
     public Rook(Guid id) : base(id)
     {
         Type = PieceType.Rook;
-        Movement = MovementType.FileAndRank;
+        SetMovement(MovementType.FileAndRank);
     }
 
-    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement, 8);
+    public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, GetMovement(), 8);
 }

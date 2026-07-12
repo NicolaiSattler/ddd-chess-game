@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using FluentResults;
 
 namespace Chess.Domain.Aggregates;
 
@@ -27,9 +26,9 @@ public class Match : AggregateRoot, IMatch
     public List<Piece> Pieces { get; private set; } = new();
     public List<Turn> Turns { get; private set; } = new();
 
-    public Match(): base(Guid.Empty) {}
+    public Match() : base(Guid.Empty) { }
     public Match(Guid id) : base(id) { }
-    public Match(Guid id, List<DomainEvent?> events) : base(id, events) { }
+    public Match(Guid id, List<DomainEvent> events) : base(id, events) { }
 
     protected override void When(DomainEvent? domainEvent)
     {
@@ -67,10 +66,10 @@ public class Match : AggregateRoot, IMatch
 
             RaiseEvent(@event);
         }
-        else 
+        else
         {
             var violation = validationResult!.Errors!.FirstOrDefault()!.Message;
-            return new() { Violation =  violation };
+            return new() { Violation = violation };
         }
 
         var activePiece = Pieces.Find(p => p.Position == command.StartPosition);
@@ -140,9 +139,11 @@ public class Match : AggregateRoot, IMatch
         Black = new() { Color = Color.Black, MemberId = @event.BlackMemberId, Elo = @event.BlackElo };
         Turns = new();
 
-        Pieces = new();
-        Pieces.AddRange(PieceFactory.CreatePiecesForColor(Color.White));
-        Pieces.AddRange(PieceFactory.CreatePiecesForColor(Color.Black));
+        Pieces =
+        [
+            .. PieceFactory.CreatePiecesForColor(Color.White),
+            .. PieceFactory.CreatePiecesForColor(Color.Black),
+        ];
 
         StartTurn(@event.StartTime);
     }
@@ -251,7 +252,7 @@ public class Match : AggregateRoot, IMatch
 
     private bool OpponentIsInCheck(Color currentPlayerColor)
     {
-        var piece =  Pieces.FirstOrDefault(p => p.Color != currentPlayerColor && p.Type == PieceType.King);
+        var piece = Pieces.FirstOrDefault(p => p.Color != currentPlayerColor && p.Type == PieceType.King);
         return piece is King king && Board.IsCheck(king, Pieces);
     }
 
@@ -261,13 +262,13 @@ public class Match : AggregateRoot, IMatch
     {
         var player = White;
 
-        if (Turns.Any())
+        if (Turns.Count != 0)
         {
             var playerAtTurn = Turns.Last().Player.MemberId;
             player = GetOpponent(playerAtTurn);
         }
 
-         Turns.Add(new() { Player = player, StartTime = startTime });
+        Turns.Add(new() { Player = player, StartTime = startTime });
     }
 
     //TODO: Unit Test in aggregate
@@ -318,7 +319,7 @@ public class Match : AggregateRoot, IMatch
         return false;
     }
 
-    private  string CalculateHash(Color color)
+    private string CalculateHash(Color color)
     {
         const string separator = "";
 

@@ -4,17 +4,12 @@ using Chess.Domain.ValueObjects;
 
 namespace Chess.Domain.Entities.Pieces;
 
-public class Queen : Piece
+public class Queen(Guid id) : Piece(id)
 {
-    public override PieceType Type { get; init; }
-    public override MovementType Movement { get; init; }
+    public override PieceType Type { get; init; } = PieceType.Queen;
+    public override MovementType Movement { get; init; } = MovementType.Diagonal | MovementType.FileAndRank;
 
     public Queen() : this(Guid.NewGuid()) { }
-    public Queen(Guid id) : base(id)
-    {
-        Type = PieceType.Queen;
-        Movement = MovementType.Diagonal | MovementType.FileAndRank;
-    }
 
     public override IEnumerable<Square> GetAttackRange() => Navigator.CalculateMovement(Position, Movement, 8);
 }
