@@ -1,0 +1,6 @@
+<Solution>
+    <Project Path="Chess.Test/Chess.Test.csproj" />
+    <Project Path="Chess.Web.Test/Chess.Web.Test.csproj" />
+    <Project Path="Chess.Web/Chess.Web.csproj" />
+    <Project Path="Chess/Chess.csproj" />
+</Solution>
