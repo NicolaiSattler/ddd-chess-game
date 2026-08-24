@@ -13,7 +13,7 @@ namespace Chess.Application.Services;
 public interface IMatchDataService
 {
     Task<Match> GetAggregateAsync(Guid aggregateId);
-    Task<List<Piece>> GetPiecesAsync(Guid aggregateId);
+    Task<IReadOnlyList<Piece>> GetPiecesAsync(Guid aggregateId);
     Task<IEnumerable<Turn>> GetTurns(Guid aggregateId);
     Task<IEnumerable<MatchEntity>> GetMatchesAsync();
 }
@@ -46,7 +46,7 @@ public class MatchDataService : IMatchDataService
 
     public async Task<IEnumerable<MatchEntity>> GetMatchesAsync() => await _matchRepository.GetAsync();
 
-    public async Task<List<Piece>> GetPiecesAsync(Guid aggregateId)
+    public async Task<IReadOnlyList<Piece>> GetPiecesAsync(Guid aggregateId)
     {
         var match = await GetAggregateAsync(aggregateId);
         return match.Pieces;

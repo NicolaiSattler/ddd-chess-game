@@ -1,5 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+
 using Ardalis.GuardClauses;
+
 using Chess.Core;
+using Chess.Domain.BusinessRules;
 using Chess.Domain.Commands;
 using Chess.Domain.Configuration;
 using Chess.Domain.Determiners;
@@ -8,23 +15,25 @@ using Chess.Domain.Entities.Pieces;
 using Chess.Domain.Events;
 using Chess.Domain.Extensions;
 using Chess.Domain.Factories;
-using Chess.Domain.ValueObjects;
 using Chess.Domain.Models;
 using Chess.Domain.Utilities;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
+using Chess.Domain.ValueObjects;
+
+using FluentResults;
 
 namespace Chess.Domain.Aggregates;
 
 public class Match : AggregateRoot, IMatch
 {
+    private List<Piece> _pieces = [];
+    private List<Turn> _turns = [];
+
     public MatchOptions Options { get; private set; } = new();
     public Player White { get; private set; } = new();
     public Player Black { get; private set; } = new();
-    public List<Piece> Pieces { get; private set; } = new();
-    public List<Turn> Turns { get; private set; } = new();
+
+    public IReadOnlyList<Piece> Pieces => _pieces.AsReadOnly();
+    public IReadOnlyList<Turn> Turns => _turns.AsReadOnly();
 
     public Match() : base(Guid.Empty) { }
     public Match(Guid id) : base(id) { }
@@ -58,23 +67,31 @@ public class Match : AggregateRoot, IMatch
     //TODO: Draw by repitition
     public TurnResult TakeTurn(TakeTurn command)
     {
-        var validationResult = TurnRules.Validate(command, Pieces, Turns);
-
-        if (validationResult.IsSuccess)
+        // Optimistic concurrency control: check if aggregate version matches expected
+        if (command.ExpectedVersion.HasValue && command.ExpectedVersion.Value != Version)
         {
-            var @event = TurnTaken.CreateFrom(command);
-
-            RaiseEvent(@event);
-        }
-        else
-        {
-            var violation = validationResult!.Errors!.FirstOrDefault()!.Message;
-            return new() { Violation = violation };
+            return new TurnResult
+            {
+                TurnValidation = Result.Fail(new ConcurrencyError())
+            };
         }
 
-        var activePiece = Pieces.Find(p => p.Position == command.StartPosition);
-        var castlingType = SpecialMoves.IsCastling(command.StartPosition, command.EndPosition, Pieces);
-        var isEnPassant = activePiece is Pawn pawn && SpecialMoves.IsEnPassant(pawn, Turns);
+        var validationResult = TurnRules.Validate(command, _pieces, _turns);
+
+        if (!validationResult.IsSuccess)
+        {
+            return new TurnResult
+            {
+                TurnValidation = validationResult
+            };
+        }
+
+        var @event = TurnTaken.CreateFrom(command);
+        RaiseEvent(@event);
+
+        var activePiece = _pieces.Find(p => p.Position == command.StartPosition);
+        var castlingType = SpecialMoves.IsCastling(command.StartPosition, command.EndPosition, _pieces);
+        var isEnPassant = activePiece is Pawn pawn && SpecialMoves.IsEnPassant(pawn, _turns);
         var isPromotion = activePiece is Pawn && SpecialMoves.PawnIsPromoted(activePiece, command.EndPosition);
 
         return new()
@@ -82,6 +99,7 @@ public class Match : AggregateRoot, IMatch
             CastlingType = castlingType,
             IsEnPassant = isEnPassant,
             IsPromotion = isPromotion,
+            TurnValidation = Result.Ok()
         };
     }
 
@@ -137,9 +155,9 @@ public class Match : AggregateRoot, IMatch
         Options = @event.Options;
         White = new() { Color = Color.White, MemberId = @event.WhiteMemberId, Elo = @event.WhiteElo };
         Black = new() { Color = Color.Black, MemberId = @event.BlackMemberId, Elo = @event.BlackElo };
-        Turns = new();
+        _turns = new();
 
-        Pieces =
+        _pieces =
         [
             .. PieceFactory.CreatePiecesForColor(Color.White),
             .. PieceFactory.CreatePiecesForColor(Color.Black),
@@ -152,32 +170,32 @@ public class Match : AggregateRoot, IMatch
     private void Handle(TurnTaken @event)
     {
         Guard.Against.Null(@event, nameof(@event));
-        Guard.Against.Null(Turns, nameof(Turns));
+        Guard.Against.Null(_turns, nameof(_turns));
 
-        var movingPiece = Pieces.Find(p => p.Position == @event.StartPosition);
+        var movingPiece = _pieces.Find(p => p.Position == @event.StartPosition);
 
         if (movingPiece == null) return;
 
-        var targetPiece = Pieces.Find(p => p.Position == @event.EndPosition);
-        var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, Turns);
-        var pieceIsCaptured = Board.PieceIsCaptured(@event, Pieces) || isEnPassant;
-        var castling = SpecialMoves.IsCastling(@event.StartPosition, @event.EndPosition, Pieces);
+        var targetPiece = _pieces.Find(p => p.Position == @event.EndPosition);
+        var isEnPassant = SpecialMoves.IsEnPassant(movingPiece, _turns);
+        var pieceIsCaptured = Board.PieceIsCaptured(@event, _pieces) || isEnPassant;
+        var castling = SpecialMoves.IsCastling(@event.StartPosition, @event.EndPosition, _pieces);
 
         if (isEnPassant)
         {
-            var turnCount = Turns.Count;
-            var position = Turns.ElementAt(turnCount - 2).EndPosition;
-            targetPiece = Pieces.Find(p => p.Position == position);
+            var turnCount = _turns.Count;
+            var position = _turns.ElementAt(turnCount - 2).EndPosition;
+            targetPiece = _pieces.Find(p => p.Position == position);
         }
 
         if (castling != CastlingType.Undefined) MoveCastingPieces(movingPiece, @event.EndPosition);
 
-        if (targetPiece != null && pieceIsCaptured) Pieces.Remove(targetPiece);
+        if (targetPiece != null && pieceIsCaptured) _pieces.Remove(targetPiece);
 
-        movingPiece.Position = @event.EndPosition;
+        movingPiece.MoveTo(@event.EndPosition);
 
         var isCheckMate = IsCheckMate(@event);
-        var isStalemate = Board.IsStalemate(movingPiece.Color, Pieces);
+        var isStalemate = Board.IsStalemate(movingPiece.Color, _pieces);
         var isCheck = OpponentIsInCheck(movingPiece.Color);
         var notation = DetermineNotation(movingPiece, targetPiece, castling, isCheck, isCheckMate);
 
@@ -202,14 +220,14 @@ public class Match : AggregateRoot, IMatch
     {
         Guard.Against.Null(@event, nameof(@event));
 
-        var pawn = Pieces.Find(p => p.Position == @event.PawnPosition && p.Type == PieceType.Pawn);
+        var pawn = _pieces.Find(p => p.Position == @event.PawnPosition && p.Type == PieceType.Pawn);
         var newPieceType = PieceFactory.CreatePiece(@event.PromotionType, pawn!.Position, pawn!.Id, pawn!.Color);
 
-        Pieces.Remove(pawn);
-        Pieces.Add(newPieceType);
+        _pieces.Remove(pawn);
+        _pieces.Add(newPieceType);
 
-        var lastTurn = Turns.ElementAt(Turns.Count - 2);
-        lastTurn.Notation += $"={@event.PromotionType.GetPieceNotation()}";
+        var lastTurn = _turns.ElementAt(_turns.Count - 2);
+        lastTurn.UpdateNotation(lastTurn.Notation + $"={@event.PromotionType.GetPieceNotation()}");
     }
 
     //TODO: Notify Client that the match has ended
@@ -252,8 +270,8 @@ public class Match : AggregateRoot, IMatch
 
     private bool OpponentIsInCheck(Color currentPlayerColor)
     {
-        var piece = Pieces.FirstOrDefault(p => p.Color != currentPlayerColor && p.Type == PieceType.King);
-        return piece is King king && Board.IsCheck(king, Pieces);
+        var piece = _pieces.FirstOrDefault(p => p.Color != currentPlayerColor && p.Type == PieceType.King);
+        return piece is King king && Board.IsCheck(king, _pieces);
     }
 
     private Player GetOpponent(Guid memberId) => memberId != White.MemberId ? White : Black;
@@ -262,13 +280,13 @@ public class Match : AggregateRoot, IMatch
     {
         var player = White;
 
-        if (Turns.Count != 0)
+        if (_turns.Count != 0)
         {
-            var playerAtTurn = Turns.Last().Player.MemberId;
+            var playerAtTurn = _turns.Last().Player.MemberId;
             player = GetOpponent(playerAtTurn);
         }
 
-        Turns.Add(new() { Player = player, StartTime = startTime });
+        _turns.Add(new() { Player = player, StartTime = startTime });
     }
 
     //TODO: Unit Test in aggregate
@@ -277,16 +295,11 @@ public class Match : AggregateRoot, IMatch
         @event = Guard.Against.Null(@event, nameof(@event));
         pieceType = Guard.Against.Null(pieceType, nameof(pieceType));
 
-        var turn = Turns.Last() ?? throw new InvalidOperationException("No turns found!");
+        var turn = _turns.Last() ?? throw new InvalidOperationException("No turns found!");
         var player = White.MemberId == @event.MemberId ? White : Black;
 
-        turn.StartPosition = @event.StartPosition;
-        turn.EndPosition = @event.EndPosition;
-        turn.PieceType = pieceType;
-        turn.Hash = CalculateHash(player.Color);
-        turn.Notation = notation;
+        turn.UpdateMoveData(pieceType, @event.StartPosition, @event.EndPosition, CalculateHash(player.Color), notation);
     }
-
 
     //TODO: Unit Test in aggregate
     private void MoveCastingPieces(Piece king, Square endPosition)
@@ -297,11 +310,11 @@ public class Match : AggregateRoot, IMatch
         var file = endPosition.File > File.E ? File.H : File.A;
         var newFilePosition = file == File.H ? File.F : File.D;
         var rookPosition = new Square(file, rank);
-        var rook = Pieces.FirstOrDefault(p => p.Position == rookPosition);
+        var rook = _pieces.FirstOrDefault(p => p.Position == rookPosition);
 
         if (rook != null)
         {
-            rook.Position = new Square(newFilePosition, rank);
+            rook.MoveTo(new Square(newFilePosition, rank));
         }
     }
 
@@ -309,11 +322,11 @@ public class Match : AggregateRoot, IMatch
     private bool IsCheckMate(TurnTaken @event)
     {
         var player = @event.MemberId == Black.MemberId ? Black : White;
-        var piece = Pieces.Find(p => p.Color != player.Color && p.Type == PieceType.King);
+        var piece = _pieces.Find(p => p.Color != player.Color && p.Type == PieceType.King);
 
         if (piece is King king)
         {
-            return Board.IsCheckMate(king, Pieces);
+            return Board.IsCheckMate(king, _pieces);
         }
 
         return false;
@@ -323,7 +336,7 @@ public class Match : AggregateRoot, IMatch
     {
         const string separator = "";
 
-        var pieceNotations = Pieces.Where(p => p.Color == color)
+        var pieceNotations = _pieces.Where(p => p.Color == color)
                                    .Select(p => p.ToString());
 
         var aggregate = string.Join(separator, pieceNotations);

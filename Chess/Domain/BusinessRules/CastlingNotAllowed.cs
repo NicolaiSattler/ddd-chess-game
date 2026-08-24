@@ -105,7 +105,12 @@ public class CastlingNotAllowed : BusinessRule
             passingSquares = new Square[] { new(File.C, rank), new(File.D, rank),};
         }
 
-        return passingSquares.Any(s => Board.IsCheck(new() { Position = s }, opponentPieces));
+        return passingSquares.Any(s => 
+        {
+            var testKing = new King();
+            testKing.MoveTo(s);
+            return Board.IsCheck(testKing, opponentPieces);
+        });
     }
 
 }

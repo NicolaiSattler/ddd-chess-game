@@ -7,7 +7,7 @@ namespace Chess.Domain.Entities.Pieces;
 public abstract class Piece : Entity
 {
     public Color Color { get; init; }
-    public Square Position { get; set; } = new(File.Undefined, 0);
+    public Square Position { get; private set; } = new(File.Undefined, 0);
     public abstract PieceType Type { get; init; }
     public abstract MovementType GetMovement();
     public abstract void SetMovement(MovementType value);
@@ -15,6 +15,11 @@ public abstract class Piece : Entity
     public Piece(Guid id) : base(id)
     {
         Position = new(File.Undefined, 0);
+    }
+
+    public Piece(Guid id, Square position) : base(id)
+    {
+        Position = position;
     }
 
     public void MoveTo(Square position)

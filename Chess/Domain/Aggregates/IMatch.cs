@@ -14,8 +14,8 @@ public interface IMatch : IAggregateRoot
     MatchOptions Options { get; }
     Player White { get; }
     Player Black { get; }
-    List<Piece> Pieces { get; }
-    List<Turn> Turns { get; }
+    IReadOnlyList<Piece> Pieces { get; }
+    IReadOnlyList<Turn> Turns { get; }
 
     void Start(StartMatch command);
     void Draw();

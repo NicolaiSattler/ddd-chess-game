@@ -1,11 +1,15 @@
 using Ardalis.GuardClauses;
+
 using Chess.Application.Services;
 using Chess.Domain.Determiners;
 using Chess.Domain.Entities;
 using Chess.Web.Dialogs.Promotion;
 using Chess.Web.Model;
+
 using Microsoft.AspNetCore.Components;
+
 using MudBlazor;
+
 using File = Chess.Domain.ValueObjects.File;
 using PieceEntity = Chess.Domain.Entities.Pieces.Piece;
 
@@ -45,11 +49,11 @@ public partial class BoardComponent : ComponentBase
     public Domain.ValueObjects.Color ActiveColor { get; private set; }
     public bool IsFinished { get; private set; }
     public Guid ActivePieceId { get; set; }
-    public List<FieldComponent> Fields { get; } = new();
-    public List<PieceEntity> Pieces { get; private set; } = new();
+    public ICollection<FieldComponent> Fields { get; } = [];
+    public ICollection<PieceEntity> Pieces { get; private set; } = [];
 
     public PieceEntity? SelectPiece(int rank, int file) =>
-        Pieces?.Find(p => p.Position == new Square((File)file, rank));
+        Pieces?.FirstOrDefault(p => p.Position == new Square((File)file, rank));
 
     public void AddChild(FieldComponent fieldComponent) => Fields.Add(fieldComponent);
 
@@ -59,7 +63,7 @@ public partial class BoardComponent : ComponentBase
     {
         SetFieldHighlight(Fields, false);
 
-        var piece = Pieces.Find(p => p.Id == pieceId);
+        var piece = Pieces.FirstOrDefault(p => p.Id == pieceId);
         var moves = piece?.GetAvailableMoves(Pieces) ?? Enumerable.Empty<Square>();
 
         if (piece is King kingPiece)
@@ -102,7 +106,7 @@ public partial class BoardComponent : ComponentBase
     {
         if (MatchDataService != null && MatchInfoService != null)
         {
-            Pieces = await MatchDataService.GetPiecesAsync(AggregateId);
+            Pieces = (await MatchDataService.GetPiecesAsync(AggregateId)).ToList();
             ActiveColor = await MatchInfoService.GetColorAtTurnAsync(AggregateId);
             Black = await MatchInfoService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.Black);
             White = await MatchInfoService.GetPlayerAsync(AggregateId, Domain.ValueObjects.Color.White);
@@ -128,7 +132,7 @@ public partial class BoardComponent : ComponentBase
         Square endPosition
     )
     {
-        if (!string.IsNullOrEmpty(turnResult.Violation))
+        if (!turnResult.IsValid)
             return;
 
         var targetPiece = Pieces.FirstOrDefault(p =>
@@ -139,7 +143,7 @@ public partial class BoardComponent : ComponentBase
 
         if (targetPiece != null)
         {
-            var field = Fields.Find(m => m.Equals(endPosition));
+            var field = Fields.FirstOrDefault(m => m.Equals(endPosition));
             field?.RemoveChild();
             field?.AddChild(activePiece);
 
@@ -241,16 +245,16 @@ public partial class BoardComponent : ComponentBase
 
         var oldFile = castlingType == CastlingType.KingSide ? File.H : File.A;
         var newFile = castlingType == CastlingType.KingSide ? File.F : File.D;
-        var rook = Pieces.Find(p =>
+        var rook = Pieces.FirstOrDefault(p =>
             p.Type == PieceType.Rook && p.Color == activePiece.Color && p.Position.File == oldFile
         );
 
         if (rook != null)
         {
-            var newField = Fields.Find(m =>
+            var newField = Fields.FirstOrDefault(m =>
                 m.File == newFile && m.Rank == activePiece.Position.Rank
             );
-            var oldField = Fields.Find(m =>
+            var oldField = Fields.FirstOrDefault(m =>
                 m.File == rook.Position.File && m.Rank == rook.Position.Rank
             );
 
@@ -265,19 +269,17 @@ public partial class BoardComponent : ComponentBase
     {
         if (MatchDataService == null)
             return;
-        if (activePiece is Pawn pawn && pawn == null)
-            return;
 
         var turns = await MatchDataService.GetTurns(AggregateId) ?? Enumerable.Empty<Turn>();
         var turnCount = turns.Count();
         var lastOppenentMove = turns.ElementAt(turnCount - 3);
         var field = lastOppenentMove?.EndPosition;
-        var targetPiece = Pieces?.Find(p => p.Position == field);
+        var targetPiece = Pieces.FirstOrDefault(p => p.Position == field);
 
         if (targetPiece != null)
             Pieces?.Remove(targetPiece);
 
-        var pawnField = Fields.Find(m => m.File == field?.File && m.Rank == field?.Rank);
+        var pawnField = Fields.FirstOrDefault(m => m.File == field?.File && m.Rank == field?.Rank);
         pawnField?.RemoveChild();
 
         StateHasChanged();
@@ -288,7 +290,7 @@ public partial class BoardComponent : ComponentBase
         if (DialogService == null || MatchDataService == null || ActionService == null)
             return;
 
-        var pawn = Pieces?.Find(p => p.Id == activePiece.Id);
+        var pawn = Pieces.FirstOrDefault(p => p.Id == activePiece.Id);
 
         if (pawn == null)
             return;
@@ -303,10 +305,10 @@ public partial class BoardComponent : ComponentBase
 
         await ActionService.PromotePawnAsync(AggregateId, pawn.Position, pieceType);
 
-        Pieces = await MatchDataService.GetPiecesAsync(AggregateId);
+        Pieces = (await MatchDataService.GetPiecesAsync(AggregateId)).ToList();
 
-        var field = Fields.Find(f => f.Equals(endPosition));
-        var piece = Pieces?.Find(p => p.Position == pawn.Position);
+        var field = Fields.FirstOrDefault(f => f.Equals(endPosition));
+        var piece = Pieces.FirstOrDefault(p => p.Position == pawn.Position);
 
         if (piece == null)
             return;
