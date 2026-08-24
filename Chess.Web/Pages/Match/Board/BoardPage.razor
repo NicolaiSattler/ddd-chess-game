@@ -6,7 +6,7 @@
 
 @page "/match/board/{AggregateId:guid}"
 
-<MudGrid Class="px-5 pt-4 d-flex flex-wrap">
+<MudGrid Class="pt-4 d-flex flex-wrap">
     <MudItem sm="12" md="8">
         <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
             <BoardComponent AggregateId="AggregateId" OnTurnEnded="OnTurnResultAsync" />

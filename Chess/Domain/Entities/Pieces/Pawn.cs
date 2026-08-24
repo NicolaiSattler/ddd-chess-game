@@ -8,7 +8,7 @@ public class Pawn : Piece
 {
     public override PieceType Type { get; init; }
 
-    private readonly MovementType movement;
+    private MovementType movement;
 
     public override MovementType GetMovement()
     {

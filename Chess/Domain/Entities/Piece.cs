@@ -17,6 +17,11 @@ public abstract class Piece : Entity
         Position = new(File.Undefined, 0);
     }
 
+    public void MoveTo(Square position)
+    {
+        Position = position;
+    }
+
     public abstract IEnumerable<Square> GetAttackRange();
 
     public override string ToString() => $"{Type}{Position}";

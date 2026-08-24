@@ -2,29 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoFixture;
 using Chess.Domain.Events;
 using Chess.Infrastructure.Entity;
 using Chess.Infrastructure.Repository;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace Chess.Test.Infrastructure;
 
 [TestClass]
-public class MatchEventRepositoryTests: TestBase
+public class MatchEventRepositoryTests : TestBase
 {
     private MatchEventRepository _sut;
     private Fixture _fixture;
     private Guid _aggregateId = Guid.NewGuid();
-    private Mock<IMemoryCache> _mockedCache;
+    private IMemoryCache _mockedCache;
 
     [TestInitialize]
     public void Initialize()
     {
-        _mockedCache = new();
-        _sut = new(Mock.Of<ILogger<MatchEventRepository>>(), _mockedCache.Object, DbContext);
+        _mockedCache = Substitute.For<IMemoryCache>();
+        _sut = new(Substitute.For<ILogger<MatchEventRepository>>(), _mockedCache, DbContext);
         _fixture = new();
 
         DbContext.Matches.Add(new()
@@ -66,16 +64,15 @@ public class MatchEventRepositoryTests: TestBase
     {
         //Arrange
         var matchStarted = _fixture.Create<MatchStarted>();
-        var mockedCacheEntry = Mock.Of<ICacheEntry>();
+        var mockedCacheEntry = Substitute.For<ICacheEntry>();
         var outputEntry = new object();
 
-        _mockedCache.Setup(m => m.CreateEntry(_aggregateId))
-                    .Returns(mockedCacheEntry)
-                    .Verifiable();
+        _mockedCache.CreateEntry(_aggregateId)
+                    .Returns(mockedCacheEntry);
 
-        _mockedCache.SetupSequence(m => m.TryGetValue(It.IsAny<object>(), out outputEntry))
-                    .Returns(false)
-                    .Returns(true);
+        var callCount = 0;
+        _mockedCache.TryGetValue(Arg.Any<object>(), out outputEntry)
+                    .Returns(_ => callCount++ == 0 ? false : true);
 
         //Act
         await _sut.AddAsync(_aggregateId, matchStarted, true);
@@ -91,16 +88,15 @@ public class MatchEventRepositoryTests: TestBase
     {
         //Arrange
         var matchStarted = _fixture.Create<MatchStarted>();
-        var mockedCacheEntry = Mock.Of<ICacheEntry>();
+        var mockedCacheEntry = Substitute.For<ICacheEntry>();
         var outputEntry = new object();
 
-        _mockedCache.Setup(m => m.CreateEntry(_aggregateId))
-                    .Returns(mockedCacheEntry)
-                    .Verifiable();
+        _mockedCache.CreateEntry(_aggregateId)
+                    .Returns(mockedCacheEntry);
 
-        _mockedCache.SetupSequence(m => m.TryGetValue(It.IsAny<object>(), out outputEntry))
-                    .Returns(false)
-                    .Returns(true);
+        var callCount = 0;
+        _mockedCache.TryGetValue(Arg.Any<object>(), out outputEntry)
+                    .Returns(_ => callCount++ == 0 ? false : true);
 
         //Act
         await _sut.AddAsync(_aggregateId, matchStarted, true);
@@ -110,25 +106,24 @@ public class MatchEventRepositoryTests: TestBase
         result.ShouldBeEmpty();
     }
 
-
     [TestMethod]
     public async Task GetAsync_ShouldReturnCachedEvents()
     {
         //Arrange
-        var output = new List<MatchEvent> { new MatchEvent() { AggregateId = _aggregateId } };
-        object outputEntry = output;
+        var output = new List<MatchEvent> { new() { AggregateId = _aggregateId } };
 
-        _mockedCache.Setup(m => m.TryGetValue(It.IsAny<object>(), out outputEntry))
-                    .Returns(true)
-                    .Verifiable();
+        _mockedCache.TryGetValue(Arg.Any<object>(), out _)
+                    .Returns(true);
 
         //Act
         var result = await _sut.GetAsync(Guid.NewGuid());
 
         //Assert
         result.ShouldNotBeEmpty();
-        _mockedCache.Verify();
+
+        _mockedCache.Received(1).TryGetValue(Arg.Any<object>(), out _);
     }
+
     [TestCleanup]
     public void Cleanup()
     {

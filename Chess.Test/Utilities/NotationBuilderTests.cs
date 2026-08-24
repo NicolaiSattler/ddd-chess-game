@@ -41,7 +41,7 @@ public class NotationBuilderTests
     {
         //Arrange
         var piece = Activator.CreateInstance(pieceType) as Piece;
-        piece.Position = new(File.E, 8);
+        piece.MoveTo(new(File.E, 8));
 
         //Act
         var result = _sut.HasCapturedPiece(piece).Build();
@@ -102,10 +102,8 @@ public class NotationBuilderTests
     public void EndPosition_ShouldReturn_FileAndRank()
     {
         //Arrange
-        var pawn = new Pawn()
-        {
-            Position = new Square(File.G, 2)
-        };
+        var pawn = new Pawn();
+        pawn.MoveTo(new Square(File.G, 2));
 
         //Act
         var result = _sut.EndsAtPosition(pawn).Build();

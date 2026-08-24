@@ -8,7 +8,7 @@ public class Knight(Guid id) : Piece(id)
 {
     public override PieceType Type { get; init; } = PieceType.Knight;
 
-    private readonly MovementType movement = MovementType.Leap;
+    private MovementType movement = MovementType.Leap;
 
     public override MovementType GetMovement()
     {

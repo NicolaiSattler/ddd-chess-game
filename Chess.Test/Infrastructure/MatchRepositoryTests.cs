@@ -1,12 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoFixture;
 using Chess.Domain.Events;
 using Chess.Infrastructure.Repository;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace Chess.Test.Infrastructure;
 
@@ -21,7 +18,7 @@ public class MatchRepositoryTests: TestBase
     [TestInitialize]
     public void Initialize()
     {
-        _sut = new(Mock.Of<ILogger<MatchRepository>>(), DbContext);
+        _sut = new(Substitute.For<ILogger<MatchRepository>>(), DbContext);
         _fixture = new();
     }
 

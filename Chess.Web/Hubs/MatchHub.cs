@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Chess.Web.Hubs;
 
-public class MatchHub: Hub
+public class MatchHub : Hub
 {
     public const string HubUrl = "/matchhub";
 
@@ -15,7 +15,7 @@ public class MatchHub: Hub
 
     public async Task PurposeDraw(string opponentMemberId)
     {
-        foreach(var connectionId in _connections.GetConnections(opponentMemberId))
+        foreach (var connectionId in _connections.GetConnections(opponentMemberId))
         {
             await Clients.User(connectionId).SendAsync("DrawPurposed");
         }

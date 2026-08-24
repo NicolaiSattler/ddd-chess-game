@@ -8,7 +8,7 @@ public class KingTests
     private King _sut;
 
     [TestMethod]
-    public void  WhiteAttackRange_E2_ShouldBeValid()
+    public void WhiteAttackRange_E2_ShouldBeValid()
     {
         //Arrange
         _sut = new() { Color = Color.White, Position = new(File.E, 1) };
@@ -26,7 +26,7 @@ public class KingTests
     }
 
     [TestMethod]
-    public void  BlackAttackRange_E8_ShouldBeValid()
+    public void BlackAttackRange_E8_ShouldBeValid()
     {
         //Arrange
         _sut = new() { Color = Color.White, Position = new(File.E, 8) };
@@ -44,7 +44,7 @@ public class KingTests
     }
 
     [TestMethod]
-    public void  BlackAttackRange_E4_ShouldBeValid()
+    public void BlackAttackRange_E4_ShouldBeValid()
     {
         //Arrange
         _sut = new() { Color = Color.White, Position = new(File.E, 4) };
